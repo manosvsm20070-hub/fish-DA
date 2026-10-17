@@ -1,12 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { CustomerDetails } from '@/types';
 import Footer from '@/components/Footer';
+import {
+  isFirebaseConfigured,
+  setupRecaptcha,
+  sendFirebasePhoneOtp,
+  formatFirebaseError,
+} from '@/lib/firebaseClient';
+import type { ConfirmationResult, RecaptchaVerifier } from 'firebase/auth';
 
 type CheckoutStep = 'phone' | 'otp' | 'details' | 'review';
 
@@ -22,6 +29,9 @@ export default function CheckoutPage() {
   const [timer, setTimer] = useState(0);
   const [devOtpHint, setDevOtpHint] = useState<string | null>(null);
 
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
+
   const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({
     name: '',
     house: '',
@@ -34,6 +44,7 @@ export default function CheckoutPage() {
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
 
   // Delivery charge calculation: free over ₹1500, else ₹100
@@ -49,34 +60,85 @@ export default function CheckoutPage() {
     return () => clearInterval(interval);
   }, [timer]);
 
+  // Clean up reCAPTCHA verifier on unmount
+  useEffect(() => {
+    return () => {
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear();
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
+    };
+  }, []);
+
+  // Format phone number to E.164 (+91XXXXXXXXXX or international)
+  const formatPhoneNumber = (raw: string): string => {
+    const cleaned = raw.trim().replace(/[\s\-\(\)]/g, '');
+    if (cleaned.startsWith('+')) {
+      return cleaned;
+    }
+    if (cleaned.startsWith('0') && cleaned.length === 11) {
+      return `+91${cleaned.substring(1)}`;
+    }
+    if (cleaned.startsWith('91') && cleaned.length === 12) {
+      return `+${cleaned}`;
+    }
+    return `+91${cleaned}`;
+  };
+
   // Step 1: Send OTP
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setErrorMsg(null);
+    setSuccessMsg(null);
     setLoading(true);
 
+    const formatted = formatPhoneNumber(phoneNumber);
+
     try {
-      const res = await fetch('/api/otp/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber, role: 'CUSTOMER' }),
-      });
+      if (isFirebaseConfigured()) {
+        const verifier = setupRecaptcha('checkout-recaptcha-container', () => {
+          // reCAPTCHA solved
+        });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setErrorMsg(data.error || 'Failed to send OTP.');
-        setLoading(false);
-        return;
-      }
+        if (!verifier) {
+          throw new Error('Could not initialize reCAPTCHA verifier. Please refresh the page.');
+        }
 
-      setVerifiedPhone(data.phone);
-      setTimer(data.countdownSec || 30);
-      if (data.devOtp) {
-        setDevOtpHint(data.devOtp);
+        recaptchaVerifierRef.current = verifier;
+        const confirmResult = await sendFirebasePhoneOtp(formatted, verifier);
+        setConfirmationResult(confirmResult);
+        setVerifiedPhone(formatted);
+        setTimer(60);
+        setSuccessMsg(`Real SMS OTP sent to ${formatted}.`);
+        setStep('otp');
+      } else {
+        // Development / Fallback mode
+        const res = await fetch('/api/otp/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: formatted, role: 'CUSTOMER' }),
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          setErrorMsg(data.error || 'Failed to send OTP.');
+          setLoading(false);
+          return;
+        }
+
+        setVerifiedPhone(data.phone);
+        setTimer(data.countdownSec || 30);
+        if (data.devOtp) {
+          setDevOtpHint(data.devOtp);
+        }
+        setStep('otp');
       }
-      setStep('otp');
-    } catch {
-      setErrorMsg('Network error. Please try again.');
+    } catch (err: unknown) {
+      console.error('Customer OTP dispatch failed:', err);
+      setErrorMsg(formatFirebaseError(err));
     } finally {
       setLoading(false);
     }
@@ -86,37 +148,78 @@ export default function CheckoutPage() {
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+    setSuccessMsg(null);
     setLoading(true);
 
     try {
-      const res = await fetch('/api/otp/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          phone: verifiedPhone,
-          code: otpCode,
-          role: 'CUSTOMER',
-        }),
-      });
+      if (confirmationResult) {
+        // 1. Verify 6-digit OTP code directly with Firebase
+        const userCredential = await confirmationResult.confirm(otpCode.trim());
+        const idToken = await userCredential.user.getIdToken();
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setErrorMsg(data.error || 'Invalid OTP code.');
-        setLoading(false);
-        return;
+        // 2. Exchange Firebase ID Token on server for verified customer session token
+        const serverRes = await fetch('/api/otp/verify-firebase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        });
+
+        const serverData = await serverRes.json();
+        if (!serverRes.ok || !serverData.success) {
+          setErrorMsg(serverData.error || 'Customer verification rejected by server.');
+          setLoading(false);
+          return;
+        }
+
+        setSessionToken(serverData.token);
+        setCustomerDetails((prev) => ({
+          ...prev,
+          phoneNumber: serverData.phone,
+        }));
+        setSuccessMsg(`Phone ${serverData.phone} verified successfully!`);
+        setStep('details');
+      } else {
+        // Fallback development mode
+        const res = await fetch('/api/otp/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: verifiedPhone,
+            code: otpCode,
+            role: 'CUSTOMER',
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          setErrorMsg(data.error || 'Invalid OTP code.');
+          setLoading(false);
+          return;
+        }
+
+        setSessionToken(data.token);
+        setCustomerDetails((prev) => ({
+          ...prev,
+          phoneNumber: data.phone,
+        }));
+        setStep('details');
       }
-
-      setSessionToken(data.token);
-      setCustomerDetails((prev) => ({
-        ...prev,
-        phoneNumber: data.phone,
-      }));
-      setStep('details');
-    } catch {
-      setErrorMsg('Verification failed. Please try again.');
+    } catch (err: unknown) {
+      console.error('Customer verification failed:', err);
+      setErrorMsg(formatFirebaseError(err));
     } finally {
       setLoading(false);
     }
+  };
+
+  // Changing phone number resets verification
+  const handleChangePhoneNumber = () => {
+    setVerifiedPhone('');
+    setSessionToken('');
+    setConfirmationResult(null);
+    setOtpCode('');
+    setCustomerDetails((prev) => ({ ...prev, phoneNumber: '' }));
+    setStep('phone');
   };
 
   // Step 3: Validate Delivery Details & Move to Review
@@ -144,7 +247,7 @@ export default function CheckoutPage() {
       setErrorMsg('Please enter your state.');
       return;
     }
-    if (!/^\d{6}$/.test(customerDetails.pinCode.trim())) {
+    if (!customerDetails.pinCode || !/^\d{6}$/.test(customerDetails.pinCode.trim())) {
       setErrorMsg('Please enter a valid 6-digit Indian PIN code.');
       return;
     }
@@ -209,6 +312,9 @@ export default function CheckoutPage() {
 
   return (
     <main className="flex-1 flex flex-col w-full px-4 md:px-8 max-w-4xl mx-auto">
+      {/* Invisible reCAPTCHA container for customer Firebase phone auth */}
+      <div id="checkout-recaptcha-container" />
+
       {/* Checkout Progress Stepper */}
       <div className="w-full py-2 mb-4 flex items-center justify-between">
         <h1 className="font-headline-lg-mobile text-on-surface font-bold">Secure Checkout</h1>
@@ -229,20 +335,67 @@ export default function CheckoutPage() {
         </div>
       )}
 
+      {successMsg && (
+        <div className="p-3 mb-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-label-md text-xs flex items-center gap-2">
+          <span className="material-symbols-outlined text-[18px]">check_circle</span>
+          <span>{successMsg}</span>
+        </div>
+      )}
+
+      {/* Visual Step Indicator */}
+      <div className="grid grid-cols-3 gap-2 mb-6">
+        <div
+          className={`py-2 px-3 rounded-xl border flex flex-col items-center gap-1 text-center ${
+            step === 'phone' || step === 'otp'
+              ? 'bg-primary/10 border-primary text-primary font-bold'
+              : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+          }`}
+        >
+          <span className="text-[10px] uppercase tracking-wider">Step 1</span>
+          <span className="font-label-md text-xs">
+            {verifiedPhone ? 'Phone Verified ✓' : 'Verify Mobile'}
+          </span>
+        </div>
+
+        <div
+          className={`py-2 px-3 rounded-xl border flex flex-col items-center gap-1 text-center ${
+            step === 'details'
+              ? 'bg-primary/10 border-primary text-primary font-bold'
+              : step === 'review'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+              : 'bg-surface-container-low border-surface-container text-on-surface-variant opacity-60'
+          }`}
+        >
+          <span className="text-[10px] uppercase tracking-wider">Step 2</span>
+          <span className="font-label-md text-xs">Delivery Details</span>
+        </div>
+
+        <div
+          className={`py-2 px-3 rounded-xl border flex flex-col items-center gap-1 text-center ${
+            step === 'review'
+              ? 'bg-primary/10 border-primary text-primary font-bold'
+              : 'bg-surface-container-low border-surface-container text-on-surface-variant opacity-60'
+          }`}
+        >
+          <span className="text-[10px] uppercase tracking-wider">Step 3</span>
+          <span className="font-label-md text-xs">Review & Place</span>
+        </div>
+      </div>
+
       {/* ================= STEP 1: PHONE NUMBER INPUT ================= */}
       {step === 'phone' && (
         <section className="bg-surface-container-lowest p-6 rounded-2xl border border-surface-container shadow-sm flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <h2 className="font-headline-sm font-bold text-on-surface">Verify Your Phone Number</h2>
+            <h2 className="font-headline-sm font-bold text-on-surface">Step 1: Mobile Verification</h2>
             <p className="font-body-sm text-xs text-on-surface-variant">
-              We verify customer phone numbers to secure your order and provide direct WhatsApp & SMS order delivery tracking.
+              Enter your mobile number to receive a real-time SMS OTP verification code before placing your aquarium order.
             </p>
           </div>
 
           <form onSubmit={handleSendOtp} className="flex flex-col gap-4 max-w-md">
             <div className="flex flex-col gap-1.5">
               <label className="font-label-md text-xs font-bold text-on-surface">
-                Mobile Number:
+                Mobile Number (India +91)
               </label>
               <div className="relative flex items-center">
                 <span className="absolute left-3.5 font-label-md text-sm text-on-surface-variant font-bold">
@@ -258,17 +411,26 @@ export default function CheckoutPage() {
                 />
               </div>
               <span className="text-[11px] text-on-surface-variant">
-                Enter your 10-digit Indian mobile number.
+                We will dispatch an SMS containing a 6-digit verification code.
               </span>
             </div>
 
             <button
               type="submit"
-              disabled={loading}
-              className="h-12 rounded-xl bg-primary hover:bg-primary-container active:scale-95 text-on-primary font-label-md font-bold flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50"
+              disabled={loading || !phoneNumber}
+              className="h-12 rounded-xl bg-primary hover:bg-primary-container active:scale-95 text-on-primary font-label-md font-bold flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[18px]">send</span>
-              <span>{loading ? 'Sending OTP...' : 'Send OTP'}</span>
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+                  <span>Dispatching SMS OTP...</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[18px]">sms</span>
+                  <span>Send Real SMS OTP</span>
+                </>
+              )}
             </button>
           </form>
         </section>
@@ -280,11 +442,11 @@ export default function CheckoutPage() {
           <div className="flex flex-col gap-1">
             <h2 className="font-headline-sm font-bold text-on-surface">Enter Verification Code</h2>
             <p className="font-body-sm text-xs text-on-surface-variant">
-              We sent a 6-digit OTP code to <strong>{verifiedPhone}</strong>.
+              We sent a 6-digit OTP code via SMS to <strong>{verifiedPhone}</strong>.
             </p>
           </div>
 
-          {devOtpHint && (
+          {devOtpHint && !confirmationResult && (
             <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs flex items-center justify-between">
               <span>
                 <strong>Dev Mock OTP:</strong> <code className="font-bold text-sm tracking-widest">{devOtpHint}</code>
@@ -302,7 +464,7 @@ export default function CheckoutPage() {
           <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4 max-w-md">
             <div className="flex flex-col gap-1.5">
               <label className="font-label-md text-xs font-bold text-on-surface">
-                6-Digit OTP:
+                6-Digit SMS Verification Code:
               </label>
               <input
                 type="text"
@@ -329,10 +491,10 @@ export default function CheckoutPage() {
               ) : (
                 <button
                   type="button"
-                  onClick={handleSendOtp}
+                  onClick={() => handleSendOtp()}
                   className="text-primary font-bold hover:underline"
                 >
-                  Resend OTP
+                  Resend SMS OTP
                 </button>
               )}
             </div>
@@ -340,10 +502,19 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={loading || otpCode.length !== 6}
-              className="h-12 rounded-xl bg-primary hover:bg-primary-container active:scale-95 text-on-primary font-label-md font-bold flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50"
+              className="h-12 rounded-xl bg-primary hover:bg-primary-container active:scale-95 text-on-primary font-label-md font-bold flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[18px]">verified</span>
-              <span>{loading ? 'Verifying...' : 'Verify OTP & Continue'}</span>
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+                  <span>Verifying Code with Firebase...</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[18px]">verified</span>
+                  <span>Verify OTP & Continue</span>
+                </>
+              )}
             </button>
           </form>
         </section>
@@ -445,26 +616,32 @@ export default function CheckoutPage() {
                   <span className="material-symbols-outlined text-[14px]">check_circle</span> Verified
                 </span>
               </label>
-              <input
-                type="text"
-                readOnly
-                value={customerDetails.phoneNumber}
-                className="h-11 px-3.5 rounded-xl bg-surface-container text-on-surface font-label-md text-sm cursor-not-allowed border border-surface-container-high"
-              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={customerDetails.phoneNumber}
+                  className="h-11 px-3.5 rounded-xl bg-surface-container font-mono text-sm text-on-surface flex-1 cursor-not-allowed border border-outline-variant/40"
+                />
+                <button
+                  type="button"
+                  onClick={handleChangePhoneNumber}
+                  className="px-3 h-11 text-xs text-secondary hover:text-primary underline font-medium cursor-pointer"
+                >
+                  Change Phone
+                </button>
+              </div>
               <span className="text-[11px] text-on-surface-variant">
-                To change your phone number, you must re-verify with OTP.
+                Changing your phone number requires real SMS verification again.
               </span>
             </div>
 
-            <div className="sm:col-span-2 pt-2 flex items-center justify-between">
-              <Link href="/cart" className="font-label-md text-xs text-secondary hover:text-primary">
-                Back to Cart
-              </Link>
+            <div className="sm:col-span-2 pt-2">
               <button
                 type="submit"
-                className="h-12 px-6 rounded-xl bg-primary hover:bg-primary-container active:scale-95 text-on-primary font-label-md font-bold flex items-center gap-2 shadow-sm transition-all"
+                className="w-full sm:w-auto px-8 h-12 rounded-xl bg-primary hover:bg-primary-container active:scale-95 text-on-primary font-label-md font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
               >
-                <span>Continue to Review Order</span>
+                <span>Continue to Order Review</span>
                 <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
               </button>
             </div>
@@ -472,90 +649,91 @@ export default function CheckoutPage() {
         </section>
       )}
 
-      {/* ================= STEP 4: ORDER REVIEW ================= */}
+      {/* ================= STEP 4: ORDER REVIEW & CONFIRMATION ================= */}
       {step === 'review' && (
         <section className="bg-surface-container-lowest p-6 rounded-2xl border border-surface-container shadow-sm flex flex-col gap-6">
-          <div className="flex flex-col gap-1">
-            <h2 className="font-headline-sm font-bold text-on-surface">Review Your Order</h2>
-            <p className="font-body-sm text-xs text-on-surface-variant">
-              Please double-check your delivery details and selected livestock before placing your order.
+          <div className="flex items-center justify-between border-b border-surface-container-high pb-4">
+            <div>
+              <h2 className="font-headline-sm font-bold text-on-surface">Review Your Order</h2>
+              <p className="font-body-sm text-xs text-on-surface-variant">
+                Confirm your order details before final submission.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setStep('details')}
+              className="font-label-md text-xs text-secondary hover:text-primary underline"
+            >
+              Edit Address
+            </button>
+          </div>
+
+          {/* Delivery Address Summary */}
+          <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-1 text-xs">
+            <span className="font-label-md font-bold text-on-surface text-sm">Delivery Address:</span>
+            <p className="text-on-surface font-medium">{customerDetails.name}</p>
+            <p className="text-on-surface-variant">{customerDetails.house}</p>
+            <p className="text-on-surface-variant">
+              {customerDetails.city}, {customerDetails.district}, {customerDetails.state} - {customerDetails.pinCode}
+            </p>
+            <p className="text-on-surface-variant font-mono">
+              Phone: {customerDetails.phoneNumber} (Verified)
             </p>
           </div>
 
-          {/* Customer Address Summary */}
-          <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <h3 className="font-label-md text-xs font-bold text-secondary uppercase tracking-wider">
-                Customer & Delivery Address
-              </h3>
-              <button
-                type="button"
-                onClick={() => setStep('details')}
-                className="font-label-sm text-xs text-primary font-bold hover:underline"
-              >
-                Edit Details
-              </button>
-            </div>
-            <div className="text-sm font-body-md text-on-surface">
-              <p className="font-bold text-base">{customerDetails.name}</p>
-              <p>{customerDetails.house}</p>
-              <p>
-                {customerDetails.city}, {customerDetails.district}, {customerDetails.state} -{' '}
-                <strong>{customerDetails.pinCode}</strong>
-              </p>
-              <p className="mt-1 text-primary font-bold flex items-center gap-1">
-                <span className="material-symbols-outlined text-[16px]">call</span>
-                {customerDetails.phoneNumber}
-              </p>
-            </div>
-          </div>
-
-          {/* Items Summary */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <h3 className="font-label-md text-xs font-bold text-secondary uppercase tracking-wider">
-                Order Items ({items.length})
-              </h3>
-              <Link href="/cart" className="font-label-sm text-xs text-primary font-bold hover:underline">
-                Back to Cart
-              </Link>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              {items.map((it) => (
-                <div
-                  key={`${it.productId}-${it.selectedSize}`}
-                  className="flex items-center justify-between p-3 rounded-xl bg-surface-container-low border border-surface-container text-sm"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-surface-container">
-                      <Image src={it.primaryImage} alt={it.productName} fill className="object-cover" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-on-surface leading-tight">{it.productName}</p>
-                      <p className="text-xs text-on-surface-variant">
-                        {it.variety} • {it.selectedSize} • Qty: {it.quantity}
-                      </p>
-                    </div>
+          {/* Order Items List */}
+          <div className="flex flex-col gap-3">
+            <span className="font-label-md font-bold text-on-surface text-sm">
+              Items in Order ({items.reduce((acc, i) => acc + i.quantity, 0)}):
+            </span>
+            <div className="divide-y divide-surface-container-high border-y border-surface-container-high">
+              {items.map((item) => (
+                <div key={`${item.productId}-${item.selectedSize}`} className="py-3 flex items-center gap-3">
+                  <div className="relative w-12 h-12 rounded-lg bg-surface-container overflow-hidden shrink-0">
+                    {item.primaryImage ? (
+                      <Image
+                        src={item.primaryImage}
+                        alt={item.productName}
+                        fill
+                        className="object-cover"
+                        sizes="48px"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
+                        <span className="material-symbols-outlined text-[18px]">set_meal</span>
+                      </div>
+                    )}
                   </div>
-                  <span className="font-bold text-primary">
-                    ₹{(it.price * it.quantity).toLocaleString('en-IN')}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-label-md text-xs font-bold text-on-surface truncate">
+                      {item.productName}
+                    </p>
+                    <p className="font-body-sm text-[11px] text-on-surface-variant truncate">
+                      Size: {item.selectedSize} | Qty: {item.quantity}
+                    </p>
+                  </div>
+                  <span className="font-label-md text-xs font-bold text-on-surface shrink-0">
+                    ₹{(item.price * item.quantity).toLocaleString('en-IN')}
                   </span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Pricing Totals */}
-          <div className="p-4 rounded-xl bg-surface-container flex flex-col gap-2 text-sm">
-            <div className="flex justify-between text-on-surface-variant font-body-md">
+          {/* Financial Calculation Breakdown */}
+          <div className="p-4 rounded-xl bg-surface-container-low flex flex-col gap-2">
+            <div className="flex justify-between text-xs text-on-surface-variant">
               <span>Items Subtotal:</span>
-              <span className="font-bold text-on-surface">₹{subtotal.toLocaleString('en-IN')}</span>
+              <span className="font-semibold text-on-surface">₹{subtotal.toLocaleString('en-IN')}</span>
             </div>
-            <div className="flex justify-between text-on-surface-variant font-body-md">
-              <span>Local Delivery:</span>
-              <span className="font-bold text-on-surface">
-                {deliveryCharge === 0 ? <span className="text-emerald-700">FREE</span> : `₹${deliveryCharge}`}
+            <div className="flex justify-between text-xs text-on-surface-variant">
+              <span>Delivery Charges (Sothupakkam & Surrounding):</span>
+              <span className="font-semibold text-on-surface">
+                {deliveryCharge === 0 ? (
+                  <span className="text-emerald-700 font-bold">FREE</span>
+                ) : (
+                  `₹${deliveryCharge}`
+                )}
               </span>
             </div>
             <div className="pt-2 border-t border-surface-container-high flex justify-between items-baseline">

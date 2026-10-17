@@ -1,27 +1,38 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Footer from '@/components/Footer';
+import {
+  isFirebaseConfigured,
+  setupRecaptcha,
+  sendFirebasePhoneOtp,
+  formatFirebaseError,
+} from '@/lib/firebaseClient';
+import type { ConfirmationResult, RecaptchaVerifier } from 'firebase/auth';
 
 export default function AdminLoginPage() {
   const router = useRouter();
 
-  // 3-step sequence: phone -> otp -> password (after OTP verified)
   const [step, setStep] = useState<'phone' | 'otp' | 'password'>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [firebaseActive, setFirebaseActive] = useState<boolean>(() => isFirebaseConfigured());
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
+
   const [devOtpHint, setDevOtpHint] = useState<string | null>(null);
   const [timer, setTimer] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [checkingExistingSession, setCheckingExistingSession] = useState(true);
 
-  // Auto-redirect if already logged in as admin
+  // Check existing session
   useEffect(() => {
     (async () => {
       try {
@@ -39,7 +50,7 @@ export default function AdminLoginPage() {
     })();
   }, [router]);
 
-  // Timer countdown for OTP resend
+  // Timer countdown
   useEffect(() => {
     if (timer > 0) {
       const interval = setInterval(() => setTimer((t) => t - 1), 1000);
@@ -47,72 +58,148 @@ export default function AdminLoginPage() {
     }
   }, [timer]);
 
-  // Step 1: Send Admin OTP
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Clean up reCAPTCHA verifier on unmount
+  useEffect(() => {
+    return () => {
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear();
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
+    };
+  }, []);
+
+  // Step 1: Validate Admin Phone and Send Real SMS OTP
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setErrorMsg(null);
+    setSuccessMsg(null);
     setLoading(true);
 
     try {
-      const res = await fetch('/api/otp/send', {
+      // 1. Server-side pre-authorization check
+      const checkRes = await fetch('/api/admin/check-eligibility', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber, role: 'ADMIN' }),
+        body: JSON.stringify({ phone: phoneNumber }),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setErrorMsg(data.error || 'Admin access is restricted to authorized store phone numbers.');
+      const checkData = await checkRes.json();
+      if (!checkRes.ok || !checkData.success) {
+        setErrorMsg(checkData.error || 'Access denied. This number is not authorized.');
         setLoading(false);
         return;
       }
 
-      setTimer(data.countdownSec || 30);
-      if (data.devOtp) {
-        setDevOtpHint(data.devOtp);
+      const authorizedPhone = checkData.phone;
+
+      // 2. Dispatch OTP via Firebase Phone Auth or Fallback
+      if (isFirebaseConfigured()) {
+        const verifier = setupRecaptcha('admin-recaptcha-container', () => {
+          // reCAPTCHA solved
+        });
+
+        if (!verifier) {
+          throw new Error('Could not initialize reCAPTCHA verifier. Please refresh the page.');
+        }
+
+        recaptchaVerifierRef.current = verifier;
+        const confirmResult = await sendFirebasePhoneOtp(authorizedPhone, verifier);
+        setConfirmationResult(confirmResult);
+        setFirebaseActive(true);
+        setTimer(60);
+        setSuccessMsg(`Real SMS OTP dispatched to ${authorizedPhone} via Firebase.`);
+        setStep('otp');
+      } else {
+        // Development / Fallback mode
+        const res = await fetch('/api/otp/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: authorizedPhone, role: 'ADMIN' }),
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          setErrorMsg(data.error || 'Failed to send OTP.');
+          setLoading(false);
+          return;
+        }
+
+        setTimer(data.countdownSec || 30);
+        if (data.devOtp) {
+          setDevOtpHint(data.devOtp);
+        }
+        setStep('otp');
       }
-      setStep('otp');
-    } catch {
-      setErrorMsg('Failed to process request. Please try again.');
+    } catch (err: unknown) {
+      console.error('Admin OTP dispatch failed:', err);
+      setErrorMsg(formatFirebaseError(err));
     } finally {
       setLoading(false);
     }
   };
 
-  // Step 2: Verify Admin OTP -> Transitions to Password step
+  // Step 2: Verify OTP
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+    setSuccessMsg(null);
     setLoading(true);
 
     try {
-      const res = await fetch('/api/otp/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          phone: phoneNumber,
-          code: otpCode,
-          role: 'ADMIN',
-        }),
-      });
+      if (confirmationResult) {
+        // 1. Verify 6-digit OTP directly with Firebase
+        const userCredential = await confirmationResult.confirm(otpCode.trim());
+        const idToken = await userCredential.user.getIdToken();
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setErrorMsg(data.error || 'Invalid OTP code.');
-        setLoading(false);
-        return;
+        // 2. Transmit verified Firebase ID token to server for admin session creation
+        const serverRes = await fetch('/api/admin/login-firebase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        });
+
+        const serverData = await serverRes.json();
+        if (!serverRes.ok || !serverData.success) {
+          setErrorMsg(serverData.error || 'Admin verification rejected by server.');
+          setLoading(false);
+          return;
+        }
+
+        // Successfully verified with Firebase and established Admin Session!
+        router.push('/admin/dashboard');
+      } else {
+        // Development fallback verification
+        const res = await fetch('/api/otp/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: phoneNumber,
+            code: otpCode,
+            role: 'ADMIN',
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          setErrorMsg(data.error || 'Invalid OTP code.');
+          setLoading(false);
+          return;
+        }
+
+        setStep('password');
       }
-
-      // OTP verified successfully! Proceed to display Password step
-      setStep('password');
-    } catch {
-      setErrorMsg('Verification failed. Please try again.');
+    } catch (err: unknown) {
+      console.error('OTP verification error:', err);
+      setErrorMsg(formatFirebaseError(err));
     } finally {
       setLoading(false);
     }
   };
 
-  // Step 3: Enter Admin Password -> Login to Admin Dashboard
+  // Step 3 (Fallback mode only): Enter Admin Password
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -132,10 +219,9 @@ export default function AdminLoginPage() {
         return;
       }
 
-      // Successfully authenticated with both OTP and Password!
       router.push('/admin/dashboard');
     } catch {
-      setErrorMsg('Login failed. Please check your connection and try again.');
+      setErrorMsg('Login failed. Please check connection and try again.');
       setLoading(false);
     }
   };
@@ -155,6 +241,9 @@ export default function AdminLoginPage() {
 
   return (
     <main className="flex-1 flex flex-col items-center justify-center px-4 py-12 max-w-md mx-auto w-full">
+      {/* Hidden reCAPTCHA container for Firebase Phone Auth */}
+      <div id="admin-recaptcha-container" />
+
       <div className="w-full bg-surface-container-lowest p-6 sm:p-8 rounded-2xl border border-surface-container shadow-md flex flex-col gap-6">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center gap-2">
@@ -172,12 +261,28 @@ export default function AdminLoginPage() {
           </span>
           <h1 className="font-headline-md font-bold text-on-surface">Store Administrator</h1>
           <p className="font-body-sm text-xs text-on-surface-variant max-w-xs">
-            Two-factor authentication required for store management access.
+            Real-time SMS OTP authentication via Firebase Phone Auth.
           </p>
         </div>
 
+        {/* Firebase Status Badge */}
+        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-surface-container text-xs">
+          <span className="text-on-surface-variant font-medium">Authentication Provider:</span>
+          {firebaseActive ? (
+            <span className="flex items-center gap-1.5 font-bold text-emerald-700">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Firebase SMS Active
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 font-bold text-amber-700" title="Add Firebase keys to .env.local for production SMS delivery">
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              Dev / Setup Mode
+            </span>
+          )}
+        </div>
+
         {/* Step Indicator */}
-        <div className="grid grid-cols-3 gap-2 text-center text-xs font-label-sm">
+        <div className="grid grid-cols-2 gap-2 text-center text-xs font-label-sm">
           <div
             className={`py-1.5 px-1 rounded-lg border flex flex-col items-center gap-0.5 ${
               step === 'phone'
@@ -186,31 +291,18 @@ export default function AdminLoginPage() {
             }`}
           >
             <span className="text-[10px] uppercase tracking-wider">Step 1</span>
-            <span className="font-medium truncate">Phone</span>
+            <span className="font-medium truncate">Admin Phone</span>
           </div>
 
           <div
             className={`py-1.5 px-1 rounded-lg border flex flex-col items-center gap-0.5 ${
-              step === 'otp'
+              step === 'otp' || step === 'password'
                 ? 'bg-primary/10 border-primary text-primary font-bold'
-                : step === 'password'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                 : 'bg-surface-container-low border-surface-container text-on-surface-variant'
             }`}
           >
             <span className="text-[10px] uppercase tracking-wider">Step 2</span>
-            <span className="font-medium truncate">{step === 'password' ? 'OTP ✓' : 'OTP'}</span>
-          </div>
-
-          <div
-            className={`py-1.5 px-1 rounded-lg border flex flex-col items-center gap-0.5 ${
-              step === 'password'
-                ? 'bg-primary/10 border-primary text-primary font-bold'
-                : 'bg-surface-container-low border-surface-container text-on-surface-variant opacity-60'
-            }`}
-          >
-            <span className="text-[10px] uppercase tracking-wider">Step 3</span>
-            <span className="font-medium truncate">Password</span>
+            <span className="font-medium truncate">SMS OTP</span>
           </div>
         </div>
 
@@ -218,6 +310,13 @@ export default function AdminLoginPage() {
           <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 font-label-md text-xs flex items-center gap-2">
             <span className="material-symbols-outlined text-[18px]">error</span>
             <span>{errorMsg}</span>
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-label-md text-xs flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">check_circle</span>
+            <span>{successMsg}</span>
           </div>
         )}
 
@@ -236,14 +335,14 @@ export default function AdminLoginPage() {
                   type="tel"
                   required
                   autoFocus
-                  placeholder="Enter mobile number"
+                  placeholder="Enter 10-digit mobile number"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   className="w-full h-12 pl-14 pr-4 rounded-xl bg-surface-container-low border border-outline-variant/60 font-body-md text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none"
                 />
               </div>
               <span className="text-[11px] text-on-surface-variant">
-                Only the designated store manager phone number is authorized.
+                Only the designated store manager phone number is authorized to request admin access.
               </span>
             </div>
 
@@ -252,8 +351,17 @@ export default function AdminLoginPage() {
               disabled={loading || !phoneNumber}
               className="h-12 rounded-xl bg-primary hover:bg-primary-container active:scale-95 text-on-primary font-label-md font-bold flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[18px]">key</span>
-              <span>{loading ? 'Verifying Phone...' : 'Send Admin OTP'}</span>
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+                  <span>Verifying Authorization...</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[18px]">sms</span>
+                  <span>Send Real SMS OTP</span>
+                </>
+              )}
             </button>
           </form>
         )}
@@ -261,7 +369,7 @@ export default function AdminLoginPage() {
         {/* ── STEP 2: Enter OTP Code ── */}
         {step === 'otp' && (
           <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
-            {devOtpHint && (
+            {devOtpHint && !confirmationResult && (
               <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs flex items-center justify-between">
                 <span>
                   <strong>Dev Mock OTP:</strong>{' '}
@@ -279,7 +387,7 @@ export default function AdminLoginPage() {
 
             <div className="flex flex-col gap-1.5">
               <label className="font-label-md text-xs font-bold text-on-surface">
-                Enter 6-Digit Admin OTP
+                Enter 6-Digit SMS Verification Code
               </label>
               <input
                 type="text"
@@ -307,10 +415,10 @@ export default function AdminLoginPage() {
               ) : (
                 <button
                   type="button"
-                  onClick={handleSendOtp}
+                  onClick={() => handleSendOtp()}
                   className="text-primary font-bold hover:underline"
                 >
-                  Resend OTP
+                  Resend SMS OTP
                 </button>
               )}
             </div>
@@ -323,19 +431,19 @@ export default function AdminLoginPage() {
               {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
-                  <span>Verifying OTP...</span>
+                  <span>Verifying Code with Firebase...</span>
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[18px]">security</span>
-                  <span>Verify OTP</span>
+                  <span className="material-symbols-outlined text-[18px]">verified_user</span>
+                  <span>Verify and Login</span>
                 </>
               )}
             </button>
           </form>
         )}
 
-        {/* ── STEP 3: Display Admin Password (ONLY after OTP) ── */}
+        {/* ── STEP 3: Fallback Password login if in dev mode ── */}
         {step === 'password' && (
           <form onSubmit={handlePasswordLogin} className="flex flex-col gap-4 animate-in fade-in duration-200">
             <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
@@ -371,16 +479,6 @@ export default function AdminLoginPage() {
                   </span>
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between text-xs font-label-md">
-              <button
-                type="button"
-                onClick={() => setStep('otp')}
-                className="text-secondary hover:text-primary underline"
-              >
-                ← Back to OTP
-              </button>
             </div>
 
             <button
