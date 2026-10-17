@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" width="300" height="80">
+  <defs>
+    <linearGradient id="aquaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00C49F" />
+      <stop offset="50%" stop-color="#028090" />
+      <stop offset="100%" stop-color="#004E64" />
+    </linearGradient>
+    <linearGradient id="bubbleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0F7FA" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#80DEEA" stop-opacity="0.4" />
+    </linearGradient>
+  </defs>
+  <!-- Dolphin Emblem -->
+  <g transform="translate(10, 10)">
+    <!-- Water Ripple Circle -->
+    <circle cx="30" cy="30" r="28" fill="#F0F9FF" stroke="#028090" stroke-width="2" stroke-dasharray="3 2" opacity="0.6"/>
+    <!-- Stylized jumping dolphin icon -->
+    <path d="M 16 38 C 18 28, 25 16, 38 15 C 47 14, 52 20, 50 25 C 46 22, 38 22, 32 26 C 26 30, 24 38, 20 44 C 18 43, 16 41, 16 38 Z" fill="url(#aquaGrad)" />
+    <!-- Dorsal Fin & Tail -->
+    <path d="M 33 19 C 34 14, 38 12, 40 13 C 38 17, 36 19, 33 19 Z" fill="url(#aquaGrad)" />
+    <path d="M 18 42 C 12 45, 10 49, 8 52 C 12 50, 16 47, 18 45 C 19 47, 19 51, 18 54 C 20 50, 21 46, 19 43 Z" fill="url(#aquaGrad)" />
+    <!-- Water Splash Bubbles -->
+    <circle cx="48" cy="18" r="3.5" fill="url(#bubbleGrad)" stroke="#028090" stroke-width="1"/>
+    <circle cx="53" cy="26" r="2" fill="url(#bubbleGrad)" stroke="#028090" stroke-width="0.8"/>
+    <circle cx="44" cy="12" r="1.5" fill="#00C49F" />
+  </g>
+  <!-- Brand Text -->
+  <text x="80" y="38" font-family="'Plus Jakarta Sans', sans-serif" font-size="22" font-weight="800" fill="#0A2540" letter-spacing="-0.5">DOLPHIN</text>
+  <text x="80" y="58" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="700" fill="#028090" letter-spacing="3.5">AQUARIUM</text>
+  <!-- Verification Badge / Subtitle -->
+  <rect x="180" y="24" width="76" height="18" rx="9" fill="#E6FFFA" stroke="#00A896" stroke-width="1"/>
+  <text x="188" y="36.5" font-family="'Plus Jakarta Sans', sans-serif" font-size="8.5" font-weight="700" fill="#007A6C" letter-spacing="0.5">EST. FRESHWATER</text>
+</svg>

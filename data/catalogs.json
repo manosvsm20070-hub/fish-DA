@@ -1,0 +1,252 @@
+[
+  {
+    "id": "cat-fish",
+    "name": "Fish",
+    "slug": "fish",
+    "description": "Live freshwater fish — goldfish, betta, guppies, sharks and more",
+    "displayOrder": 1,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-10-01T04:27:59.993Z"
+  },
+  {
+    "id": "cat-goldfish",
+    "name": "Goldfish",
+    "slug": "goldfish",
+    "description": "Fancy goldfish varieties",
+    "displayOrder": 2,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-betta",
+    "name": "Betta Fish",
+    "slug": "betta",
+    "description": "Show betta fish varieties",
+    "displayOrder": 3,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-guppy",
+    "name": "Guppy",
+    "slug": "guppy",
+    "description": "Breeder guppies and endlers",
+    "displayOrder": 4,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-molly",
+    "name": "Molly",
+    "slug": "molly",
+    "description": "Mollies and livebearers",
+    "displayOrder": 5,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-flowerhorn",
+    "name": "Flowerhorn",
+    "slug": "flowerhorn",
+    "description": "King Kamfa and Flowerhorn cichlids",
+    "displayOrder": 6,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-sharks",
+    "name": "Aquarium Sharks",
+    "slug": "sharks",
+    "description": "Freshwater aquarium sharks",
+    "displayOrder": 7,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-monster",
+    "name": "Monster Fish",
+    "slug": "monster-fish",
+    "description": "Monster fish and gars",
+    "displayOrder": 8,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-catfish",
+    "name": "Catfish",
+    "slug": "catfish",
+    "description": "Monster catfish varieties",
+    "displayOrder": 9,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-danio",
+    "name": "Zebra Danio",
+    "slug": "zebra-danio",
+    "description": "Zebra danio and GloFish",
+    "displayOrder": 10,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-tanks",
+    "name": "Aquarium Tanks",
+    "slug": "tanks",
+    "description": "Standard and rimless aquarium tanks",
+    "displayOrder": 11,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-custom-tanks",
+    "name": "Custom Tanks",
+    "slug": "custom-tanks",
+    "description": "Custom-built rimless aquarium tanks",
+    "displayOrder": 12,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-motors",
+    "name": "Motors & Pumps",
+    "slug": "motors",
+    "description": "Aquarium motors and water pumps",
+    "displayOrder": 13,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-filters",
+    "name": "Filters",
+    "slug": "filters",
+    "description": "Aquarium filtration systems",
+    "displayOrder": 14,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-medicines",
+    "name": "Fish Medicines",
+    "slug": "medicines",
+    "description": "Fish medicines and water conditioners",
+    "displayOrder": 15,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-food",
+    "name": "Fish Food",
+    "slug": "food",
+    "description": "Premium fish food and feeding supplies",
+    "displayOrder": 16,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-stones",
+    "name": "Aquarium Stones",
+    "slug": "stones",
+    "description": "Decorative aquarium stones and rocks",
+    "displayOrder": 17,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-gravel",
+    "name": "Colored Gravel",
+    "slug": "gravel",
+    "description": "Colored aquarium gravel and substrate",
+    "displayOrder": 18,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-bowls",
+    "name": "Aquarium Bowls",
+    "slug": "bowls",
+    "description": "Decorative aquarium bowls and small tanks",
+    "displayOrder": 19,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-nets",
+    "name": "Aquarium Nets",
+    "slug": "nets",
+    "description": "Fish catching and cleaning nets",
+    "displayOrder": 20,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-plants",
+    "name": "Aquarium Plants",
+    "slug": "plants",
+    "description": "Live and artificial aquarium plants",
+    "displayOrder": 21,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-decorations",
+    "name": "Decorations",
+    "slug": "decorations",
+    "description": "Aquarium decorations and ornaments",
+    "displayOrder": 22,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-accessories",
+    "name": "Accessories",
+    "slug": "accessories",
+    "description": "Aquarium accessories and tools",
+    "displayOrder": 23,
+    "status": "Active",
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-01T00:00:00Z"
+  },
+  {
+    "id": "cat-aquarium-lighting-1790314692686",
+    "name": "Aquarium Lighting",
+    "slug": "aquarium-lighting",
+    "description": "High-spec LED lamps and full-spectrum planted lights",
+    "displayOrder": 15,
+    "status": "Active",
+    "createdAt": "2026-09-25T05:38:12.686Z",
+    "updatedAt": "2026-09-25T05:38:12.686Z"
+  },
+  {
+    "id": "cat-dwcwdvc-1790828890238",
+    "name": "dwcwdvc",
+    "slug": "dwcwdvc",
+    "description": "evrevv",
+    "displayOrder": 43,
+    "status": "Archived",
+    "createdAt": "2026-10-01T04:28:10.238Z",
+    "updatedAt": "2026-10-06T05:02:33.662Z"
+  }
+]
