@@ -190,7 +190,6 @@ export default function CheckoutPage() {
                 required
                 value={customerDetails.name}
                 onChange={(e) => setCustomerDetails({ ...customerDetails, name: e.target.value })}
-                placeholder="e.g. Ramesh Kumar"
                 className="h-11 px-3.5 rounded-xl bg-surface-container-low border border-outline-variant/60 font-body-md text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none"
               />
             </div>
@@ -207,7 +206,6 @@ export default function CheckoutPage() {
                   required
                   value={customerDetails.phoneNumber}
                   onChange={(e) => setCustomerDetails({ ...customerDetails, phoneNumber: e.target.value })}
-                  placeholder="9876543210"
                   className="w-full h-11 pl-14 pr-4 rounded-xl bg-surface-container-low border border-outline-variant/60 font-body-md text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none"
                 />
               </div>
@@ -226,7 +224,6 @@ export default function CheckoutPage() {
                 required
                 value={customerDetails.house}
                 onChange={(e) => setCustomerDetails({ ...customerDetails, house: e.target.value })}
-                placeholder="e.g. No. 12, Gandhi Street, Near Temple"
                 className="h-11 px-3.5 rounded-xl bg-surface-container-low border border-outline-variant/60 font-body-md text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none"
               />
             </div>
