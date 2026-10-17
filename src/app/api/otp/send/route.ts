@@ -21,7 +21,6 @@ export async function POST(req: NextRequest) {
       success: true,
       phone: normalized.normalized,
       countdownSec: result.countdownSec,
-      devOtp: result.devOtp, // available only in mock development mode
     });
   } catch (err: unknown) {
     console.error('API /api/otp/send error:', err);

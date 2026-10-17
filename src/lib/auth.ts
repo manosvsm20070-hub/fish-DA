@@ -84,7 +84,7 @@ export function checkRateLimit(phone: string): { allowed: boolean; remainingWait
 export async function sendOtp(
   phone: string,
   role: 'ADMIN' | 'CUSTOMER'
-): Promise<{ success: boolean; error?: string; devOtp?: string; countdownSec?: number }> {
+): Promise<{ success: boolean; error?: string; countdownSec?: number }> {
   // Check rate limit
   const rateLimit = checkRateLimit(phone);
   if (!rateLimit.allowed) {
@@ -114,16 +114,10 @@ export async function sendOtp(
     role,
   });
 
-  const otpMode = process.env.OTP_MODE || 'mock';
-
-  if (otpMode === 'mock') {
-    // In mock development mode, provide the code so local testing functions immediately
-    return {
-      success: true,
-      countdownSec: 30,
-      devOtp: otpNumber,
-    };
-  }
+  return {
+    success: true,
+    countdownSec: 30,
+  };
 
   // In production with Twilio / Firebase / SMS gateway:
   try {

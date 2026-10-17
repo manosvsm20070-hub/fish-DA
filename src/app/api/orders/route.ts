@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifySessionToken } from '@/lib/auth';
+import { normalizePhoneNumber } from '@/lib/auth';
 import { getProducts, createOrder } from '@/lib/storage';
 import { sendOrderNotifications } from '@/lib/notifications';
 import { Order, OrderItem } from '@/types';
@@ -7,25 +7,9 @@ import { Order, OrderItem } from '@/types';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { token, customerDetails, items } = body;
+    const { customerDetails, items } = body;
 
-    // 1. Verify customer phone token
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: 'Phone OTP verification is required to place an order.' },
-        { status: 401 }
-      );
-    }
-
-    const verified = verifySessionToken(token);
-    if (!verified.valid) {
-      return NextResponse.json(
-        { success: false, error: 'Your session has expired. Please verify your phone number again.' },
-        { status: 401 }
-      );
-    }
-
-    // 2. Validate customer details
+    // 1. Validate customer details
     if (!customerDetails) {
       return NextResponse.json(
         { success: false, error: 'Delivery details are required.' },
@@ -41,20 +25,21 @@ export async function POST(req: NextRequest) {
     if (!district?.trim()) return NextResponse.json({ success: false, error: 'District is required' }, { status: 400 });
     if (!state?.trim()) return NextResponse.json({ success: false, error: 'State is required' }, { status: 400 });
 
+    // Validate phone number
+    if (!phoneNumber?.trim()) {
+      return NextResponse.json({ success: false, error: 'Phone number is required' }, { status: 400 });
+    }
+    const phoneNorm = normalizePhoneNumber(phoneNumber);
+    if (!phoneNorm.valid) {
+      return NextResponse.json({ success: false, error: phoneNorm.error || 'Please enter a valid mobile number' }, { status: 400 });
+    }
+
     // Validate 6-digit Indian PIN code
     if (!pinCode || !/^\d{6}$/.test(pinCode.trim())) {
       return NextResponse.json({ success: false, error: 'Please enter a valid 6-digit Indian PIN code' }, { status: 400 });
     }
 
-    // Ensure phone number matches verified session phone
-    if (verified.phone && phoneNumber !== verified.phone) {
-      return NextResponse.json(
-        { success: false, error: 'Phone number does not match your verified session.' },
-        { status: 400 }
-      );
-    }
-
-    // 3. Validate items
+    // 2. Validate items
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ success: false, error: 'Your cart is empty.' }, { status: 400 });
     }
@@ -119,7 +104,7 @@ export async function POST(req: NextRequest) {
       district: district.trim(),
       state: state.trim(),
       pinCode: pinCode.trim(),
-      phoneNumber: verified.phone || phoneNumber,
+      phoneNumber: phoneNorm.normalized,
       items: verifiedOrderItems,
       subtotal: calculatedSubtotal,
       deliveryCharge,
