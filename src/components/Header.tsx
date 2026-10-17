@@ -6,8 +6,28 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { SHOP_INFO } from '@/data/products';
+import AnnouncementBar from '@/components/AnnouncementBar';
 
-export default function Header() {
+interface HeaderProps {
+  announcement?: {
+    enabled: boolean;
+    text: string;
+    linkText?: string;
+    linkUrl?: string;
+  };
+  storeName?: string;
+  phoneDial?: string;
+  phoneDisplay?: string;
+  whatsappNumber?: string;
+}
+
+export default function Header({
+  announcement,
+  storeName,
+  phoneDial,
+  phoneDisplay,
+  whatsappNumber,
+}: HeaderProps = {}) {
   const pathname = usePathname();
   const { cartCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -22,7 +42,8 @@ export default function Header() {
   ];
 
   return (
-    <header className="fixed top-0 w-full z-50 pt-safe bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-surface-container">
+    <header className="fixed top-0 w-full z-50 pt-safe bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-surface-container">
+      <AnnouncementBar announcement={announcement} />
       <div className="h-20 px-4 md:px-8 max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Brand Logo & Location */}
         <Link href="/" className="flex items-center gap-3 group">
@@ -37,7 +58,7 @@ export default function Header() {
           </div>
           <div className="hidden sm:flex flex-col">
             <span className="font-headline-sm font-bold text-primary tracking-tight leading-tight">
-              {SHOP_INFO.name}
+              {storeName || SHOP_INFO.name}
             </span>
             <span className="font-label-sm text-on-surface-variant flex items-center gap-0.5">
               <span className="material-symbols-outlined text-[13px] text-primary">location_on</span>
@@ -74,9 +95,9 @@ export default function Header() {
           {/* Call Store */}
           <a
             aria-label="Call Store"
-            href={SHOP_INFO.phoneDial}
+            href={phoneDial || SHOP_INFO.phoneDial}
             className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center bg-surface-container-high text-primary hover:bg-secondary-container transition-colors shadow-sm"
-            title="Call 07845637566"
+            title={`Call ${phoneDisplay || SHOP_INFO.phoneDisplay}`}
           >
             <span className="material-symbols-outlined text-[20px]">call</span>
           </a>
@@ -84,11 +105,11 @@ export default function Header() {
           {/* WhatsApp Direct */}
           <a
             aria-label="WhatsApp Store"
-            href={SHOP_INFO.whatsappDirect}
+            href={`https://wa.me/${whatsappNumber || SHOP_INFO.whatsappNumber}?text=Hello%20${encodeURIComponent(storeName || SHOP_INFO.name)},%20I%20am%20inquiring%20about%20live%20fish%20stock%20and%20prices`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center bg-primary text-on-primary hover:bg-primary-container transition-colors shadow-sm"
-            title="WhatsApp Dolphin Aquarium"
+            title={`WhatsApp ${storeName || SHOP_INFO.name}`}
           >
             <span className="material-symbols-outlined text-[20px]">chat</span>
           </a>

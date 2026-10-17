@@ -1,13 +1,49 @@
 import fs from 'fs';
 import path from 'path';
-import { Product, Order, PriceHistory, Catalog, ProductStatus, OrderStatus } from '@/types';
-import { INITIAL_PRODUCTS } from '@/data/products';
+import { Product, Order, PriceHistory, Catalog, ProductStatus, OrderStatus, SiteSettings } from '@/types';
+import { INITIAL_PRODUCTS, SHOP_INFO } from '@/data/products';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const PRODUCTS_FILE = path.join(DATA_DIR, 'products.json');
 const ORDERS_FILE = path.join(DATA_DIR, 'orders.json');
 const PRICE_HISTORY_FILE = path.join(DATA_DIR, 'price_history.json');
 const CATALOGS_FILE = path.join(DATA_DIR, 'catalogs.json');
+const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
+
+export const DEFAULT_SETTINGS: SiteSettings = {
+  adminPassword: process.env.ADMIN_PASSWORD || 'bestfish',
+  theme: {
+    preset: 'ocean-teal',
+    primaryColor: '#006572',
+    accentColor: '#cc4729',
+    darkMode: false,
+  },
+  customerInterface: {
+    storeName: SHOP_INFO.name,
+    tagline: SHOP_INFO.tagline,
+    announcement: {
+      enabled: true,
+      text: '🌊 Direct live fish transit & delivery across Sothupakkam & Chengalpattu region. Free delivery on orders over ₹1,500!',
+      linkText: 'Shop Fish Now',
+      linkUrl: '/fish',
+    },
+    hero: {
+      headline: SHOP_INFO.name,
+      subtitle: 'Freshwater Livestock, Custom Rimless Tanks & Aquatic Equipment',
+      bannerImage: 'https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=1600&q=80',
+      quarantineBadgeText: 'Quarantine Certified',
+      ratingBadgeText: '4.9 (Live Stock)',
+      highlightNotice: '100% Healthy Quarantine Assured. Direct Tank Delivery across Sothupakkam & Chengalpattu region.',
+    },
+    contact: {
+      address: SHOP_INFO.address,
+      phoneDisplay: SHOP_INFO.phoneDisplay,
+      phoneDial: SHOP_INFO.phoneDial,
+      whatsappNumber: SHOP_INFO.whatsappNumber,
+      openHours: SHOP_INFO.openHours,
+    },
+  },
+};
 
 // Default catalog list seeded from existing categories
 const DEFAULT_CATALOGS: Catalog[] = [
@@ -58,6 +94,10 @@ function ensureDataFiles() {
 
   if (!fs.existsSync(CATALOGS_FILE)) {
     fs.writeFileSync(CATALOGS_FILE, JSON.stringify(DEFAULT_CATALOGS, null, 2), 'utf-8');
+  }
+
+  if (!fs.existsSync(SETTINGS_FILE)) {
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2), 'utf-8');
   }
 }
 
@@ -286,5 +326,102 @@ export async function updateOrderNotificationStatus(
     }
   } catch (err) {
     console.error('Failed to update order notification status:', err);
+  }
+}
+
+// ======================== SETTINGS & THEME OPERATIONS ========================
+
+export async function getSettings(): Promise<SiteSettings> {
+  try {
+    ensureDataFiles();
+    const data = fs.readFileSync(SETTINGS_FILE, 'utf-8');
+    const parsed = JSON.parse(data);
+    return {
+      ...DEFAULT_SETTINGS,
+      ...parsed,
+      theme: { ...DEFAULT_SETTINGS.theme, ...(parsed.theme || {}) },
+      customerInterface: {
+        ...DEFAULT_SETTINGS.customerInterface,
+        ...(parsed.customerInterface || {}),
+        announcement: {
+          ...DEFAULT_SETTINGS.customerInterface.announcement,
+          ...(parsed.customerInterface?.announcement || {}),
+        },
+        hero: {
+          ...DEFAULT_SETTINGS.customerInterface.hero,
+          ...(parsed.customerInterface?.hero || {}),
+        },
+        contact: {
+          ...DEFAULT_SETTINGS.customerInterface.contact,
+          ...(parsed.customerInterface?.contact || {}),
+        },
+      },
+    };
+  } catch (err) {
+    console.error('Failed reading settings file, returning defaults:', err);
+    return DEFAULT_SETTINGS;
+  }
+}
+
+export async function updateSettings(
+  updates: Partial<SiteSettings>
+): Promise<{ success: boolean; settings?: SiteSettings; error?: string }> {
+  try {
+    ensureDataFiles();
+    const current = await getSettings();
+    const next: SiteSettings = {
+      ...current,
+      ...updates,
+      theme: { ...current.theme, ...(updates.theme || {}) },
+      customerInterface: {
+        ...current.customerInterface,
+        ...(updates.customerInterface || {}),
+        announcement: {
+          ...current.customerInterface.announcement,
+          ...(updates.customerInterface?.announcement || {}),
+        },
+        hero: {
+          ...current.customerInterface.hero,
+          ...(updates.customerInterface?.hero || {}),
+        },
+        contact: {
+          ...current.customerInterface.contact,
+          ...(updates.customerInterface?.contact || {}),
+        },
+      },
+    };
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(next, null, 2), 'utf-8');
+    return { success: true, settings: next };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Failed to update settings';
+    return { success: false, error: errorMsg };
+  }
+}
+
+export async function getAdminPassword(): Promise<string> {
+  const settings = await getSettings();
+  return settings.adminPassword || process.env.ADMIN_PASSWORD || 'bestfish';
+}
+
+export async function updateAdminPassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    ensureDataFiles();
+    const existing = await getAdminPassword();
+    if (currentPassword !== existing) {
+      return { success: false, error: 'Current password is incorrect.' };
+    }
+    if (!newPassword || newPassword.trim().length < 4) {
+      return { success: false, error: 'New password must be at least 4 characters long.' };
+    }
+    const current = await getSettings();
+    current.adminPassword = newPassword.trim();
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(current, null, 2), 'utf-8');
+    return { success: true };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Failed to update password';
+    return { success: false, error: errorMsg };
   }
 }

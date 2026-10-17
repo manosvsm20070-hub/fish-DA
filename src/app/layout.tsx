@@ -52,13 +52,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+import ThemeApplier from '@/components/ThemeApplier';
+import { getSettings } from '@/lib/storage';
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const settings = await getSettings();
+  const primaryColor = settings.theme?.primaryColor || '#006572';
+  const accentColor = settings.theme?.accentColor || '#cc4729';
+  const darkMode = !!settings.theme?.darkMode;
+  const isAnnouncementActive = !!(settings.customerInterface?.announcement?.enabled && settings.customerInterface?.announcement?.text);
+
   return (
-    <html lang="en" className={`${plusJakarta.variable} ${inter.variable} antialiased`}>
+    <html lang="en" className={`${plusJakarta.variable} ${inter.variable} ${darkMode ? 'dark' : ''} antialiased`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -67,15 +76,47 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
         />
+        <style
+          id="theme-css-vars"
+          dangerouslySetInnerHTML={{
+            __html: `
+              :root {
+                --color-primary: ${primaryColor};
+                --color-primary-container: ${primaryColor};
+                --color-tertiary-container: ${accentColor};
+                --color-coral: ${accentColor};
+              }
+              html.dark {
+                --color-surface: #0b1320;
+                --color-surface-dim: #131d2e;
+                --color-surface-bright: #172338;
+                --color-surface-container-lowest: #0d1524;
+                --color-surface-container-low: #131e31;
+                --color-surface-container: #1b2840;
+                --color-surface-container-high: #243450;
+                --color-surface-container-highest: #2e4162;
+                --color-on-surface: #f1f5f9;
+                --color-on-surface-variant: #94a3b8;
+              }
+            `,
+          }}
+        />
       </head>
       <body className="bg-surface font-body-md text-on-surface flex flex-col min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
+        <ThemeApplier primaryColor={primaryColor} accentColor={accentColor} darkMode={darkMode} />
         <CartProvider>
-          <Header />
-          <div className="flex-1 flex flex-col pt-20 pb-20 lg:pb-12">
+          <Header
+            announcement={settings.customerInterface?.announcement}
+            storeName={settings.customerInterface?.storeName}
+            phoneDial={settings.customerInterface?.contact?.phoneDial}
+            phoneDisplay={settings.customerInterface?.contact?.phoneDisplay}
+            whatsappNumber={settings.customerInterface?.contact?.whatsappNumber}
+          />
+          <div className={`flex-1 flex flex-col ${isAnnouncementActive ? 'pt-28' : 'pt-20'} pb-20 lg:pb-12`}>
             {children}
           </div>
           <BottomNav />
-          <FloatingWhatsApp />
+          <FloatingWhatsApp whatsappNumber={settings.customerInterface?.contact?.whatsappNumber} />
         </CartProvider>
       </body>
     </html>

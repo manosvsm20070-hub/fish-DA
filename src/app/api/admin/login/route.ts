@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = verifyAdminPassword(password);
+    const result = await verifyAdminPassword(password);
     if (!result.success || !result.token) {
       return NextResponse.json(
         { success: false, error: result.error || 'Incorrect admin password.' },

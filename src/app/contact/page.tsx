@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSettings } from '@/lib/storage';
 import { SHOP_INFO } from '@/data/products';
 import Footer from '@/components/Footer';
 
@@ -7,13 +8,22 @@ export const metadata = {
   description: 'Visit Dolphin Aquarium at No. 5 Monasakthi Valagam, Cheyur - Vandavasi Rd, Sothupakkam, Tamil Nadu 603319. Phone: 07845637566.',
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const settings = await getSettings();
+  const ci = settings.customerInterface;
+  const storeName = ci?.storeName || SHOP_INFO.name;
+  const address = ci?.contact?.address || SHOP_INFO.address;
+  const phoneDisplay = ci?.contact?.phoneDisplay || SHOP_INFO.phoneDisplay;
+  const phoneDial = ci?.contact?.phoneDial || SHOP_INFO.phoneDial;
+  const whatsappNumber = ci?.contact?.whatsappNumber || SHOP_INFO.whatsappNumber;
+  const openHours = ci?.contact?.openHours || SHOP_INFO.openHours;
+
   return (
     <main className="flex-1 flex flex-col w-full px-4 md:px-8 max-w-7xl mx-auto">
       <div className="w-full py-2 mb-2 flex items-center justify-between">
         <h1 className="font-headline-lg-mobile text-on-surface font-bold">Store & Contact Info</h1>
         <span className="font-label-sm text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold">
-          Open Daily (9 AM – 9 PM)
+          {openHours}
         </span>
       </div>
 
@@ -26,7 +36,7 @@ export default function ContactPage() {
                 Visit Our Physical Store
               </span>
               <h2 className="font-headline-lg font-bold text-on-surface mt-1">
-                Dolphin Aquarium
+                {storeName}
               </h2>
               <p className="font-body-md text-on-surface-variant text-sm mt-1">
                 Your local destination for healthy freshwater fish, live plants, custom rimless glass tanks, and premium aquatic equipment.
@@ -41,7 +51,7 @@ export default function ContactPage() {
                 <div>
                   <span className="font-label-md font-bold text-on-surface block">Address:</span>
                   <p className="text-on-surface-variant leading-relaxed">
-                    {SHOP_INFO.address}
+                    {address}
                   </p>
                 </div>
               </div>
@@ -52,8 +62,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <span className="font-label-md font-bold text-on-surface block">Phone:</span>
-                  <a href={SHOP_INFO.phoneDial} className="text-primary font-bold hover:underline">
-                    {SHOP_INFO.phoneDisplay}
+                  <a href={phoneDial} className="text-primary font-bold hover:underline">
+                    {phoneDisplay}
                   </a>
                 </div>
               </div>
@@ -64,22 +74,22 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <span className="font-label-md font-bold text-on-surface block">Business Hours:</span>
-                  <span className="text-on-surface-variant">{SHOP_INFO.openHours}</span>
+                  <span className="text-on-surface-variant">{openHours}</span>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
               <a
-                href={SHOP_INFO.phoneDial}
+                href={phoneDial}
                 className="w-full sm:w-auto h-12 px-6 rounded-xl bg-primary text-on-primary font-label-md font-bold flex items-center justify-center gap-2 shadow-sm hover:bg-primary-container transition-all active:scale-95"
               >
                 <span className="material-symbols-outlined text-[20px]">call</span>
-                <span>Call Store ({SHOP_INFO.phoneDisplay})</span>
+                <span>Call Store ({phoneDisplay})</span>
               </a>
 
               <a
-                href={`${SHOP_INFO.whatsappDirect}?text=Hello%20Dolphin%20Aquarium,%20I%20have%20an%20inquiry`}
+                href={`https://wa.me/${whatsappNumber}?text=Hello%20${encodeURIComponent(storeName)},%20I%20have%20an%20inquiry`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto h-12 px-6 rounded-xl bg-[#25D366] text-white font-label-md font-bold flex items-center justify-center gap-2 shadow-sm hover:bg-[#1ebd59] transition-all active:scale-95"

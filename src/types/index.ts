@@ -130,3 +130,38 @@ export interface AdminSession {
   token: string;
   expiresAt: number;
 }
+
+export interface SiteSettings {
+  adminPassword?: string;
+  theme: {
+    preset: string;
+    primaryColor: string;
+    accentColor: string;
+    darkMode: boolean;
+  };
+  customerInterface: {
+    storeName: string;
+    tagline: string;
+    announcement: {
+      enabled: boolean;
+      text: string;
+      linkText?: string;
+      linkUrl?: string;
+    };
+    hero: {
+      headline: string;
+      subtitle: string;
+      bannerImage: string;
+      quarantineBadgeText: string;
+      ratingBadgeText: string;
+      highlightNotice: string;
+    };
+    contact: {
+      address: string;
+      phoneDisplay: string;
+      phoneDial: string;
+      whatsappNumber: string;
+      openHours: string;
+    };
+  };
+}

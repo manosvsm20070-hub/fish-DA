@@ -1,9 +1,51 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { SHOP_INFO } from '@/data/products';
 
-export default function Footer() {
+interface FooterProps {
+  storeName?: string;
+  tagline?: string;
+  address?: string;
+  phoneDisplay?: string;
+  phoneDial?: string;
+  whatsappNumber?: string;
+  openHours?: string;
+}
+
+export default function Footer(props: FooterProps = {}) {
+  const [info, setInfo] = useState({
+    name: props.storeName || SHOP_INFO.name,
+    address: props.address || SHOP_INFO.address,
+    phoneDisplay: props.phoneDisplay || SHOP_INFO.phoneDisplay,
+    phoneDial: props.phoneDial || SHOP_INFO.phoneDial,
+    whatsappNumber: props.whatsappNumber || SHOP_INFO.whatsappNumber,
+    openHours: props.openHours || SHOP_INFO.openHours,
+  });
+
+  useEffect(() => {
+    if (!props.storeName) {
+      fetch('/api/settings')
+        .then((r) => r.json())
+        .then((d) => {
+          if (d?.customerInterface) {
+            const ci = d.customerInterface;
+            setInfo({
+              name: ci.storeName || SHOP_INFO.name,
+              address: ci.contact?.address || SHOP_INFO.address,
+              phoneDisplay: ci.contact?.phoneDisplay || SHOP_INFO.phoneDisplay,
+              phoneDial: ci.contact?.phoneDial || SHOP_INFO.phoneDial,
+              whatsappNumber: ci.contact?.whatsappNumber || SHOP_INFO.whatsappNumber,
+              openHours: ci.contact?.openHours || SHOP_INFO.openHours,
+            });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [props.storeName]);
+
   return (
     <footer className="mt-16 pt-12 pb-24 lg:pb-12 bg-surface-container-low border-t border-surface-container">
       <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col gap-8">
@@ -19,25 +61,25 @@ export default function Footer() {
               />
             </div>
             <p className="font-headline-sm font-bold text-primary mt-1">
-              {SHOP_INFO.name}
+              {info.name}
             </p>
             <p className="font-body-sm text-on-surface-variant max-w-md">
               Freshwater livestock, fancy goldfish, show bettas, predator monster fish, custom rimless aquariums, and professional aquatic equipment. Serving Sothupakkam, Cheyur, Vandavasi, and the Chengalpattu region.
             </p>
             <div className="flex items-start gap-1.5 text-on-surface-variant font-body-sm mt-1">
               <span className="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">location_on</span>
-              <span>{SHOP_INFO.address}</span>
+              <span>{info.address}</span>
             </div>
             <div className="flex items-center gap-2 mt-2">
               <a
-                href={SHOP_INFO.phoneDial}
+                href={info.phoneDial}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-on-primary font-label-md shadow-xs hover:bg-primary-container transition-colors"
               >
                 <span className="material-symbols-outlined text-[16px]">call</span>
-                <span>{SHOP_INFO.phoneDisplay}</span>
+                <span>{info.phoneDisplay}</span>
               </a>
               <a
-                href={SHOP_INFO.whatsappDirect}
+                href={`https://wa.me/${info.whatsappNumber}?text=Hello%20${encodeURIComponent(info.name)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#25D366] text-white font-label-md font-bold shadow-xs hover:bg-[#1ebd59] transition-colors"

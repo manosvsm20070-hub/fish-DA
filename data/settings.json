@@ -1,0 +1,34 @@
+{
+  "adminPassword": "bestfish",
+  "theme": {
+    "preset": "ocean-teal",
+    "primaryColor": "#006572",
+    "accentColor": "#cc4729",
+    "darkMode": false
+  },
+  "customerInterface": {
+    "storeName": "Dolphin Aquarium",
+    "tagline": "Freshwater Specialist & Custom Rimless Tanks",
+    "announcement": {
+      "enabled": true,
+      "text": "🌊 Direct live fish transit & delivery across Sothupakkam & Chengalpattu region. Free delivery on orders over ₹1,500!",
+      "linkText": "Shop Fish Now",
+      "linkUrl": "/fish"
+    },
+    "hero": {
+      "headline": "Dolphin Aquarium",
+      "subtitle": "Freshwater Livestock, Custom Rimless Tanks & Aquatic Equipment",
+      "bannerImage": "https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=1600&q=80",
+      "quarantineBadgeText": "Quarantine Certified",
+      "ratingBadgeText": "4.9 (Live Stock)",
+      "highlightNotice": "100% Healthy Quarantine Assured. Direct Tank Delivery across Sothupakkam & Chengalpattu region."
+    },
+    "contact": {
+      "address": "No. 5 Monasakthi Valagam, Cheyur - Vandavasi Rd, Sothupakkam, Tamil Nadu 603319",
+      "phoneDisplay": "07845637566",
+      "phoneDial": "tel:07845637566",
+      "whatsappNumber": "917845637566",
+      "openHours": "Open 7 days a week: 9:00 AM – 9:00 PM"
+    }
+  }
+}

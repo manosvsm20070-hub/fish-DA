@@ -3,12 +3,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Product, Order, Catalog } from '@/types';
+import { Product, Order, Catalog, SiteSettings } from '@/types';
+import SettingsManager from '@/components/admin/SettingsManager';
 
 // ─────────────────────────────────────────────────────────────
 // SECTION TYPES
 // ─────────────────────────────────────────────────────────────
-type AdminSection = 'dashboard' | 'products' | 'catalogs' | 'orders';
+type AdminSection = 'dashboard' | 'products' | 'catalogs' | 'orders' | 'settings';
 
 // ─────────────────────────────────────────────────────────────
 // HELPER: Admin fetch with error
@@ -416,6 +417,7 @@ export default function AdminDashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [catalogs, setCatalogs] = useState<Catalog[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Filters
@@ -446,14 +448,16 @@ export default function AdminDashboardPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [pr, cr, or] = await Promise.all([
+      const [pr, cr, or, sr] = await Promise.all([
         adminFetch('/api/admin/products'),
         adminFetch('/api/admin/catalogs'),
         adminFetch('/api/admin/orders'),
+        adminFetch('/api/admin/settings'),
       ]);
       if (pr.ok) setProducts(pr.data.products || []);
       if (cr.ok) setCatalogs(cr.data.catalogs || []);
       if (or.ok) setOrders(or.data.orders || []);
+      if (sr.ok) setSettings(sr.data.settings || null);
     } finally { setLoading(false); }
   }, []);
 
@@ -595,6 +599,7 @@ export default function AdminDashboardPage() {
     { id: 'products', icon: 'inventory_2', label: 'Products' },
     { id: 'catalogs', icon: 'category', label: 'Catalogs' },
     { id: 'orders', icon: 'receipt_long', label: 'Orders' },
+    { id: 'settings', icon: 'settings', label: 'Settings' },
   ];
 
   return (
@@ -909,6 +914,16 @@ export default function AdminDashboardPage() {
                 ))
               )}
             </div>
+          )}
+
+          {/* ═══════════════ SETTINGS ═══════════════ */}
+          {activeSection === 'settings' && (
+            <SettingsManager
+              key={settings ? `${settings.theme?.preset}-${settings.theme?.primaryColor}-${settings.customerInterface?.storeName}` : 'loading'}
+              settings={settings}
+              onRefresh={loadData}
+              showToast={showToast}
+            />
           )}
         </div>
       </div>

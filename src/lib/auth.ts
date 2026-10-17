@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { getAdminPassword } from '@/lib/storage';
 
 export const ADMIN_PHONE_NUMBER = process.env.ADMIN_PHONE_NUMBER || '+917845637566';
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'bestfish';
@@ -182,8 +183,9 @@ export function verifyOtp(
 }
 
 // Verify Admin Password directly
-export function verifyAdminPassword(password: string): { success: boolean; error?: string; token?: string } {
-  if (!password || password.trim() !== ADMIN_PASSWORD) {
+export async function verifyAdminPassword(password: string): Promise<{ success: boolean; error?: string; token?: string }> {
+  const activePassword = await getAdminPassword();
+  if (!password || password.trim() !== activePassword) {
     return { success: false, error: 'Incorrect admin password. Please try again.' };
   }
   const token = createSessionToken(ADMIN_PHONE_NUMBER, 'ADMIN');
