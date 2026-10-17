@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,13 +8,11 @@ import { useCart } from '@/context/CartContext';
 import { CustomerDetails } from '@/types';
 import Footer from '@/components/Footer';
 
-type CheckoutStep = 'details' | 'review';
-
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, clearCart } = useCart();
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const [step, setStep] = useState<CheckoutStep>('details');
   const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({
     name: '',
     house: '',
@@ -27,87 +25,109 @@ export default function CheckoutPage() {
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false);
 
   // Delivery charge calculation: free over ₹1500, else ₹100
   const deliveryCharge = subtotal >= 1500 ? 0 : 100;
   const grandTotal = subtotal + deliveryCharge;
 
-  // Step 1: Validate Delivery Details & Move to Review
-  const handleDetailsSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Single-Step Final Place Order
+  const handlePlaceOrder = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (isSubmittingOrder || isOrderPlaced) return;
+
     setErrorMsg(null);
 
+    // 1. Validation
     if (!customerDetails.name.trim()) {
       setErrorMsg('Please enter your full name.');
       return;
     }
+
     if (!customerDetails.phoneNumber.trim()) {
       setErrorMsg('Please enter your mobile number.');
       return;
     }
-    // Basic phone validation: 10 digits
-    const cleanedPhone = customerDetails.phoneNumber.replace(/[\s\-\(\)\+]/g, '');
-    if (cleanedPhone.length < 10) {
-      setErrorMsg('Please enter a valid 10-digit mobile number.');
+
+    // Clean phone number: remove non-digits
+    const digitsOnly = customerDetails.phoneNumber.replace(/\D/g, '');
+    const phone10 = digitsOnly.startsWith('91') && digitsOnly.length === 12
+      ? digitsOnly.slice(2)
+      : digitsOnly;
+
+    if (!/^[6-9]\d{9}$/.test(phone10)) {
+      setErrorMsg('Please enter a valid 10-digit Indian mobile number (e.g. 9876543210).');
       return;
     }
+
     if (!customerDetails.house.trim()) {
       setErrorMsg('Please enter your house or street address.');
       return;
     }
+
     if (!customerDetails.city.trim()) {
       setErrorMsg('Please enter your city / town.');
       return;
     }
-    if (!customerDetails.district.trim()) {
-      setErrorMsg('Please enter your district.');
-      return;
-    }
-    if (!customerDetails.state.trim()) {
-      setErrorMsg('Please enter your state.');
-      return;
-    }
+
     if (!customerDetails.pinCode || !/^\d{6}$/.test(customerDetails.pinCode.trim())) {
       setErrorMsg('Please enter a valid 6-digit Indian PIN code.');
       return;
     }
 
-    setStep('review');
-  };
+    if (!items || items.length === 0) {
+      setErrorMsg('Your cart is empty. Please add items before placing an order.');
+      return;
+    }
 
-  // Step 2: Final Place Order
-  const handlePlaceOrder = async () => {
-    if (isSubmittingOrder) return;
     setIsSubmittingOrder(true);
-    setErrorMsg(null);
 
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          customerDetails,
+          customerDetails: {
+            ...customerDetails,
+            phoneNumber: phone10,
+            district: customerDetails.district.trim() || customerDetails.city.trim() || 'Chengalpattu',
+            state: customerDetails.state.trim() || 'Tamil Nadu',
+          },
           items,
         }),
       });
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        setErrorMsg(data.error || 'Failed to place order.');
+        setErrorMsg(data.error || 'Failed to place order. Please try again.');
         setIsSubmittingOrder(false);
         return;
       }
 
-      // Success! Clear cart and route to order success page
+      // Order created successfully
+      setIsOrderPlaced(true);
       clearCart();
       router.push(`/order-success/${data.orderNumber}`);
     } catch {
-      setErrorMsg('Failed to process order. Please try again.');
+      setErrorMsg('Network error while placing order. Please try again.');
       setIsSubmittingOrder(false);
     }
   };
 
-  // If cart is empty, prompt to browse
+  // State: Order placed redirecting
+  if (isOrderPlaced) {
+    return (
+      <main className="flex-1 flex flex-col items-center justify-center py-20 px-4 text-center">
+        <div className="w-14 h-14 border-4 border-[#cc4729] border-t-transparent rounded-full animate-spin mb-4" />
+        <h2 className="font-headline-sm font-bold text-on-surface">Order Placed Successfully!</h2>
+        <p className="font-body-sm text-xs text-on-surface-variant mt-1">
+          Redirecting to order confirmation...
+        </p>
+      </main>
+    );
+  }
+
+  // State: Empty cart
   if (items.length === 0) {
     return (
       <main className="flex-1 flex flex-col w-full px-4 md:px-8 max-w-7xl mx-auto py-12">
@@ -130,64 +150,48 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="flex-1 flex flex-col w-full px-4 md:px-8 max-w-4xl mx-auto">
-      {/* Checkout Progress Stepper */}
-      <div className="w-full py-2 mb-4 flex items-center justify-between">
-        <h1 className="font-headline-lg-mobile text-on-surface font-bold">Secure Checkout</h1>
-        <span className="font-label-sm text-xs px-3 py-1 rounded-full bg-surface-container text-primary font-bold">
-          Step {step === 'details' ? '1 of 2: Details' : '2 of 2: Review'}
-        </span>
-      </div>
-
-      {errorMsg && (
-        <div className="p-3 mb-4 rounded-xl bg-red-50 border border-red-200 text-red-700 font-label-md text-xs flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px]">error</span>
-          <span>{errorMsg}</span>
-        </div>
-      )}
-
-      {/* Visual Step Indicator */}
-      <div className="grid grid-cols-2 gap-2 mb-6">
-        <div
-          className={`py-2 px-3 rounded-xl border flex flex-col items-center gap-1 text-center ${
-            step === 'details'
-              ? 'bg-primary/10 border-primary text-primary font-bold'
-              : 'bg-emerald-50 border-emerald-200 text-emerald-700'
-          }`}
-        >
-          <span className="text-[10px] uppercase tracking-wider">Step 1</span>
-          <span className="font-label-md text-xs">Delivery Details</span>
+    <main className="flex-1 flex flex-col w-full px-4 md:px-8 max-w-6xl mx-auto py-6">
+      {/* Checkout Header */}
+      <div className="w-full mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-surface-container-high pb-4">
+        <div>
+          <h1 className="font-headline-lg text-2xl md:text-3xl font-extrabold text-on-surface">
+            Secure Checkout
+          </h1>
+          <p className="font-body-sm text-xs text-on-surface-variant mt-0.5">
+            Direct dispatch from Dolphin Aquarium, Sothupakkam &bull; Cash on Delivery
+          </p>
         </div>
 
-        <div
-          className={`py-2 px-3 rounded-xl border flex flex-col items-center gap-1 text-center ${
-            step === 'review'
-              ? 'bg-primary/10 border-primary text-primary font-bold'
-              : 'bg-surface-container-low border-surface-container text-on-surface-variant opacity-60'
-          }`}
-        >
-          <span className="text-[10px] uppercase tracking-wider">Step 2</span>
-          <span className="font-label-md text-xs">Review & Place</span>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
+            <span className="material-symbols-outlined text-[16px]">verified</span>
+            Direct Store Dispatch
+          </span>
         </div>
       </div>
 
-      {/* ================= STEP 1: CUSTOMER DETAILS FORM ================= */}
-      {step === 'details' && (
-        <section className="bg-surface-container-lowest p-6 rounded-2xl border border-surface-container shadow-sm flex flex-col gap-5">
-          <div className="flex flex-col gap-1">
-            <h2 className="font-headline-sm font-bold text-on-surface">Delivery Details</h2>
-            <p className="font-body-sm text-xs text-on-surface-variant">
-              Please enter your name, contact number, and address for safe transit and dispatch.
-            </p>
+      {/* Main 2-Column Responsive Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* LEFT COLUMN: Delivery Details Form */}
+        <section className="lg:col-span-7 bg-surface-container-lowest p-6 rounded-2xl border border-surface-container shadow-sm flex flex-col gap-5">
+          <div className="flex items-center justify-between border-b border-surface-container-high pb-3">
+            <div className="flex items-center gap-2">
+              <span className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
+                1
+              </span>
+              <h2 className="font-headline-sm font-bold text-on-surface text-base md:text-lg">
+                Delivery Details
+              </h2>
+            </div>
+            <span className="text-[11px] text-on-surface-variant font-medium">* Required fields</span>
           </div>
 
-          <form onSubmit={handleDetailsSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <form ref={formRef} onSubmit={handlePlaceOrder} noValidate className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Full Name */}
             <div className="flex flex-col gap-1.5 sm:col-span-2">
               <label className="font-label-md text-xs font-bold text-on-surface">Full Name *</label>
               <input
                 type="text"
-                required
                 value={customerDetails.name}
                 onChange={(e) => setCustomerDetails({ ...customerDetails, name: e.target.value })}
                 className="h-11 px-3.5 rounded-xl bg-surface-container-low border border-outline-variant/60 font-body-md text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none"
@@ -198,14 +202,14 @@ export default function CheckoutPage() {
             <div className="flex flex-col gap-1.5 sm:col-span-2">
               <label className="font-label-md text-xs font-bold text-on-surface">Mobile Number *</label>
               <div className="relative flex items-center">
-                <span className="absolute left-3.5 font-label-md text-sm text-on-surface-variant font-bold">
+                <span className="absolute left-3.5 font-label-md text-sm text-on-surface-variant font-bold select-none">
                   +91
                 </span>
                 <input
                   type="tel"
-                  required
+                  maxLength={10}
                   value={customerDetails.phoneNumber}
-                  onChange={(e) => setCustomerDetails({ ...customerDetails, phoneNumber: e.target.value })}
+                  onChange={(e) => setCustomerDetails({ ...customerDetails, phoneNumber: e.target.value.replace(/\D/g, '') })}
                   className="w-full h-11 pl-14 pr-4 rounded-xl bg-surface-container-low border border-outline-variant/60 font-body-md text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none"
                 />
               </div>
@@ -221,7 +225,6 @@ export default function CheckoutPage() {
               </label>
               <input
                 type="text"
-                required
                 value={customerDetails.house}
                 onChange={(e) => setCustomerDetails({ ...customerDetails, house: e.target.value })}
                 className="h-11 px-3.5 rounded-xl bg-surface-container-low border border-outline-variant/60 font-body-md text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none"
@@ -233,7 +236,6 @@ export default function CheckoutPage() {
               <label className="font-label-md text-xs font-bold text-on-surface">City / Town *</label>
               <input
                 type="text"
-                required
                 value={customerDetails.city}
                 onChange={(e) => setCustomerDetails({ ...customerDetails, city: e.target.value })}
                 className="h-11 px-3.5 rounded-xl bg-surface-container-low border border-outline-variant/60 font-body-md text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none"
@@ -242,10 +244,9 @@ export default function CheckoutPage() {
 
             {/* District */}
             <div className="flex flex-col gap-1.5">
-              <label className="font-label-md text-xs font-bold text-on-surface">District *</label>
+              <label className="font-label-md text-xs font-bold text-on-surface">District</label>
               <input
                 type="text"
-                required
                 value={customerDetails.district}
                 onChange={(e) => setCustomerDetails({ ...customerDetails, district: e.target.value })}
                 className="h-11 px-3.5 rounded-xl bg-surface-container-low border border-outline-variant/60 font-body-md text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none"
@@ -257,7 +258,6 @@ export default function CheckoutPage() {
               <label className="font-label-md text-xs font-bold text-on-surface">State *</label>
               <input
                 type="text"
-                required
                 value={customerDetails.state}
                 onChange={(e) => setCustomerDetails({ ...customerDetails, state: e.target.value })}
                 className="h-11 px-3.5 rounded-xl bg-surface-container-low border border-outline-variant/60 font-body-md text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none"
@@ -269,104 +269,72 @@ export default function CheckoutPage() {
               <label className="font-label-md text-xs font-bold text-on-surface">6-Digit PIN Code *</label>
               <input
                 type="text"
-                required
                 maxLength={6}
                 value={customerDetails.pinCode}
                 onChange={(e) => setCustomerDetails({ ...customerDetails, pinCode: e.target.value.replace(/\D/g, '') })}
                 className="h-11 px-3.5 rounded-xl bg-surface-container-low border border-outline-variant/60 font-body-md text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none"
               />
             </div>
-
-            <div className="sm:col-span-2 pt-2">
-              <button
-                type="submit"
-                className="w-full sm:w-auto px-8 h-12 rounded-xl bg-primary hover:bg-primary-container active:scale-95 text-on-primary font-label-md font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
-              >
-                <span>Continue to Order Review</span>
-                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-              </button>
-            </div>
           </form>
         </section>
-      )}
 
-      {/* ================= STEP 2: ORDER REVIEW & CONFIRMATION ================= */}
-      {step === 'review' && (
-        <section className="bg-surface-container-lowest p-6 rounded-2xl border border-surface-container shadow-sm flex flex-col gap-6">
-          <div className="flex items-center justify-between border-b border-surface-container-high pb-4">
-            <div>
-              <h2 className="font-headline-sm font-bold text-on-surface">Review Your Order</h2>
-              <p className="font-body-sm text-xs text-on-surface-variant">
-                Confirm your order details before final submission.
-              </p>
+        {/* RIGHT COLUMN: Order Summary & Place Order Button */}
+        <section className="lg:col-span-5 bg-surface-container-lowest p-6 rounded-2xl border border-surface-container shadow-sm flex flex-col gap-5 lg:sticky lg:top-24">
+          <div className="flex items-center justify-between border-b border-surface-container-high pb-3">
+            <div className="flex items-center gap-2">
+              <span className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
+                2
+              </span>
+              <h2 className="font-headline-sm font-bold text-on-surface text-base md:text-lg">
+                Order Summary
+              </h2>
             </div>
-            <button
-              type="button"
-              onClick={() => setStep('details')}
-              className="font-label-md text-xs text-secondary hover:text-primary underline cursor-pointer"
-            >
-              Edit Details
-            </button>
-          </div>
-
-          {/* Delivery Address Summary */}
-          <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-1 text-xs">
-            <span className="font-label-md font-bold text-on-surface text-sm">Delivery Contact & Address:</span>
-            <p className="text-on-surface font-semibold">{customerDetails.name}</p>
-            <p className="text-on-surface-variant font-mono">Mobile: +91 {customerDetails.phoneNumber}</p>
-            <p className="text-on-surface-variant">{customerDetails.house}</p>
-            <p className="text-on-surface-variant">
-              {customerDetails.city}, {customerDetails.district}, {customerDetails.state} - {customerDetails.pinCode}
-            </p>
-          </div>
-
-          {/* Order Items List */}
-          <div className="flex flex-col gap-3">
-            <span className="font-label-md font-bold text-on-surface text-sm">
-              Items in Order ({items.reduce((acc, i) => acc + i.quantity, 0)}):
+            <span className="font-label-sm text-xs font-bold text-primary">
+              {items.reduce((acc, i) => acc + i.quantity, 0)} items
             </span>
-            <div className="divide-y divide-surface-container-high border-y border-surface-container-high">
-              {items.map((item) => (
-                <div key={`${item.productId}-${item.selectedSize}`} className="py-3 flex items-center gap-3">
-                  <div className="relative w-12 h-12 rounded-lg bg-surface-container overflow-hidden shrink-0">
-                    {item.primaryImage ? (
-                      <Image
-                        src={item.primaryImage}
-                        alt={item.productName}
-                        fill
-                        className="object-cover"
-                        sizes="48px"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
-                        <span className="material-symbols-outlined text-[18px]">set_meal</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-label-md text-xs font-bold text-on-surface truncate">
-                      {item.productName}
-                    </p>
-                    <p className="font-body-sm text-[11px] text-on-surface-variant truncate">
-                      Size: {item.selectedSize} | Qty: {item.quantity}
-                    </p>
-                  </div>
-                  <span className="font-label-md text-xs font-bold text-on-surface shrink-0">
-                    ₹{(item.price * item.quantity).toLocaleString('en-IN')}
-                  </span>
-                </div>
-              ))}
-            </div>
           </div>
 
-          {/* Financial Calculation Breakdown */}
-          <div className="p-4 rounded-xl bg-surface-container-low flex flex-col gap-2">
+          {/* Items Preview List */}
+          <div className="flex flex-col gap-3 max-h-60 overflow-y-auto pr-1 divide-y divide-surface-container">
+            {items.map((item) => (
+              <div key={`${item.productId}-${item.selectedSize}`} className="pt-2 first:pt-0 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-surface-container overflow-hidden shrink-0 relative border border-surface-container">
+                  {item.primaryImage ? (
+                    <Image
+                      src={item.primaryImage}
+                      alt={item.productName}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="material-symbols-outlined text-on-surface-variant flex items-center justify-center h-full text-base">
+                      pets
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-label-md text-xs font-bold text-on-surface truncate">
+                    {item.productName}
+                  </p>
+                  <p className="font-body-sm text-[11px] text-on-surface-variant truncate">
+                    Size: {item.selectedSize} &bull; Qty: {item.quantity}
+                  </p>
+                </div>
+                <span className="font-label-md text-xs font-bold text-on-surface shrink-0">
+                  ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Price Breakdown */}
+          <div className="p-4 rounded-xl bg-surface-container-low flex flex-col gap-2 border border-surface-container">
             <div className="flex justify-between text-xs text-on-surface-variant">
               <span>Items Subtotal:</span>
               <span className="font-semibold text-on-surface">₹{subtotal.toLocaleString('en-IN')}</span>
             </div>
             <div className="flex justify-between text-xs text-on-surface-variant">
-              <span>Delivery Charges (Sothupakkam & Surrounding):</span>
+              <span>Delivery Charges:</span>
               <span className="font-semibold text-on-surface">
                 {deliveryCharge === 0 ? (
                   <span className="text-emerald-700 font-bold">FREE</span>
@@ -376,31 +344,48 @@ export default function CheckoutPage() {
               </span>
             </div>
             <div className="pt-2 border-t border-surface-container-high flex justify-between items-baseline">
-              <span className="font-headline-sm font-bold text-on-surface">Grand Total:</span>
-              <span className="font-headline-xl font-extrabold text-primary">
+              <span className="font-headline-sm font-bold text-on-surface text-sm">Grand Total:</span>
+              <span className="font-headline-xl font-extrabold text-[#cc4729] text-xl">
                 ₹{grandTotal.toLocaleString('en-IN')}
               </span>
             </div>
           </div>
 
-          {/* Notice & Place Order Button */}
+          {/* Error Message Alert (rendered directly above the action button) */}
+          {errorMsg && (
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 font-label-md text-xs flex items-center gap-2.5 animate-fadeIn">
+              <span className="material-symbols-outlined text-[18px] text-red-600 shrink-0">error</span>
+              <span className="font-medium leading-relaxed">{errorMsg}</span>
+            </div>
+          )}
+
+          {/* Notice & Place Order Action */}
           <div className="flex flex-col gap-3">
-            <p className="text-[11px] text-on-surface-variant">
-              By clicking &quot;Place Order Now&quot;, your request is submitted directly to our Sothupakkam store. The team will contact you on your mobile number to confirm dispatch timing.
+            <p className="text-[11px] text-on-surface-variant leading-relaxed">
+              By clicking &quot;Place Order Now&quot;, your order is placed directly with our Sothupakkam store. We will contact your mobile number to confirm dispatch timing.
             </p>
 
             <button
               type="button"
               disabled={isSubmittingOrder}
-              onClick={handlePlaceOrder}
-              className="h-14 rounded-xl bg-[#cc4729] hover:bg-[#b03b20] active:scale-95 text-white font-label-lg font-bold flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 text-base cursor-pointer"
+              onClick={() => handlePlaceOrder()}
+              className="w-full h-14 rounded-xl bg-[#cc4729] hover:bg-[#b03b20] active:scale-[0.98] text-white font-label-lg font-bold flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 text-base cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[22px]">check_circle</span>
-              <span>{isSubmittingOrder ? 'Submitting Order...' : 'Place Order Now'}</span>
+              {isSubmittingOrder ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Placing Your Order...</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[22px]">check_circle</span>
+                  <span>Place Order Now &bull; ₹{grandTotal.toLocaleString('en-IN')}</span>
+                </>
+              )}
             </button>
           </div>
         </section>
-      )}
+      </div>
 
       <Footer />
     </main>

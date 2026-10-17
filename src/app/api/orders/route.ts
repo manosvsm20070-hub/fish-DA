@@ -19,11 +19,12 @@ export async function POST(req: NextRequest) {
 
     const { name, house, city, district, state, pinCode, phoneNumber } = customerDetails;
 
-    if (!name?.trim()) return NextResponse.json({ success: false, error: 'Name is required' }, { status: 400 });
+    if (!name?.trim()) return NextResponse.json({ success: false, error: 'Full Name is required' }, { status: 400 });
     if (!house?.trim()) return NextResponse.json({ success: false, error: 'House/Street address is required' }, { status: 400 });
-    if (!city?.trim()) return NextResponse.json({ success: false, error: 'City is required' }, { status: 400 });
-    if (!district?.trim()) return NextResponse.json({ success: false, error: 'District is required' }, { status: 400 });
-    if (!state?.trim()) return NextResponse.json({ success: false, error: 'State is required' }, { status: 400 });
+    if (!city?.trim()) return NextResponse.json({ success: false, error: 'City / Town is required' }, { status: 400 });
+
+    const effectiveDistrict = district?.trim() || city?.trim() || 'Chengalpattu';
+    const effectiveState = state?.trim() || 'Tamil Nadu';
 
     // Validate phone number
     if (!phoneNumber?.trim()) {
@@ -101,8 +102,8 @@ export async function POST(req: NextRequest) {
       customerName: name.trim(),
       house: house.trim(),
       city: city.trim(),
-      district: district.trim(),
-      state: state.trim(),
+      district: effectiveDistrict,
+      state: effectiveState,
       pinCode: pinCode.trim(),
       phoneNumber: phoneNorm.normalized,
       items: verifiedOrderItems,
