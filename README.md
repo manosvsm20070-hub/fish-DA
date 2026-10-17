@@ -87,8 +87,8 @@
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/manosvsm20070-hub/D.A-for-freelancing.git
-   cd D.A-for-freelancing
+   git clone https://github.com/manosvsm20070-hub/fish-DA.git
+   cd fish-DA
    ```
 
 2. **Install dependencies:**
