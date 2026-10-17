@@ -29,7 +29,7 @@ export default function CartPage() {
           </div>
           <h2 className="font-headline-md font-bold text-on-surface">Your Cart is Empty</h2>
           <p className="font-body-md text-on-surface-variant max-w-md text-sm">
-            Looks like you haven't added any livestock, tanks, or accessories yet. Explore our fresh arrivals and curated aquarium collections.
+            Looks like you haven&apos;t added any livestock, tanks, or accessories yet. Explore our fresh arrivals and curated aquarium collections.
           </p>
           <div className="flex items-center gap-3 pt-2">
             <Link

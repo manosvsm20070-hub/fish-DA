@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   try {
     const catalogs = await getCatalogs();
     return NextResponse.json({ success: true, catalogs });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ success: false, error: 'Failed to load catalogs' }, { status: 500 });
   }
 }
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     try { revalidatePath('/', 'layout'); } catch {}
 
     return NextResponse.json({ success: true, catalog: result.catalog }, { status: 201 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('POST /api/admin/catalogs error:', err);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }

@@ -569,7 +569,7 @@ export default function CheckoutPage() {
           {/* Notice & Place Order Button */}
           <div className="flex flex-col gap-3">
             <p className="text-[11px] text-on-surface-variant">
-              By clicking "Place Order", your request is submitted directly to our Sothupakkam store. The team will contact you on your verified phone number to confirm dispatch timing.
+              By clicking &quot;Place Order&quot;, your request is submitted directly to our Sothupakkam store. The team will contact you on your verified phone number to confirm dispatch timing.
             </p>
 
             <button

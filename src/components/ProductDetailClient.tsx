@@ -31,6 +31,7 @@ export default function ProductDetailClient({
     product.sizes && product.sizes.length > 0 ? product.sizes[0] : 'Standard'
   );
   const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCart();
 
   const imagesList = validImages.length > 0 ? validImages : primaryValid ? [primaryValid] : [];
 

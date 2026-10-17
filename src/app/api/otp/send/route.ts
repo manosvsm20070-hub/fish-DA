@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       countdownSec: result.countdownSec,
       devOtp: result.devOtp, // available only in mock development mode
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('API /api/otp/send error:', err);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }

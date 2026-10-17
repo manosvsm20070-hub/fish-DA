@@ -229,8 +229,8 @@ function ProductForm({ initial, catalogs, onSave, onCancel, isSaving, mode }: Pr
           <div className="grid grid-cols-4 gap-2 mb-3">
             {images.map((img, i) => (
               <div key={i} className={`relative aspect-square rounded-lg overflow-hidden border-2 group ${form.primaryImage === img ? 'border-primary' : 'border-surface-container'}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 {img ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={img} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-surface-container">
@@ -458,6 +458,7 @@ export default function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (authenticated) loadData();
   }, [authenticated, loadData]);
 
@@ -846,7 +847,7 @@ export default function AdminDashboardPage() {
                 ))
               )}
               {!loading && catalogs.length === 0 && (
-                <div className="py-16 text-center text-on-surface-variant">No catalogs. Click "Add Catalog" to create one.</div>
+                <div className="py-16 text-center text-on-surface-variant">No catalogs. Click &quot;Add Catalog&quot; to create one.</div>
               )}
             </div>
           )}

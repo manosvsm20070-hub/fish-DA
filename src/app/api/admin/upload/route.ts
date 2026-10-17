@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
       url: publicUrl,
       fileName: safeName,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Image upload failed:', err);
     return NextResponse.json(
       { success: false, error: 'Image upload failed. Please try again.' },

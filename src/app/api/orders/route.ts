@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
       orderNumber: newOrder.orderNumber,
       order: newOrder,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('API /api/orders error:', err);
     return NextResponse.json({ success: false, error: 'Internal server error while processing order' }, { status: 500 });
   }

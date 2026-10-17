@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     });
 
     return res;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('API /api/otp/verify error:', err);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }

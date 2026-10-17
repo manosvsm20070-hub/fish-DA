@@ -133,7 +133,7 @@ export async function sendOtp(
       success: true,
       countdownSec: 30,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to dispatch SMS OTP:', err);
     return {
       success: false,

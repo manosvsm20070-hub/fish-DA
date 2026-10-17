@@ -17,7 +17,7 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, product });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('API /api/products/[id] error:', err);
     return NextResponse.json({ success: false, error: 'Failed to retrieve product' }, { status: 500 });
   }

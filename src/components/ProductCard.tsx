@@ -20,7 +20,7 @@ export default function ProductCard({
   const [selectedSize, setSelectedSize] = useState(
     product.sizes && product.sizes.length > 0 ? product.sizes[0] : 'Standard'
   );
-  const [quantity, setQuantity] = useState(1);
+  const quantity = 1;
 
   const aspectClass =
     aspectRatio === '16/10'

@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     });
 
     return res;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('API /api/admin/login error:', err);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },

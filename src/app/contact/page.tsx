@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import { SHOP_INFO } from '@/data/products';
 import Footer from '@/components/Footer';
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import Link from 'next/link';
 import { getPublishedProducts as getProducts } from '@/lib/storage';
 import TanksEquipmentClient from '@/components/TanksEquipmentClient';
 import Footer from '@/components/Footer';

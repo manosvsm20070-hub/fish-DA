@@ -57,9 +57,10 @@ Status: ${order.status}
       // e.g. await resend.emails.send({ from: process.env.EMAIL_FROM, to: adminEmail, subject: emailSubject, text: emailBody })
       emailSent = true;
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
     console.error('Email notification failure:', err);
-    errors.push(`Email notification failed: ${err?.message}`);
+    errors.push(`Email notification failed: ${msg}`);
   }
 
   // 2. Send WhatsApp Notification
@@ -104,9 +105,10 @@ Total: ₹${order.total}
         whatsappSent = true;
       }
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
     console.error('WhatsApp notification failure:', err);
-    errors.push(`WhatsApp notification failed: ${err?.message}`);
+    errors.push(`WhatsApp notification failed: ${msg}`);
   }
 
   // Record notification statuses into order storage

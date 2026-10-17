@@ -24,7 +24,9 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await req.json();
-    const { id: _id, createdAt: _c, ...updates } = body;
+    const updates = { ...body };
+    delete updates.id;
+    delete updates.createdAt;
 
     const result = await updateCatalog(id, updates);
     if (!result.success) return NextResponse.json({ success: false, error: result.error }, { status: 400 });
@@ -32,7 +34,7 @@ export async function PATCH(
     try { revalidatePath('/', 'layout'); } catch {}
 
     return NextResponse.json({ success: true, catalog: result.catalog });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -53,7 +55,7 @@ export async function DELETE(
     try { revalidatePath('/', 'layout'); } catch {}
 
     return NextResponse.json({ success: true, message: 'Catalog archived.' });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

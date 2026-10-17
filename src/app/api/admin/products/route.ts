@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { verifySessionToken } from '@/lib/auth';
-import { getProducts, createProduct, updateProductFull } from '@/lib/storage';
+import { getProducts, createProduct } from '@/lib/storage';
 import { Product } from '@/types';
 
 function adminAuth(req: NextRequest) {
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, count: filtered.length, products: filtered });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ success: false, error: 'Failed to load products' }, { status: 500 });
   }
 }
@@ -50,7 +50,6 @@ export async function POST(req: NextRequest) {
     if (!body.category?.trim()) return NextResponse.json({ success: false, error: 'Category is required' }, { status: 400 });
     if (body.price === undefined || isNaN(Number(body.price))) return NextResponse.json({ success: false, error: 'Valid price is required' }, { status: 400 });
 
-    const now = new Date().toISOString();
     const slug = body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const uniqueId = body.id || `prod-${slug}-${Date.now()}`;
 
@@ -88,7 +87,7 @@ export async function POST(req: NextRequest) {
     } catch {}
 
     return NextResponse.json({ success: true, product: result.product }, { status: 201 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('POST /api/admin/products error:', err);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }

@@ -26,7 +26,9 @@ export async function PATCH(
     const body = await req.json();
 
     // Strip server-only immutable fields — everything else is editable by admin
-    const { id: _id, createdAt: _c, ...updates } = body;
+    const updates = { ...body };
+    delete updates.id;
+    delete updates.createdAt;
 
     // Validate price if present
     if (updates.price !== undefined) {
@@ -55,7 +57,7 @@ export async function PATCH(
     } catch {}
 
     return NextResponse.json({ success: true, message: 'Product updated successfully.', product: result.product });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('PATCH /api/admin/products/[id] error:', err);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
@@ -81,7 +83,7 @@ export async function DELETE(
     } catch {}
 
     return NextResponse.json({ success: true, message: 'Product archived.' });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -1,5 +1,4 @@
 import React from 'react';
-import { notFound } from 'next/navigation';
 import { getPublishedProducts as getProducts } from '@/lib/storage';
 import FishCatalogClient from '@/components/FishCatalogClient';
 import Footer from '@/components/Footer';

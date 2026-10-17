@@ -31,7 +31,7 @@ export async function PATCH(
     if (!result.success) return NextResponse.json({ success: false, error: result.error }, { status: 400 });
 
     return NextResponse.json({ success: true, message: `Order ${orderNumber} status updated to ${status}` });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

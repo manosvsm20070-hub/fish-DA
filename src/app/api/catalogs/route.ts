@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const catalogs = await getActiveCatalogs();
     return NextResponse.json({ success: true, catalogs });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ success: false, error: 'Failed to load catalogs' }, { status: 500 });
   }
 }

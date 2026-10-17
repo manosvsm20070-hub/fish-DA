@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Product, Order, PriceHistory, Catalog, ProductStatus } from '@/types';
+import { Product, Order, PriceHistory, Catalog, ProductStatus, OrderStatus } from '@/types';
 import { INITIAL_PRODUCTS } from '@/data/products';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -93,8 +93,9 @@ export async function createCatalog(catalog: Omit<Catalog, 'createdAt' | 'update
     catalogs.push(newCatalog);
     fs.writeFileSync(CATALOGS_FILE, JSON.stringify(catalogs, null, 2), 'utf-8');
     return { success: true, catalog: newCatalog };
-  } catch (err: any) {
-    return { success: false, error: err?.message || 'Failed to create catalog' };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Failed to create catalog';
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -108,8 +109,9 @@ export async function updateCatalog(id: string, updates: Partial<Omit<Catalog, '
     catalogs[index] = { ...catalogs[index], ...updates, updatedAt: new Date().toISOString() };
     fs.writeFileSync(CATALOGS_FILE, JSON.stringify(catalogs, null, 2), 'utf-8');
     return { success: true, catalog: catalogs[index] };
-  } catch (err: any) {
-    return { success: false, error: err?.message || 'Failed to update catalog' };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Failed to update catalog';
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -153,8 +155,9 @@ export async function createProduct(product: Omit<Product, 'createdAt' | 'update
     products.push(newProduct);
     fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(products, null, 2), 'utf-8');
     return { success: true, product: newProduct };
-  } catch (err: any) {
-    return { success: false, error: err?.message || 'Failed to create product' };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Failed to create product';
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -195,9 +198,10 @@ export async function updateProductFull(
     products[index] = { ...currentProduct, ...updates, id, createdAt: currentProduct.createdAt, updatedAt: now };
     fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(products, null, 2), 'utf-8');
     return { success: true, product: products[index] };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to update product:', err);
-    return { success: false, error: err?.message || 'Database update failed' };
+    const errorMsg = err instanceof Error ? err.message : 'Database update failed';
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -246,9 +250,10 @@ export async function createOrder(order: Order): Promise<{ success: boolean; ord
     orders.unshift(order);
     fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf-8');
     return { success: true, order };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed creating order:', err);
-    return { success: false, error: err?.message || 'Failed to save order' };
+    const errorMsg = err instanceof Error ? err.message : 'Failed to save order';
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -258,11 +263,12 @@ export async function updateOrderStatus(orderNumber: string, status: string): Pr
     const orders = await getOrders();
     const index = orders.findIndex((o) => o.orderNumber === orderNumber);
     if (index === -1) return { success: false, error: 'Order not found' };
-    orders[index] = { ...orders[index], status: status as any, updatedAt: new Date().toISOString() };
+    orders[index] = { ...orders[index], status: status as OrderStatus, updatedAt: new Date().toISOString() };
     fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf-8');
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err?.message };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Failed to update order status';
+    return { success: false, error: errorMsg };
   }
 }
 

@@ -1,7 +1,4 @@
-import { Product, ProductStatus } from '@/types';
-
-// ProductStatus is used to tag all seed products as Published
-const _status: ProductStatus = 'Published';
+import { Product } from '@/types';
 
 export const INITIAL_PRODUCTS: Product[] = [
   // ===================== GOLDFISH COLLECTION =====================

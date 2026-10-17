@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, count: products.length, products });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('API /api/products error:', err);
     return NextResponse.json({ success: false, error: 'Failed to retrieve products' }, { status: 500 });
   }
