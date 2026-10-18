@@ -198,5 +198,21 @@
     "newPrice": 850,
     "changedAt": "2026-10-18T04:18:07.029Z",
     "adminId": "+917845637566"
+  },
+  {
+    "id": "ph_1792307434574_ymwwi",
+    "productId": "gf-oranda-red-cap",
+    "oldPrice": 850,
+    "newPrice": 80,
+    "changedAt": "2026-10-18T07:10:34.574Z",
+    "adminId": "+917845637566"
+  },
+  {
+    "id": "ph_1792307517713_nl4k1",
+    "productId": "gf-ranchu-lionhead",
+    "oldPrice": 1100,
+    "newPrice": 1250,
+    "changedAt": "2026-10-18T07:11:57.712Z",
+    "adminId": "+917845637566"
   }
 ]
