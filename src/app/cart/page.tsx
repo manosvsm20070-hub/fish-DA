@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
@@ -15,8 +15,27 @@ export default function CartPage() {
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
+  const [customerCity, setCustomerCity] = useState('Sothupakkam');
+  const [customerPincode, setCustomerPincode] = useState('603319');
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [generalError, setGeneralError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSent, setOrderSent] = useState(false);
+
+  // Load previously saved delivery address from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('da_delivery_address');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.name) setCustomerName(parsed.name);
+        if (parsed.phone) setCustomerPhone(parsed.phone);
+        if (parsed.address) setCustomerAddress(parsed.address);
+        if (parsed.city) setCustomerCity(parsed.city);
+        if (parsed.pincode) setCustomerPincode(parsed.pincode);
+      }
+    } catch {}
+  }, []);
 
   const whatsappNumber = live?.contact?.whatsappNumber || SHOP_INFO.whatsappNumber || '917845637566';
   const storeName = live?.storeName || 'Dolphin Aquarium';
@@ -25,24 +44,88 @@ export default function CartPage() {
   const deliveryCharge = subtotal >= 1500 || subtotal === 0 ? 0 : 100;
   const grandTotal = subtotal + deliveryCharge;
 
+  // Strict validation for required delivery address and contact info
+  const validateDeliveryDetails = () => {
+    const errs: { [key: string]: string } = {};
+
+    if (!customerName.trim()) {
+      errs.name = 'Full name is required.';
+    }
+
+    const cleanPhone = customerPhone.replace(/\D/g, '');
+    const phone10 = cleanPhone.startsWith('91') && cleanPhone.length === 12
+      ? cleanPhone.slice(2)
+      : cleanPhone;
+
+    if (!phone10) {
+      errs.phone = 'Mobile number is required.';
+    } else if (!/^[6-9]\d{9}$/.test(phone10)) {
+      errs.phone = 'Enter a valid 10-digit Indian mobile number.';
+    }
+
+    if (!customerAddress.trim()) {
+      errs.address = 'Delivery address (House/Street/Landmark) is required.';
+    } else if (customerAddress.trim().length < 5) {
+      errs.address = 'Please enter a complete delivery address (at least 5 characters).';
+    }
+
+    if (!customerCity.trim()) {
+      errs.city = 'City / Town is required.';
+    }
+
+    if (!customerPincode.trim()) {
+      errs.pincode = '6-digit PIN code is required.';
+    } else if (!/^\d{6}$/.test(customerPincode.trim())) {
+      errs.pincode = 'Enter a valid 6-digit PIN code.';
+    }
+
+    setFormErrors(errs);
+
+    if (Object.keys(errs).length > 0) {
+      setGeneralError('Please enter your complete delivery address and phone number to place the order.');
+      return null;
+    }
+
+    setGeneralError(null);
+    return {
+      name: customerName.trim(),
+      phone: phone10,
+      address: customerAddress.trim(),
+      city: customerCity.trim(),
+      pincode: customerPincode.trim(),
+    };
+  };
+
   const handleWhatsAppOrder = async () => {
     if (items.length === 0 || isSubmitting) return;
+
+    // Address and contact details are required to place order
+    const validated = validateDeliveryDetails();
+    if (!validated) {
+      const addressBox = document.getElementById('delivery-address-form');
+      if (addressBox) {
+        addressBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // 1. Format clean WhatsApp order text
+      // Save address for user convenience in future
+      try {
+        localStorage.setItem('da_delivery_address', JSON.stringify(validated));
+      } catch {}
+
+      // 1. Format clean WhatsApp order text with verified delivery address
       let msg = `🐠 *NEW ORDER — ${storeName}*\n`;
       msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-      msg += `👤 *Customer Details:*\n`;
-      msg += `• Name: ${customerName.trim() || 'WhatsApp Customer'}\n`;
-      if (customerPhone.trim()) {
-        msg += `• Phone: ${customerPhone.trim()}\n`;
-      }
-      if (customerAddress.trim()) {
-        msg += `• Delivery Address: ${customerAddress.trim()}\n`;
-      } else {
-        msg += `• Delivery Address: (Will provide in chat)\n`;
-      }
+      msg += `📍 *DELIVERY ADDRESS:*\n`;
+      msg += `• Name: ${validated.name}\n`;
+      msg += `• Mobile: +91 ${validated.phone}\n`;
+      msg += `• Address: ${validated.address}\n`;
+      msg += `• City / Town: ${validated.city}\n`;
+      msg += `• PIN Code: ${validated.pincode}\n`;
       msg += `━━━━━━━━━━━━━━━━━━━━\n`;
       msg += `📦 *Items Ordered (${items.reduce((acc, i) => acc + i.quantity, 0)}):*\n`;
       items.forEach((item, idx) => {
@@ -53,7 +136,7 @@ export default function CartPage() {
       msg += `🚚 *Delivery:* ${deliveryCharge === 0 ? 'FREE' : '₹' + deliveryCharge}\n`;
       msg += `⭐ *Grand Total: ₹${grandTotal.toLocaleString('en-IN')}*\n`;
       msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-      msg += `📍 *Store:* Sothupakkam, Chengalpattu\nPlease confirm availability and dispatch time. Thank you!`;
+      msg += `🏪 *Store:* Sothupakkam, Chengalpattu\nPlease confirm order acceptance and dispatch timing. Thank you!`;
 
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
 
@@ -64,13 +147,13 @@ export default function CartPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             customerDetails: {
-              name: customerName.trim() || 'WhatsApp Customer',
-              phoneNumber: customerPhone.replace(/\D/g, '') || '7845637566',
-              house: customerAddress.trim() || 'WhatsApp Order',
-              city: 'Sothupakkam',
-              district: 'Chengalpattu',
+              name: validated.name,
+              phoneNumber: validated.phone,
+              house: validated.address,
+              city: validated.city,
+              district: validated.city,
               state: 'Tamil Nadu',
-              pinCode: '603319',
+              pinCode: validated.pincode,
             },
             items,
           }),
@@ -255,43 +338,172 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* Quick Delivery Details for WhatsApp message */}
-            <div className="p-3.5 rounded-xl bg-surface-container-low border border-surface-container/80 flex flex-col gap-2.5">
-              <span className="font-label-sm text-xs font-bold text-on-surface flex items-center gap-1">
-                <span className="material-symbols-outlined text-[16px] text-primary">person_pin</span>
-                <span>Your Delivery Details (Optional)</span>
-              </span>
+            {/* Delivery Address Section (Mandatory to place order) */}
+            <div
+              id="delivery-address-form"
+              className={`p-4 rounded-2xl border transition-all flex flex-col gap-3 ${
+                generalError
+                  ? 'bg-red-50/50 border-red-300 dark:bg-red-950/20 dark:border-red-800'
+                  : 'bg-surface-container-low border-surface-container/80'
+              }`}
+            >
+              <div className="flex items-center justify-between pb-2 border-b border-surface-container/60">
+                <span className="font-label-md text-xs font-bold text-on-surface flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[18px] text-[#cc4729]">location_on</span>
+                  <span>Delivery Address</span>
+                </span>
+                <span className="text-[10px] font-bold text-red-600 bg-red-100 dark:bg-red-900/40 px-2 py-0.5 rounded-full">
+                  * Address Required
+                </span>
+              </div>
 
-              <input
-                type="text"
-                placeholder="Your Name (e.g. Kumar)"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full h-9 px-3 rounded-lg bg-surface-container border border-outline-variant/60 font-body-md text-xs focus:ring-1 focus:ring-primary focus:outline-none"
-              />
+              {/* Full Name */}
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-on-surface">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  {formErrors.name && (
+                    <span className="text-[10px] text-red-600 font-semibold">{formErrors.name}</span>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  placeholder="e.g. Kumar S"
+                  value={customerName}
+                  onChange={(e) => {
+                    setCustomerName(e.target.value);
+                    if (formErrors.name) setFormErrors((prev) => ({ ...prev, name: '' }));
+                    if (generalError) setGeneralError(null);
+                  }}
+                  className={`w-full h-10 px-3 rounded-lg bg-surface-container border text-xs text-on-surface focus:outline-none transition-all ${
+                    formErrors.name ? 'border-red-500 bg-red-50/30' : 'border-outline-variant/60 focus:border-primary'
+                  }`}
+                />
+              </div>
 
-              <input
-                type="tel"
-                placeholder="Phone Number (e.g. 9876543210)"
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                className="w-full h-9 px-3 rounded-lg bg-surface-container border border-outline-variant/60 font-body-md text-xs focus:ring-1 focus:ring-primary focus:outline-none"
-              />
+              {/* Mobile Number */}
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-on-surface">
+                    Mobile Number <span className="text-red-500">*</span>
+                  </label>
+                  {formErrors.phone && (
+                    <span className="text-[10px] text-red-600 font-semibold">{formErrors.phone}</span>
+                  )}
+                </div>
+                <div className="relative flex items-center">
+                  <span className="absolute left-3 text-xs font-bold text-on-surface-variant select-none">
+                    +91
+                  </span>
+                  <input
+                    type="tel"
+                    maxLength={10}
+                    placeholder="10-digit mobile number"
+                    value={customerPhone}
+                    onChange={(e) => {
+                      setCustomerPhone(e.target.value.replace(/\D/g, ''));
+                      if (formErrors.phone) setFormErrors((prev) => ({ ...prev, phone: '' }));
+                      if (generalError) setGeneralError(null);
+                    }}
+                    className={`w-full h-10 pl-11 pr-3 rounded-lg bg-surface-container border text-xs text-on-surface focus:outline-none transition-all ${
+                      formErrors.phone ? 'border-red-500 bg-red-50/30' : 'border-outline-variant/60 focus:border-primary'
+                    }`}
+                  />
+                </div>
+              </div>
 
-              <textarea
-                placeholder="Address / Area (e.g. Near Bus Stand, Sothupakkam)"
-                value={customerAddress}
-                onChange={(e) => setCustomerAddress(e.target.value)}
-                rows={2}
-                className="w-full px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/60 font-body-md text-xs focus:ring-1 focus:ring-primary focus:outline-none resize-none"
-              />
+              {/* House / Street Address & Landmark */}
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-on-surface">
+                    Delivery Address (Door No, Street, Area) <span className="text-red-500">*</span>
+                  </label>
+                  {formErrors.address && (
+                    <span className="text-[10px] text-red-600 font-semibold">{formErrors.address}</span>
+                  )}
+                </div>
+                <textarea
+                  placeholder="e.g. Door No. 12, Main Road, Near Bus Stand"
+                  value={customerAddress}
+                  onChange={(e) => {
+                    setCustomerAddress(e.target.value);
+                    if (formErrors.address) setFormErrors((prev) => ({ ...prev, address: '' }));
+                    if (generalError) setGeneralError(null);
+                  }}
+                  rows={2}
+                  className={`w-full px-3 py-2 rounded-lg bg-surface-container border text-xs text-on-surface focus:outline-none transition-all resize-none ${
+                    formErrors.address ? 'border-red-500 bg-red-50/30' : 'border-outline-variant/60 focus:border-primary'
+                  }`}
+                />
+              </div>
+
+              {/* City and PIN Code in 2 columns */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-on-surface">
+                      City / Town <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="e.g. Sothupakkam"
+                    value={customerCity}
+                    onChange={(e) => {
+                      setCustomerCity(e.target.value);
+                      if (formErrors.city) setFormErrors((prev) => ({ ...prev, city: '' }));
+                      if (generalError) setGeneralError(null);
+                    }}
+                    className={`w-full h-10 px-3 rounded-lg bg-surface-container border text-xs text-on-surface focus:outline-none transition-all ${
+                      formErrors.city ? 'border-red-500 bg-red-50/30' : 'border-outline-variant/60 focus:border-primary'
+                    }`}
+                  />
+                  {formErrors.city && (
+                    <span className="text-[10px] text-red-600 font-semibold">{formErrors.city}</span>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-on-surface">
+                      PIN Code <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    placeholder="e.g. 603319"
+                    value={customerPincode}
+                    onChange={(e) => {
+                      setCustomerPincode(e.target.value.replace(/\D/g, ''));
+                      if (formErrors.pincode) setFormErrors((prev) => ({ ...prev, pincode: '' }));
+                      if (generalError) setGeneralError(null);
+                    }}
+                    className={`w-full h-10 px-3 rounded-lg bg-surface-container border text-xs text-on-surface focus:outline-none transition-all ${
+                      formErrors.pincode ? 'border-red-500 bg-red-50/30' : 'border-outline-variant/60 focus:border-primary'
+                    }`}
+                  />
+                  {formErrors.pincode && (
+                    <span className="text-[10px] text-red-600 font-semibold">{formErrors.pincode}</span>
+                  )}
+                </div>
+              </div>
             </div>
 
+            {/* Error Message Alert */}
+            {generalError && (
+              <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2.5 animate-fadeIn">
+                <span className="material-symbols-outlined text-[20px] text-red-600 shrink-0">error</span>
+                <span className="font-semibold leading-relaxed">{generalError}</span>
+              </div>
+            )}
+
             {/* WhatsApp Direct Notice */}
-            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-start gap-2">
+            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 text-xs flex items-start gap-2">
               <span className="material-symbols-outlined text-[18px] text-emerald-700 shrink-0 mt-0.5">verified</span>
               <p>
-                <strong>Direct WhatsApp Ordering:</strong> Your order will open directly on WhatsApp with our store (+91 78456 37566) for instant confirmation and dispatch timing.
+                <strong>Direct WhatsApp Ordering:</strong> Once your address is entered, your order will open on WhatsApp (+91 78456 37566) for instant confirmation and dispatch timing.
               </p>
             </div>
 

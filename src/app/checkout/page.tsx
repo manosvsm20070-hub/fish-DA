@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -26,6 +26,24 @@ export default function CheckoutPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [isOrderPlaced, setIsOrderPlaced] = useState(false);
+
+  // Sync saved address from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('da_delivery_address');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setCustomerDetails((prev) => ({
+          ...prev,
+          name: parsed.name || prev.name,
+          phoneNumber: parsed.phone || prev.phoneNumber,
+          house: parsed.address || prev.house,
+          city: parsed.city || prev.city,
+          pinCode: parsed.pincode || prev.pinCode,
+        }));
+      }
+    } catch {}
+  }, []);
 
   // Delivery charge calculation: free over ₹1500, else ₹100
   const deliveryCharge = subtotal >= 1500 ? 0 : 100;
@@ -104,9 +122,28 @@ export default function CheckoutPage() {
         return;
       }
 
+      // Save delivery details to localStorage for user convenience
+      try {
+        localStorage.setItem(
+          'da_delivery_address',
+          JSON.stringify({
+            name: customerDetails.name.trim(),
+            phone: phone10,
+            address: customerDetails.house.trim(),
+            city: customerDetails.city.trim(),
+            pincode: customerDetails.pinCode.trim(),
+          })
+        );
+      } catch {}
+
       // Order created successfully — generate WhatsApp message
-      const itemsList = items.map((i, idx) => `${idx + 1}. *${i.productName}* (${i.selectedSize})\n   Qty: ${i.quantity} × ₹${i.price.toLocaleString('en-IN')} = ₹${(i.price * i.quantity).toLocaleString('en-IN')}`).join('\n');
-      const whatsappMsg = `🐠 *NEW ORDER — ${data.orderNumber}*\n━━━━━━━━━━━━━━━━━━━━\n👤 *Customer:*\n• Name: ${customerDetails.name}\n• Phone: ${customerDetails.phoneNumber}\n• Address: ${customerDetails.house}, ${customerDetails.city}, ${customerDetails.district}, ${customerDetails.state} - ${customerDetails.pinCode}\n━━━━━━━━━━━━━━━━━━━━\n📦 *Items:*\n${itemsList}\n━━━━━━━━━━━━━━━━━━━━\n💰 Subtotal: ₹${subtotal.toLocaleString('en-IN')}\n🚚 Delivery: ${deliveryCharge === 0 ? 'FREE' : '₹' + deliveryCharge}\n⭐ *Total Amount: ₹${grandTotal.toLocaleString('en-IN')}*\n━━━━━━━━━━━━━━━━━━━━\nPlease confirm order and delivery timing. Thank you!`;
+      const itemsList = items
+        .map(
+          (i, idx) =>
+            `${idx + 1}. *${i.productName}* (${i.selectedSize})\n   Qty: ${i.quantity} × ₹${i.price.toLocaleString('en-IN')} = ₹${(i.price * i.quantity).toLocaleString('en-IN')}`
+        )
+        .join('\n');
+      const whatsappMsg = `🐠 *NEW ORDER — ${data.orderNumber}*\n━━━━━━━━━━━━━━━━━━━━\n📍 *DELIVERY ADDRESS:*\n• Name: ${customerDetails.name}\n• Mobile: +91 ${phone10}\n• Address: ${customerDetails.house}\n• City: ${customerDetails.city}\n• PIN Code: ${customerDetails.pinCode}\n━━━━━━━━━━━━━━━━━━━━\n📦 *Items Ordered:*\n${itemsList}\n━━━━━━━━━━━━━━━━━━━━\n💰 Subtotal: ₹${subtotal.toLocaleString('en-IN')}\n🚚 Delivery: ${deliveryCharge === 0 ? 'FREE' : '₹' + deliveryCharge}\n⭐ *Total Amount: ₹${grandTotal.toLocaleString('en-IN')}*\n━━━━━━━━━━━━━━━━━━━━\n🏪 *Store:* Sothupakkam, Chengalpattu\nPlease confirm order acceptance and delivery timing. Thank you!`;
 
       const whatsappUrl = `https://wa.me/917845637566?text=${encodeURIComponent(whatsappMsg)}`;
       window.open(whatsappUrl, '_blank');
