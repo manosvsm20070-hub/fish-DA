@@ -240,17 +240,17 @@ function ProductForm({ initial, catalogs, onSave, onCancel, isSaving, mode }: Pr
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelCls}>
-            Price (₹) {form.isLiveFish ? <span className="text-amber-600 font-normal text-[11px]">(Optional for live fish · Inquiry only on storefront)</span> : '*'}
+            Price (₹) <span className="text-emerald-600 font-normal text-[11px]">(Visible on Storefront)</span> *
           </label>
           <input
-            required={!form.isLiveFish}
+            required
             type="number"
             min="0"
             step="1"
             value={form.price}
             onChange={(e) => set('price', e.target.value)}
             className={inputCls}
-            placeholder={form.isLiveFish ? '0 (Optional for live fish)' : '850'}
+            placeholder="150"
           />
         </div>
         <div>

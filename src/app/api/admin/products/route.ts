@@ -63,11 +63,11 @@ export async function POST(req: NextRequest) {
     const isLiveFish = body.isLiveFish === true || body.isLiveFish === 'true';
     const category = body.category?.trim() || 'Fish';
     
-    // Live fish can have 0 or empty price (inquiry only on storefront)
+    // Default price to numeric value or 0
     const priceVal =
       body.price !== undefined && body.price !== '' && !isNaN(Number(body.price))
         ? Number(body.price)
-        : (isLiveFish ? 0 : 0);
+        : 0;
 
     const slug = body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const uniqueId = body.id || `prod-${slug}-${Date.now()}`;

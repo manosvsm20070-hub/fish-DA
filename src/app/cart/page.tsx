@@ -127,21 +127,21 @@ export default function CartPage() {
       msg += `• City / Town: ${validated.city}\n`;
       msg += `• PIN Code: ${validated.pincode}\n`;
       msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-      const hasLiveFish = items.some((i) => i.isLiveFish);
+      const hasUnpricedItems = items.some((i) => !i.price || i.price <= 0);
       msg += `📦 *Items Ordered (${items.reduce((acc, i) => acc + i.quantity, 0)}):*\n`;
       items.forEach((item, idx) => {
-        if (item.isLiveFish) {
-          msg += `${idx + 1}. *${item.productName}* (Live Stock)\n   ${item.variety ? item.variety + ' • ' : ''}Size: ${item.selectedSize}\n   Qty: ${item.quantity} (Price on inquiry)\n`;
+        if (!item.price || item.price <= 0) {
+          msg += `${idx + 1}. *${item.productName}*${item.isLiveFish ? ' (Live Stock)' : ''}\n   ${item.variety ? item.variety + ' • ' : ''}Size: ${item.selectedSize}\n   Qty: ${item.quantity} (Price on inquiry)\n`;
         } else {
-          msg += `${idx + 1}. *${item.productName}*\n   ${item.variety ? item.variety + ' • ' : ''}Size: ${item.selectedSize}\n   Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')} = ₹${(item.price * item.quantity).toLocaleString('en-IN')}\n`;
+          msg += `${idx + 1}. *${item.productName}*${item.isLiveFish ? ' (Live Stock)' : ''}\n   ${item.variety ? item.variety + ' • ' : ''}Size: ${item.selectedSize}\n   Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')} = ₹${(item.price * item.quantity).toLocaleString('en-IN')}\n`;
         }
       });
       msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-      msg += `💰 *Subtotal (Gear & Essentials):* ₹${subtotal.toLocaleString('en-IN')}\n`;
+      msg += `💰 *Subtotal:* ₹${subtotal.toLocaleString('en-IN')}\n`;
       msg += `🚚 *Delivery:* ${deliveryCharge === 0 ? 'FREE' : '₹' + deliveryCharge}\n`;
-      msg += `⭐ *Grand Total: ₹${grandTotal.toLocaleString('en-IN')}${hasLiveFish ? ' (+ Live Fish)' : ''}*\n`;
-      if (hasLiveFish) {
-        msg += `🐠 *Live Fish Note:* Prices and availability confirmed on WhatsApp.\n`;
+      msg += `⭐ *Grand Total: ₹${grandTotal.toLocaleString('en-IN')}${hasUnpricedItems ? ' (+ Inquired Items)' : ''}*\n`;
+      if (hasUnpricedItems) {
+        msg += `🐠 *Note:* Availability and unpriced items confirmed on WhatsApp.\n`;
       }
       msg += `━━━━━━━━━━━━━━━━━━━━\n`;
       msg += `🏪 *Store:* Sothupakkam, Chengalpattu\nPlease confirm order acceptance and dispatch timing. Thank you!`;
@@ -342,10 +342,10 @@ export default function CartPage() {
                 </span>
               </div>
 
-              {items.some((i) => i.isLiveFish) && (
+              {items.some((i) => !i.price || i.price <= 0) && (
                 <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 text-xs text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-900/40 flex items-start gap-1.5">
                   <span className="material-symbols-outlined text-[16px] shrink-0 mt-0.5">info</span>
-                  <span>Includes live fish — prices and availability are verified and confirmed directly via WhatsApp.</span>
+                  <span>Includes items with price on request — prices will be confirmed directly via WhatsApp.</span>
                 </div>
               )}
 
