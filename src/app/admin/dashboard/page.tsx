@@ -619,6 +619,29 @@ export default function AdminDashboardPage() {
     if (authenticated) loadData();
   }, [authenticated, loadData]);
 
+  // Auto-refresh orders whenever navigating to Orders section
+  useEffect(() => {
+    if (authenticated && activeSection === 'orders') {
+      adminFetch('/api/admin/orders').then((res) => {
+        if (res.ok && res.data.orders) setOrders(res.data.orders);
+      });
+    }
+  }, [authenticated, activeSection]);
+
+  // Periodic background refresh (every 15s) for live customer orders
+  useEffect(() => {
+    if (!authenticated) return;
+    const interval = setInterval(async () => {
+      try {
+        const or = await adminFetch('/api/admin/orders');
+        if (or.ok && Array.isArray(or.data.orders)) {
+          setOrders(or.data.orders);
+        }
+      } catch {}
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [authenticated]);
+
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' });
     router.replace('/admin');
@@ -1142,85 +1165,156 @@ export default function AdminDashboardPage() {
           {/* ═══════════════ ORDERS ═══════════════ */}
           {activeSection === 'orders' && (
             <div className="flex flex-col gap-4">
-              {/* WhatsApp Direct Ordering Notice & Quick Link */}
-              <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              {/* Orders Header Banner & Refresh Controls */}
+              <div className="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-xs">
-                    <span className="material-symbols-outlined text-[22px]">chat</span>
+                  <div className="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-xs">
+                    <span className="material-symbols-outlined text-[22px]">receipt_long</span>
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-emerald-950 dark:text-emerald-100 flex items-center gap-2">
-                      Direct WhatsApp Ordering Active
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#25D366]/20 text-[#25D366]">Live</span>
+                    <h3 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                      Customer Orders History
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
+                        {orders.length} {orders.length === 1 ? 'Order' : 'Orders'}
+                      </span>
+                      {stats.pendingOrders > 0 && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                          {stats.pendingOrders} Pending
+                        </span>
+                      )}
                     </h3>
-                    <p className="text-xs text-emerald-800/90 dark:text-emerald-300 mt-0.5">
-                      Customer orders are dispatched directly to your WhatsApp (<strong>+91 78456 37566</strong>). Submitted web checkouts are also archived below for your logs.
+                    <p className="text-xs text-on-surface-variant mt-0.5">
+                      All customer web orders are stored and logged here with customer phone numbers, delivery addresses, and purchased items.
                     </p>
                   </div>
                 </div>
-                <a
-                  href={`https://wa.me/${(settings?.customerInterface?.contact?.whatsappNumber || '917845637566').replace(/\D/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold transition-all shadow-sm shrink-0"
-                >
-                  <span className="material-symbols-outlined text-base">chat</span>
-                  Open WhatsApp Orders
-                </a>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setLoading(true);
+                      const or = await adminFetch('/api/admin/orders');
+                      if (or.ok) setOrders(or.data.orders || []);
+                      setLoading(false);
+                      showToast('Orders history refreshed.');
+                    }}
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold transition-all shadow-xs cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">refresh</span>
+                    <span>Refresh</span>
+                  </button>
+                  <a
+                    href={`https://wa.me/${(settings?.customerInterface?.contact?.whatsappNumber || '917845637566').replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold transition-all shadow-xs shrink-0"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">chat</span>
+                    <span>Store WhatsApp</span>
+                  </a>
+                </div>
               </div>
 
               {loading ? (
-                <div className="py-16 text-center text-primary font-label-md animate-pulse">Loading...</div>
+                <div className="py-16 text-center text-primary font-label-md animate-pulse">Loading orders...</div>
               ) : orders.length === 0 ? (
-                <div className="py-16 text-center text-on-surface-variant">No orders yet.</div>
+                <div className="py-20 text-center flex flex-col items-center justify-center gap-3 bg-surface-container-lowest rounded-2xl border border-surface-container p-8">
+                  <span className="material-symbols-outlined text-4xl text-on-surface-variant">receipt_long</span>
+                  <p className="text-sm font-bold text-on-surface">No Orders Yet</p>
+                  <p className="text-xs text-on-surface-variant max-w-sm">
+                    Customer orders placed through your storefront will be automatically stored and listed here with full details.
+                  </p>
+                </div>
               ) : (
-                orders.map((o) => (
-                  <div key={o.id} className="p-4 rounded-xl bg-surface-container-lowest border border-surface-container flex flex-col gap-3">
-                    <div className="flex items-start justify-between gap-3 flex-wrap">
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-base text-primary">{o.orderNumber}</span>
-                          <StatusBadge status={o.status} />
+                orders.map((o) => {
+                  const cleanPhone = (o.phoneNumber || '').replace(/\D/g, '');
+                  const phone10 = cleanPhone.startsWith('91') && cleanPhone.length === 12 ? cleanPhone.slice(2) : cleanPhone;
+                  const customerWhatsAppUrl = `https://wa.me/91${phone10}?text=${encodeURIComponent(
+                    `Hello ${o.customerName}, this is Dolphin Aquarium regarding your order ${o.orderNumber}.`
+                  )}`;
+
+                  return (
+                    <div key={o.id} className="p-4 rounded-xl bg-surface-container-lowest border border-surface-container flex flex-col gap-3 shadow-xs">
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-base text-primary">{o.orderNumber}</span>
+                            <StatusBadge status={o.status} />
+                          </div>
+                          <div className="text-sm font-bold text-on-surface">{o.customerName}</div>
+                          <div className="flex items-center gap-2 flex-wrap text-xs">
+                            <a
+                              href={`tel:${o.phoneNumber}`}
+                              className="text-primary hover:underline font-semibold flex items-center gap-1"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">call</span>
+                              {o.phoneNumber}
+                            </a>
+                            <span className="text-on-surface-variant">•</span>
+                            <a
+                              href={customerWhatsAppUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md font-bold flex items-center gap-1 text-[11px] hover:bg-emerald-100 transition-all"
+                            >
+                              <span className="material-symbols-outlined text-[13px] text-[#25D366]">chat</span>
+                              WhatsApp Customer
+                            </a>
+                          </div>
+                          <div className="text-xs text-on-surface-variant mt-0.5 flex items-start gap-1">
+                            <span className="material-symbols-outlined text-[14px] text-[#cc4729] shrink-0 mt-0.5">location_on</span>
+                            <span>{o.house}, {o.city}, {o.district}, {o.state} – {o.pinCode}</span>
+                          </div>
                         </div>
-                        <div className="text-sm font-bold text-on-surface mt-0.5">{o.customerName}</div>
-                        <div className="text-xs text-on-surface-variant">{o.phoneNumber}</div>
-                        <div className="text-xs text-on-surface-variant mt-0.5">
-                          {o.house}, {o.city}, {o.district}, {o.state} – {o.pinCode}
+
+                        <div className="text-right">
+                          <div className="font-extrabold text-xl text-on-surface">₹{o.total.toLocaleString('en-IN')}</div>
+                          <div className="text-[11px] text-on-surface-variant mt-0.5">
+                            Delivery: {o.deliveryCharge === 0 ? <span className="text-emerald-700 font-bold">FREE</span> : `₹${o.deliveryCharge}`}
+                          </div>
+                          <div className="text-[10px] text-on-surface-variant mt-0.5">{new Date(o.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-extrabold text-xl text-on-surface">₹{o.total.toLocaleString('en-IN')}</div>
-                        <div className="text-[10px] text-on-surface-variant">{new Date(o.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</div>
+
+                      {/* Items List */}
+                      <div className="flex flex-col gap-1.5 pt-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary">Ordered Items</span>
+                        {o.items.map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between text-xs bg-surface-container rounded-lg px-3 py-2">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-on-surface">{item.productName}</span>
+                              {item.variety && <span className="text-on-surface-variant">({item.variety})</span>}
+                              {item.size && <span className="text-on-surface-variant font-medium text-[11px] bg-surface-container-high px-1.5 py-0.2 rounded">{item.size}</span>}
+                              <span className="text-on-surface-variant">× {item.quantity}</span>
+                            </div>
+                            <span className="font-bold text-primary">₹{item.subtotal.toLocaleString('en-IN')}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Order status change */}
+                      <div className="flex items-center justify-between pt-2 border-t border-surface-container flex-wrap gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs text-on-surface-variant font-bold mr-1">Update Status:</span>
+                          {(['Pending', 'Confirmed', 'Packed', 'Shipped', 'Delivered', 'Cancelled'] as const).map((s) => (
+                            <button
+                              key={s}
+                              onClick={() => handleOrderStatus(o.orderNumber, s)}
+                              disabled={o.status === s}
+                              className={`text-[10px] px-2.5 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                                o.status === s
+                                  ? 'bg-primary text-on-primary cursor-default'
+                                  : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high active:scale-95'
+                              }`}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
-
-                    {/* Items */}
-                    <div className="flex flex-col gap-1">
-                      {o.items.map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between text-xs bg-surface-container rounded-lg px-3 py-1.5">
-                          <span className="text-on-surface">{item.productName} ({item.variety}) × {item.quantity}</span>
-                          <span className="font-bold text-primary">₹{item.subtotal.toLocaleString('en-IN')}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Order status change */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs text-on-surface-variant font-bold">Update Status:</span>
-                      {(['Pending', 'Confirmed', 'Packed', 'Shipped', 'Delivered', 'Cancelled'] as const).map((s) => (
-                        <button key={s} onClick={() => handleOrderStatus(o.orderNumber, s)}
-                          disabled={o.status === s}
-                          className={`text-[10px] px-2.5 py-1 rounded-full font-bold transition-all ${
-                            o.status === s
-                              ? 'bg-primary text-on-primary cursor-default'
-                              : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-                          }`}>
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           )}
