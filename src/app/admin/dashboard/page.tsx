@@ -883,39 +883,17 @@ export default function AdminDashboardPage() {
           </span>
           <div className="ml-auto flex items-center gap-2">
             {activeSection === 'products' && (
-              <>
-                {products.length > 0 && (
-                  <button
-                    onClick={handleDeleteAllProducts}
-                    className="h-9 px-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 font-label-md text-xs font-bold flex items-center gap-1.5 transition-all"
-                    title="Delete all products"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
-                    <span className="hidden sm:inline">Delete All</span>
-                  </button>
-                )}
-                <button onClick={() => setShowAddProduct(true)}
-                  className="h-9 px-4 rounded-xl bg-primary text-on-primary font-label-md text-xs font-bold flex items-center gap-1.5 shadow-sm hover:bg-primary-container transition-all">
-                  <span className="material-symbols-outlined text-[16px]">add</span>
-                  Add Product
-                </button>
-              </>
+              <button onClick={() => setShowAddProduct(true)}
+                className="h-9 px-4 rounded-xl bg-primary text-on-primary font-label-md text-xs font-bold flex items-center gap-1.5 shadow-sm hover:bg-primary-container transition-all">
+                <span className="material-symbols-outlined text-[16px]">add</span>
+                Add Product
+              </button>
             )}
             {activeSection === 'catalogs' && (
               <button onClick={() => setShowAddCatalog(true)}
                 className="h-9 px-4 rounded-xl bg-primary text-on-primary font-label-md text-xs font-bold flex items-center gap-1.5 shadow-sm hover:bg-primary-container transition-all">
                 <span className="material-symbols-outlined text-[16px]">add</span>
                 Add Catalog
-              </button>
-            )}
-            {activeSection === 'orders' && orders.length > 0 && (
-              <button
-                onClick={handleDeleteAllOrders}
-                className="h-9 px-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 font-label-md text-xs font-bold flex items-center gap-1.5 transition-all"
-                title="Delete all orders history"
-              >
-                <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
-                <span className="hidden sm:inline">Delete Orders History</span>
               </button>
             )}
             <button
@@ -983,17 +961,7 @@ export default function AdminDashboardPage() {
 
               {orders.slice(0, 5).length > 0 && (
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="font-label-md text-xs font-bold text-secondary uppercase tracking-wider">Recent Orders</h2>
-                    <button
-                      onClick={handleDeleteAllOrders}
-                      className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1 hover:underline cursor-pointer"
-                      title="Clear orders history"
-                    >
-                      <span className="material-symbols-outlined text-[15px]">delete_sweep</span>
-                      Clear Orders History
-                    </button>
-                  </div>
+                  <h2 className="font-label-md text-xs font-bold text-secondary uppercase tracking-wider mb-3">Recent Orders</h2>
                   <div className="flex flex-col gap-2">
                     {orders.slice(0, 5).map((o) => (
                       <div key={o.id} className="flex items-center justify-between p-3 rounded-xl bg-surface-container-lowest border border-surface-container">
