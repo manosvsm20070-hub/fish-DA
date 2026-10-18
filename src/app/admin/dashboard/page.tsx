@@ -1044,7 +1044,34 @@ export default function AdminDashboardPage() {
 
           {/* ═══════════════ ORDERS ═══════════════ */}
           {activeSection === 'orders' && (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
+              {/* WhatsApp Direct Ordering Notice & Quick Link */}
+              <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <span className="material-symbols-outlined text-[22px]">chat</span>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-emerald-950 dark:text-emerald-100 flex items-center gap-2">
+                      Direct WhatsApp Ordering Active
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#25D366]/20 text-[#25D366]">Live</span>
+                    </h3>
+                    <p className="text-xs text-emerald-800/90 dark:text-emerald-300 mt-0.5">
+                      Customer orders are dispatched directly to your WhatsApp (<strong>+91 78456 37566</strong>). Submitted web checkouts are also archived below for your logs.
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={`https://wa.me/${(settings?.customerInterface?.contact?.whatsappNumber || '917845637566').replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold transition-all shadow-sm shrink-0"
+                >
+                  <span className="material-symbols-outlined text-base">chat</span>
+                  Open WhatsApp Orders
+                </a>
+              </div>
+
               {loading ? (
                 <div className="py-16 text-center text-primary font-label-md animate-pulse">Loading...</div>
               ) : orders.length === 0 ? (

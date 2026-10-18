@@ -1,17 +1,89 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
+import { SHOP_INFO } from '@/data/products';
+import { useLiveSettings } from '@/components/RealtimeSiteSync';
 import Footer from '@/components/Footer';
 
 export default function CartPage() {
-  const { items, updateQuantity, removeFromCart, subtotal, cartCount } = useCart();
+  const { items, updateQuantity, removeFromCart, subtotal, cartCount, clearCart } = useCart();
+  const live = useLiveSettings();
+
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderSent, setOrderSent] = useState(false);
+
+  const whatsappNumber = live?.contact?.whatsappNumber || SHOP_INFO.whatsappNumber || '917845637566';
+  const storeName = live?.storeName || 'Dolphin Aquarium';
 
   // Free delivery for orders over ₹1,500, else flat ₹100
   const deliveryCharge = subtotal >= 1500 || subtotal === 0 ? 0 : 100;
   const grandTotal = subtotal + deliveryCharge;
+
+  const handleWhatsAppOrder = async () => {
+    if (items.length === 0 || isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      // 1. Format clean WhatsApp order text
+      let msg = `🐠 *NEW ORDER — ${storeName}*\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `👤 *Customer Details:*\n`;
+      msg += `• Name: ${customerName.trim() || 'WhatsApp Customer'}\n`;
+      if (customerPhone.trim()) {
+        msg += `• Phone: ${customerPhone.trim()}\n`;
+      }
+      if (customerAddress.trim()) {
+        msg += `• Delivery Address: ${customerAddress.trim()}\n`;
+      } else {
+        msg += `• Delivery Address: (Will provide in chat)\n`;
+      }
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `📦 *Items Ordered (${items.reduce((acc, i) => acc + i.quantity, 0)}):*\n`;
+      items.forEach((item, idx) => {
+        msg += `${idx + 1}. *${item.productName}*\n   ${item.variety ? item.variety + ' • ' : ''}Size: ${item.selectedSize}\n   Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')} = ₹${(item.price * item.quantity).toLocaleString('en-IN')}\n`;
+      });
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `💰 *Subtotal:* ₹${subtotal.toLocaleString('en-IN')}\n`;
+      msg += `🚚 *Delivery:* ${deliveryCharge === 0 ? 'FREE' : '₹' + deliveryCharge}\n`;
+      msg += `⭐ *Grand Total: ₹${grandTotal.toLocaleString('en-IN')}*\n`;
+      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      msg += `📍 *Store:* Sothupakkam, Chengalpattu\nPlease confirm availability and dispatch time. Thank you!`;
+
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+
+      // 2. Asynchronously save order record to database for store logging
+      try {
+        fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerDetails: {
+              name: customerName.trim() || 'WhatsApp Customer',
+              phoneNumber: customerPhone.replace(/\D/g, '') || '7845637566',
+              house: customerAddress.trim() || 'WhatsApp Order',
+              city: 'Sothupakkam',
+              district: 'Chengalpattu',
+              state: 'Tamil Nadu',
+              pinCode: '603319',
+            },
+            items,
+          }),
+        }).catch(() => {});
+      } catch {}
+
+      // 3. Launch WhatsApp directly
+      setOrderSent(true);
+      window.open(whatsappUrl, '_blank');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main className="flex-1 flex flex-col w-full px-4 md:px-8 max-w-7xl mx-auto">
@@ -135,11 +207,19 @@ export default function CartPage() {
                 <span className="material-symbols-outlined text-[16px]">arrow_back</span>
                 <span>Continue Shopping</span>
               </Link>
+
+              <button
+                type="button"
+                onClick={() => clearCart()}
+                className="text-xs text-red-600 hover:underline font-medium"
+              >
+                Clear Cart
+              </button>
             </div>
           </div>
 
-          {/* Cart Summary Card */}
-          <div className="p-6 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col gap-4">
+          {/* Cart Summary & Direct WhatsApp Order */}
+          <div className="p-6 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col gap-4 sticky top-24">
             <h3 className="font-headline-sm font-bold text-on-surface pb-2 border-b border-surface-container">
               Order Summary
             </h3>
@@ -175,19 +255,84 @@ export default function CartPage() {
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs">
+            {/* Quick Delivery Details for WhatsApp message */}
+            <div className="p-3.5 rounded-xl bg-surface-container-low border border-surface-container/80 flex flex-col gap-2.5">
+              <span className="font-label-sm text-xs font-bold text-on-surface flex items-center gap-1">
+                <span className="material-symbols-outlined text-[16px] text-primary">person_pin</span>
+                <span>Your Delivery Details (Optional)</span>
+              </span>
+
+              <input
+                type="text"
+                placeholder="Your Name (e.g. Kumar)"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                className="w-full h-9 px-3 rounded-lg bg-surface-container border border-outline-variant/60 font-body-md text-xs focus:ring-1 focus:ring-primary focus:outline-none"
+              />
+
+              <input
+                type="tel"
+                placeholder="Phone Number (e.g. 9876543210)"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                className="w-full h-9 px-3 rounded-lg bg-surface-container border border-outline-variant/60 font-body-md text-xs focus:ring-1 focus:ring-primary focus:outline-none"
+              />
+
+              <textarea
+                placeholder="Address / Area (e.g. Near Bus Stand, Sothupakkam)"
+                value={customerAddress}
+                onChange={(e) => setCustomerAddress(e.target.value)}
+                rows={2}
+                className="w-full px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/60 font-body-md text-xs focus:ring-1 focus:ring-primary focus:outline-none resize-none"
+              />
+            </div>
+
+            {/* WhatsApp Direct Notice */}
+            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-start gap-2">
+              <span className="material-symbols-outlined text-[18px] text-emerald-700 shrink-0 mt-0.5">verified</span>
               <p>
-                <strong>Live Livestock Notice:</strong> Oxygen bags guarantee safe transit. Phone OTP verification is required on the next step to place your order.
+                <strong>Direct WhatsApp Ordering:</strong> Your order will open directly on WhatsApp with our store (+91 78456 37566) for instant confirmation and dispatch timing.
               </p>
             </div>
 
-            <Link
-              href="/checkout"
-              className="h-12 rounded-xl bg-[#cc4729] hover:bg-[#b03b20] active:scale-95 text-white font-label-lg font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
+            {/* Primary Order Action Button */}
+            <button
+              type="button"
+              onClick={handleWhatsAppOrder}
+              disabled={isSubmitting || items.length === 0}
+              className="w-full h-14 rounded-xl bg-[#25D366] hover:bg-[#1ebd59] active:scale-[0.98] text-white font-label-lg font-bold flex items-center justify-center gap-2.5 shadow-md transition-all disabled:opacity-50 text-base cursor-pointer"
             >
-              <span>Proceed to Checkout</span>
-              <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
-            </Link>
+              {isSubmitting ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Preparing WhatsApp Order...</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[24px]">chat</span>
+                  <span>Order via WhatsApp &bull; ₹{grandTotal.toLocaleString('en-IN')}</span>
+                </>
+              )}
+            </button>
+
+            {orderSent && (
+              <div className="p-3 rounded-xl bg-surface-container-high border border-primary/30 text-center flex flex-col gap-2">
+                <span className="font-label-md text-xs font-bold text-primary flex items-center justify-center gap-1">
+                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                  <span>WhatsApp Opened!</span>
+                </span>
+                <p className="text-[11px] text-on-surface-variant">
+                  If WhatsApp didn&apos;t open automatically, click below:
+                </p>
+                <button
+                  type="button"
+                  onClick={handleWhatsAppOrder}
+                  className="text-xs text-primary font-bold underline cursor-pointer"
+                >
+                  Click here to re-open WhatsApp
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

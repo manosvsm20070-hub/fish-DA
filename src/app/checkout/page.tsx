@@ -104,7 +104,13 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Order created successfully
+      // Order created successfully — generate WhatsApp message
+      const itemsList = items.map((i, idx) => `${idx + 1}. *${i.productName}* (${i.selectedSize})\n   Qty: ${i.quantity} × ₹${i.price.toLocaleString('en-IN')} = ₹${(i.price * i.quantity).toLocaleString('en-IN')}`).join('\n');
+      const whatsappMsg = `🐠 *NEW ORDER — ${data.orderNumber}*\n━━━━━━━━━━━━━━━━━━━━\n👤 *Customer:*\n• Name: ${customerDetails.name}\n• Phone: ${customerDetails.phoneNumber}\n• Address: ${customerDetails.house}, ${customerDetails.city}, ${customerDetails.district}, ${customerDetails.state} - ${customerDetails.pinCode}\n━━━━━━━━━━━━━━━━━━━━\n📦 *Items:*\n${itemsList}\n━━━━━━━━━━━━━━━━━━━━\n💰 Subtotal: ₹${subtotal.toLocaleString('en-IN')}\n🚚 Delivery: ${deliveryCharge === 0 ? 'FREE' : '₹' + deliveryCharge}\n⭐ *Total Amount: ₹${grandTotal.toLocaleString('en-IN')}*\n━━━━━━━━━━━━━━━━━━━━\nPlease confirm order and delivery timing. Thank you!`;
+
+      const whatsappUrl = `https://wa.me/917845637566?text=${encodeURIComponent(whatsappMsg)}`;
+      window.open(whatsappUrl, '_blank');
+
       setIsOrderPlaced(true);
       clearCart();
       router.push(`/order-success/${data.orderNumber}`);
@@ -370,17 +376,17 @@ export default function CheckoutPage() {
               type="button"
               disabled={isSubmittingOrder}
               onClick={() => handlePlaceOrder()}
-              className="w-full h-14 rounded-xl bg-[#cc4729] hover:bg-[#b03b20] active:scale-[0.98] text-white font-label-lg font-bold flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 text-base cursor-pointer"
+              className="w-full h-14 rounded-xl bg-[#25D366] hover:bg-[#1ebd59] active:scale-[0.98] text-white font-label-lg font-bold flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 text-base cursor-pointer"
             >
               {isSubmittingOrder ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Placing Your Order...</span>
+                  <span>Submitting to WhatsApp...</span>
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[22px]">check_circle</span>
-                  <span>Place Order Now &bull; ₹{grandTotal.toLocaleString('en-IN')}</span>
+                  <span className="material-symbols-outlined text-[24px]">chat</span>
+                  <span>Send Order via WhatsApp &bull; ₹{grandTotal.toLocaleString('en-IN')}</span>
                 </>
               )}
             </button>
