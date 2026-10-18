@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { SHOP_INFO } from '@/data/products';
 import AnnouncementBar from '@/components/AnnouncementBar';
+import { useLiveSettings } from '@/components/RealtimeSiteSync';
 
 interface HeaderProps {
   announcement?: {
@@ -28,6 +29,12 @@ export default function Header({
   phoneDisplay,
   whatsappNumber,
 }: HeaderProps = {}) {
+  const live = useLiveSettings();
+  const currentStoreName = live?.storeName || storeName || SHOP_INFO.name;
+  const currentPhoneDial = live?.contact?.phoneDial || phoneDial || SHOP_INFO.phoneDial;
+  const currentPhoneDisplay = live?.contact?.phoneDisplay || phoneDisplay || SHOP_INFO.phoneDisplay;
+  const currentWhatsapp = live?.contact?.whatsappNumber || whatsappNumber || SHOP_INFO.whatsappNumber;
+
   const pathname = usePathname();
   const { cartCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -58,7 +65,7 @@ export default function Header({
           </div>
           <div className="hidden sm:flex flex-col">
             <span className="font-headline-sm font-bold text-primary tracking-tight leading-tight">
-              {storeName || SHOP_INFO.name}
+              {currentStoreName}
             </span>
             <span className="font-label-sm text-on-surface-variant flex items-center gap-0.5">
               <span className="material-symbols-outlined text-[13px] text-primary">location_on</span>
@@ -95,9 +102,9 @@ export default function Header({
           {/* Call Store */}
           <a
             aria-label="Call Store"
-            href={phoneDial || SHOP_INFO.phoneDial}
+            href={currentPhoneDial}
             className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center bg-surface-container-high text-primary hover:bg-secondary-container transition-colors shadow-sm"
-            title={`Call ${phoneDisplay || SHOP_INFO.phoneDisplay}`}
+            title={`Call ${currentPhoneDisplay}`}
           >
             <span className="material-symbols-outlined text-[20px]">call</span>
           </a>
@@ -105,11 +112,11 @@ export default function Header({
           {/* WhatsApp Direct */}
           <a
             aria-label="WhatsApp Store"
-            href={`https://wa.me/${whatsappNumber || SHOP_INFO.whatsappNumber}?text=Hello%20${encodeURIComponent(storeName || SHOP_INFO.name)},%20I%20am%20inquiring%20about%20live%20fish%20stock%20and%20prices`}
+            href={`https://wa.me/${currentWhatsapp}?text=Hello%20${encodeURIComponent(currentStoreName)},%20I%20am%20inquiring%20about%20live%20fish%20stock%20and%20prices`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center bg-primary text-on-primary hover:bg-primary-container transition-colors shadow-sm"
-            title={`WhatsApp ${storeName || SHOP_INFO.name}`}
+            title={`WhatsApp ${currentStoreName}`}
           >
             <span className="material-symbols-outlined text-[20px]">chat</span>
           </a>

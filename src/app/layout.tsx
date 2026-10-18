@@ -53,7 +53,11 @@ export const metadata: Metadata = {
 };
 
 import ThemeApplier from '@/components/ThemeApplier';
+import RealtimeSiteSync from '@/components/RealtimeSiteSync';
 import { getSettings } from '@/lib/storage';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function RootLayout({
   children,
@@ -104,20 +108,22 @@ export default async function RootLayout({
       </head>
       <body className="bg-surface font-body-md text-on-surface flex flex-col min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
         <ThemeApplier primaryColor={primaryColor} accentColor={accentColor} darkMode={darkMode} />
-        <CartProvider>
-          <Header
-            announcement={settings.customerInterface?.announcement}
-            storeName={settings.customerInterface?.storeName}
-            phoneDial={settings.customerInterface?.contact?.phoneDial}
-            phoneDisplay={settings.customerInterface?.contact?.phoneDisplay}
-            whatsappNumber={settings.customerInterface?.contact?.whatsappNumber}
-          />
-          <div className={`flex-1 flex flex-col ${isAnnouncementActive ? 'pt-28' : 'pt-20'} pb-20 lg:pb-12`}>
-            {children}
-          </div>
-          <BottomNav />
-          <FloatingWhatsApp whatsappNumber={settings.customerInterface?.contact?.whatsappNumber} />
-        </CartProvider>
+        <RealtimeSiteSync initialSettings={settings}>
+          <CartProvider>
+            <Header
+              announcement={settings.customerInterface?.announcement}
+              storeName={settings.customerInterface?.storeName}
+              phoneDial={settings.customerInterface?.contact?.phoneDial}
+              phoneDisplay={settings.customerInterface?.contact?.phoneDisplay}
+              whatsappNumber={settings.customerInterface?.contact?.whatsappNumber}
+            />
+            <div className={`flex-1 flex flex-col ${isAnnouncementActive ? 'pt-28' : 'pt-20'} pb-20 lg:pb-12`}>
+              {children}
+            </div>
+            <BottomNav />
+            <FloatingWhatsApp whatsappNumber={settings.customerInterface?.contact?.whatsappNumber} />
+          </CartProvider>
+        </RealtimeSiteSync>
       </body>
     </html>
   );

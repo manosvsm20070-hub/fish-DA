@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { getPublishedProducts as getProducts, getSettings } from '@/lib/storage';
 import { SHOP_INFO } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
+import LiveHeroBanner from '@/components/LiveHeroBanner';
 import Footer from '@/components/Footer';
 
 export const dynamic = 'force-dynamic';
@@ -31,77 +32,8 @@ export default async function HomePage() {
       </div>
 
       <div className="flex flex-col w-full gap-6 md:gap-8">
-        {/* Shop Spotlight & Trust Hero Banner (From Stitch Screen 4) */}
-        <section className="relative overflow-hidden rounded-2xl bg-surface-container-low shadow-sm border border-surface-container/70">
-          <div className="relative w-full h-56 sm:h-72 md:h-80 overflow-hidden">
-            <Image
-              src={ci?.hero?.bannerImage || 'https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=1600&q=80'}
-              alt={ci?.hero?.headline || 'Dolphin Aquarium'}
-              fill
-              priority
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low via-surface-container-low/40 to-transparent"></div>
-
-            {/* Badges on Hero */}
-            <div className="absolute top-3 left-3">
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-lowest/90 text-primary font-label-sm text-xs shadow-sm backdrop-blur-md font-semibold">
-                <span className="material-symbols-outlined text-[15px] text-primary">verified</span>
-                {ci?.hero?.quarantineBadgeText || 'Quarantine Certified'}
-              </span>
-            </div>
-            <div className="absolute top-3 right-3">
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-highest/90 text-on-surface font-label-sm text-xs backdrop-blur-md font-semibold">
-                <span className="material-symbols-outlined text-[14px] text-amber-500">star</span>
-                {ci?.hero?.ratingBadgeText || '4.9 (Live Stock)'}
-              </span>
-            </div>
-          </div>
-
-          <div className="p-4 sm:p-6 flex flex-col gap-3">
-            <div className="flex flex-col">
-              <h1 className="font-headline-lg font-bold text-on-surface">
-                {ci?.hero?.headline || ci?.storeName || 'Dolphin Aquarium'}
-              </h1>
-              <p className="font-body-sm sm:font-body-md text-secondary">
-                {ci?.hero?.subtitle || ci?.tagline || 'Freshwater Livestock, Custom Rimless Tanks & Aquatic Equipment'}
-              </p>
-            </div>
-
-            <div className="flex items-start gap-1.5 text-on-surface-variant font-body-sm text-xs sm:text-sm">
-              <span className="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">pin_drop</span>
-              <span>{ci?.contact?.address || SHOP_INFO.address}</span>
-            </div>
-
-            {/* Quick Action Buttons */}
-            <div className="grid grid-cols-2 gap-2 pt-1 max-w-md">
-              <a
-                className="flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-surface-container-highest text-primary font-label-md font-bold hover:bg-surface-container transition-all active:scale-95 shadow-xs"
-                href={ci?.contact?.phoneDial || SHOP_INFO.phoneDial}
-              >
-                <span className="material-symbols-outlined text-[18px]">call</span>
-                <span>Call Store</span>
-              </a>
-              <a
-                className="flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-primary text-on-primary font-label-md font-bold hover:bg-primary-container transition-all active:scale-95 shadow-sm"
-                href={`https://wa.me/${ci?.contact?.whatsappNumber || SHOP_INFO.whatsappNumber}?text=Hello%20${encodeURIComponent(ci?.storeName || SHOP_INFO.name)},%20I%20am%20inquiring%20about%20live%20fish%20stock%20and%20prices`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="material-symbols-outlined text-[18px]">chat</span>
-                <span>WhatsApp</span>
-              </a>
-            </div>
-
-            {/* Highlights Banner */}
-            <div className="mt-1 p-3 rounded-xl bg-surface-container flex items-center gap-2.5">
-              <span className="material-symbols-outlined text-[22px] text-primary shrink-0">shield</span>
-              <p className="font-label-sm text-xs text-on-secondary-container leading-relaxed">
-                {ci?.hero?.highlightNotice || '100% Healthy Quarantine Assured. Direct Tank Delivery across Sothupakkam & Chengalpattu region.'}
-              </p>
-            </div>
-          </div>
-        </section>
+        {/* Shop Spotlight & Trust Hero Banner with Real-time Live Updates */}
+        <LiveHeroBanner initialInterface={ci} />
 
         {/* Interactive Category Chips Scroll */}
         <section className="flex flex-col gap-2">

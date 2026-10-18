@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { SiteSettings } from '@/types';
 import { compressImage } from '@/lib/imageCompression';
+import { broadcastAdminUpdate } from '@/lib/broadcastSync';
 
 interface SettingsManagerProps {
   settings: SiteSettings | null;
@@ -188,6 +189,16 @@ export default function SettingsManager({ settings, onRefresh, showToast }: Sett
       }
 
       showToast('Theme settings saved! Storefront updated.');
+      broadcastAdminUpdate('SETTINGS_UPDATED', {
+        settings: {
+          theme: {
+            preset: themePreset,
+            primaryColor,
+            accentColor,
+            darkMode,
+          },
+        },
+      });
       await onRefresh();
     } catch {
       showToast('Network error while saving theme', 'error');
@@ -283,6 +294,35 @@ export default function SettingsManager({ settings, onRefresh, showToast }: Sett
       }
 
       showToast('Customer interface saved! Storefront updated.');
+      broadcastAdminUpdate('SETTINGS_UPDATED', {
+        settings: {
+          customerInterface: {
+            storeName,
+            tagline,
+            announcement: {
+              enabled: announcementEnabled,
+              text: announcementText,
+              linkText: announcementLinkText,
+              linkUrl: announcementLinkUrl,
+            },
+            hero: {
+              headline: heroHeadline,
+              subtitle: heroSubtitle,
+              bannerImage: heroBannerImage,
+              quarantineBadgeText,
+              ratingBadgeText,
+              highlightNotice,
+            },
+            contact: {
+              address,
+              phoneDisplay,
+              phoneDial,
+              whatsappNumber,
+              openHours,
+            },
+          },
+        },
+      });
       await onRefresh();
     } catch {
       showToast('Network error while saving customer interface', 'error');

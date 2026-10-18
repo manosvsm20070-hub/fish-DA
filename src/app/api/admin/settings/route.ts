@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { verifySessionToken } from '@/lib/auth';
 import { getSettings, updateSettings } from '@/lib/storage';
 
@@ -50,6 +51,15 @@ export async function PUT(req: NextRequest) {
     if (!result.success || !result.settings) {
       return NextResponse.json({ success: false, error: result.error || 'Failed to update settings' }, { status: 500 });
     }
+
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/', 'page');
+      revalidatePath('/fish', 'page');
+      revalidatePath('/tanks', 'page');
+      revalidatePath('/contact', 'page');
+      revalidatePath('/medicines', 'page');
+    } catch {}
 
     return NextResponse.json({
       success: true,

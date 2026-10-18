@@ -2,9 +2,11 @@
 
 import React from 'react';
 import { SHOP_INFO } from '@/data/products';
+import { useLiveSettings } from '@/components/RealtimeSiteSync';
 
 export default function FloatingWhatsApp({ whatsappNumber }: { whatsappNumber?: string } = {}) {
-  const number = whatsappNumber || SHOP_INFO.whatsappNumber;
+  const live = useLiveSettings();
+  const number = live?.contact?.whatsappNumber || whatsappNumber || SHOP_INFO.whatsappNumber;
   return (
     <div className="fixed bottom-20 lg:bottom-8 right-4 md:right-8 z-40">
       <a

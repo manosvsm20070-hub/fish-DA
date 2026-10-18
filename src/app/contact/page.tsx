@@ -3,6 +3,9 @@ import { getSettings } from '@/lib/storage';
 import { SHOP_INFO } from '@/data/products';
 import Footer from '@/components/Footer';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata = {
   title: 'Contact Dolphin Aquarium | Sothupakkam Tamil Nadu',
   description: 'Visit Dolphin Aquarium at No. 5 Monasakthi Valagam, Cheyur - Vandavasi Rd, Sothupakkam, Tamil Nadu 603319. Phone: 07845637566.',

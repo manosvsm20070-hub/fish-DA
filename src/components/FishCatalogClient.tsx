@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
 
@@ -13,27 +13,64 @@ export default function FishCatalogClient({
   initialProducts,
   initialCategory = 'all',
 }: FishCatalogClientProps) {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [activeQuickFilter, setActiveQuickFilter] = useState<'all' | 'community' | 'beginner' | 'aggressive'>('all');
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [careFilter, setCareFilter] = useState<string>('all');
 
-  const categories = [
-    { label: 'All Live Stock', key: 'all', count: initialProducts.length },
-    { label: 'Goldfish (26)', key: 'goldfish', count: 5 },
-    { label: 'Betta Fish (15)', key: 'betta', count: 3 },
-    { label: 'Guppies & Endlers', key: 'guppy', count: 2 },
-    { label: 'Mollies', key: 'molly', count: 1 },
-    { label: 'Aquarium Sharks', key: 'sharks', count: 2 },
-    { label: 'Flowerhorn', key: 'flowerhorn', count: 2 },
-    { label: 'Zebra & GloFish', key: 'zebra-danio', count: 1 },
-    { label: 'Monster Fish & Catfish', key: 'monster-fish', count: 2 },
-  ];
+  // Keep state in sync when server components revalidate
+  useEffect(() => {
+    setProducts(initialProducts);
+  }, [initialProducts]);
+
+  // Real-time listener: instantly reload fresh fish products on admin updates
+  useEffect(() => {
+    const handleProductsUpdated = async () => {
+      try {
+        const res = await fetch('/api/products', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.products && Array.isArray(data.products)) {
+            const liveFish = data.products.filter((p: Product) => p.isLiveFish);
+            setProducts(liveFish);
+          }
+        }
+      } catch {}
+    };
+
+    window.addEventListener('dolphin_products_updated', handleProductsUpdated);
+    return () => {
+      window.removeEventListener('dolphin_products_updated', handleProductsUpdated);
+    };
+  }, []);
+
+  const categories = useMemo(() => {
+    const countFor = (keyword: string) =>
+      products.filter(
+        (p) =>
+          p.category.toLowerCase().includes(keyword) ||
+          p.subCategory?.toLowerCase().includes(keyword) ||
+          p.variety.toLowerCase().includes(keyword)
+      ).length;
+
+    return [
+      { label: 'All Live Stock', key: 'all', count: products.length },
+      { label: `Goldfish (${countFor('goldfish')})`, key: 'goldfish', count: countFor('goldfish') },
+      { label: `Betta Fish (${countFor('betta')})`, key: 'betta', count: countFor('betta') },
+      { label: `Guppies & Endlers (${countFor('gupp')})`, key: 'guppy', count: countFor('gupp') },
+      { label: `Mollies (${countFor('moll')})`, key: 'molly', count: countFor('moll') },
+      { label: `Aquarium Sharks (${countFor('shark')})`, key: 'sharks', count: countFor('shark') },
+      { label: `Flowerhorn (${countFor('flowerhorn')})`, key: 'flowerhorn', count: countFor('flowerhorn') },
+      { label: `Zebra & GloFish (${countFor('zebra') + countFor('glo')})`, key: 'zebra-danio', count: countFor('zebra') + countFor('glo') },
+      { label: `Monster & Catfish (${countFor('monster') + countFor('catfish')})`, key: 'monster-fish', count: countFor('monster') + countFor('catfish') },
+    ];
+  }, [products]);
 
   // Filtering Logic
   const filteredProducts = useMemo(() => {
-    return initialProducts.filter((product) => {
+    return products.filter((product) => {
       // 1. Search Query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -76,7 +113,7 @@ export default function FishCatalogClient({
 
       return true;
     });
-  }, [initialProducts, searchQuery, activeCategory, activeQuickFilter, careFilter]);
+  }, [products, searchQuery, activeCategory, activeQuickFilter, careFilter]);
 
   const resetFilters = () => {
     setSearchQuery('');

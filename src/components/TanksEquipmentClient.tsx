@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/types';
@@ -13,11 +13,36 @@ interface TanksEquipmentClientProps {
 }
 
 export default function TanksEquipmentClient({
-  products,
+  products: initialProducts,
   initialFilter = 'all',
 }: TanksEquipmentClientProps) {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   const [activeFilter, setActiveFilter] = useState(initialFilter);
   const { addToCart } = useCart();
+
+  useEffect(() => {
+    setProducts(initialProducts);
+  }, [initialProducts]);
+
+  useEffect(() => {
+    const handleProductsUpdated = async () => {
+      try {
+        const res = await fetch('/api/products', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.products && Array.isArray(data.products)) {
+            const gear = data.products.filter((p: Product) => !p.isLiveFish);
+            setProducts(gear);
+          }
+        }
+      } catch {}
+    };
+
+    window.addEventListener('dolphin_products_updated', handleProductsUpdated);
+    return () => {
+      window.removeEventListener('dolphin_products_updated', handleProductsUpdated);
+    };
+  }, []);
 
   const filterTabs = [
     { label: 'All Gear', key: 'all', icon: 'apps' },

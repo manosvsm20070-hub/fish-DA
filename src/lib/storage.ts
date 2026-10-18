@@ -119,6 +119,17 @@ let memoryCatalogs: Catalog[] | null = null;
 let memorySettings: SiteSettings | null = null;
 let memoryPriceHistory: PriceHistory[] | null = null;
 
+// Realtime sync version timestamps
+let lastSettingsUpdate = Date.now();
+let lastProductsUpdate = Date.now();
+
+export function getSyncVersion() {
+  return {
+    settingsUpdatedAt: lastSettingsUpdate,
+    productsUpdatedAt: lastProductsUpdate,
+  };
+}
+
 function readFileSafe<T>(filename: string, fallbackFactory: () => T): T {
   const workingDir = getWorkingDataDir();
   const workingPath = path.join(/*turbopackIgnore: true*/ workingDir, filename);
@@ -224,6 +235,7 @@ export async function createCatalog(
     const newCatalog: Catalog = { ...catalog, createdAt: now, updatedAt: now };
     catalogs.push(newCatalog);
     memoryCatalogs = catalogs;
+    lastProductsUpdate = Date.now();
     writeFileSafe('catalogs.json', catalogs);
     return { success: true, catalog: newCatalog };
   } catch (err: unknown) {
@@ -243,6 +255,7 @@ export async function updateCatalog(
 
     catalogs[index] = { ...catalogs[index], ...updates, updatedAt: new Date().toISOString() };
     memoryCatalogs = catalogs;
+    lastProductsUpdate = Date.now();
     writeFileSafe('catalogs.json', catalogs);
     return { success: true, catalog: catalogs[index] };
   } catch (err: unknown) {
@@ -286,6 +299,7 @@ export async function createProduct(
     const newProduct: Product = { ...product, createdAt: now, updatedAt: now };
     products.push(newProduct);
     memoryProducts = products;
+    lastProductsUpdate = Date.now();
     writeFileSafe('products.json', products);
     return { success: true, product: newProduct };
   } catch (err: unknown) {
@@ -327,6 +341,7 @@ export async function updateProductFull(
 
     products[index] = { ...currentProduct, ...updates, id, createdAt: currentProduct.createdAt, updatedAt: now };
     memoryProducts = products;
+    lastProductsUpdate = Date.now();
     writeFileSafe('products.json', products);
     return { success: true, product: products[index] };
   } catch (err: unknown) {
@@ -483,6 +498,7 @@ export async function updateSettings(
       },
     };
     memorySettings = next;
+    lastSettingsUpdate = Date.now();
     writeFileSafe('settings.json', next);
     return { success: true, settings: next };
   } catch (err: unknown) {
@@ -511,6 +527,7 @@ export async function updateAdminPassword(
     const current = await getSettings();
     current.adminPassword = newPassword.trim();
     memorySettings = current;
+    lastSettingsUpdate = Date.now();
     writeFileSafe('settings.json', current);
     return { success: true };
   } catch (err: unknown) {

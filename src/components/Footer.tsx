@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { SHOP_INFO } from '@/data/products';
+import { useLiveSettings } from '@/components/RealtimeSiteSync';
 
 interface FooterProps {
   storeName?: string;
@@ -16,35 +17,15 @@ interface FooterProps {
 }
 
 export default function Footer(props: FooterProps = {}) {
-  const [info, setInfo] = useState({
-    name: props.storeName || SHOP_INFO.name,
-    address: props.address || SHOP_INFO.address,
-    phoneDisplay: props.phoneDisplay || SHOP_INFO.phoneDisplay,
-    phoneDial: props.phoneDial || SHOP_INFO.phoneDial,
-    whatsappNumber: props.whatsappNumber || SHOP_INFO.whatsappNumber,
-    openHours: props.openHours || SHOP_INFO.openHours,
-  });
-
-  useEffect(() => {
-    if (!props.storeName) {
-      fetch('/api/settings')
-        .then((r) => r.json())
-        .then((d) => {
-          if (d?.customerInterface) {
-            const ci = d.customerInterface;
-            setInfo({
-              name: ci.storeName || SHOP_INFO.name,
-              address: ci.contact?.address || SHOP_INFO.address,
-              phoneDisplay: ci.contact?.phoneDisplay || SHOP_INFO.phoneDisplay,
-              phoneDial: ci.contact?.phoneDial || SHOP_INFO.phoneDial,
-              whatsappNumber: ci.contact?.whatsappNumber || SHOP_INFO.whatsappNumber,
-              openHours: ci.contact?.openHours || SHOP_INFO.openHours,
-            });
-          }
-        })
-        .catch(() => {});
-    }
-  }, [props.storeName]);
+  const live = useLiveSettings();
+  const info = {
+    name: live?.storeName || props.storeName || SHOP_INFO.name,
+    address: live?.contact?.address || props.address || SHOP_INFO.address,
+    phoneDisplay: live?.contact?.phoneDisplay || props.phoneDisplay || SHOP_INFO.phoneDisplay,
+    phoneDial: live?.contact?.phoneDial || props.phoneDial || SHOP_INFO.phoneDial,
+    whatsappNumber: live?.contact?.whatsappNumber || props.whatsappNumber || SHOP_INFO.whatsappNumber,
+    openHours: live?.contact?.openHours || props.openHours || SHOP_INFO.openHours,
+  };
 
   return (
     <footer className="mt-16 pt-12 pb-24 lg:pb-12 bg-surface-container-low border-t border-surface-container">

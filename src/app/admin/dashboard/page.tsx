@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Product, Order, Catalog, SiteSettings } from '@/types';
 import SettingsManager from '@/components/admin/SettingsManager';
 import { compressImage } from '@/lib/imageCompression';
+import { broadcastAdminUpdate } from '@/lib/broadcastSync';
 
 // ─────────────────────────────────────────────────────────────
 // SECTION TYPES
@@ -568,6 +569,7 @@ export default function AdminDashboardPage() {
         showToast('Product created successfully!');
         setShowAddProduct(false);
       }
+      broadcastAdminUpdate('PRODUCTS_UPDATED');
       await loadData();
     } finally { setIsSaving(false); }
   };
@@ -577,6 +579,7 @@ export default function AdminDashboardPage() {
     const { ok, data } = await adminFetch(`/api/admin/products/${id}`, { method: 'DELETE' });
     if (!ok) { showToast(data.error || 'Archive failed', 'error'); return; }
     showToast('Product archived.');
+    broadcastAdminUpdate('PRODUCTS_UPDATED');
     await loadData();
   };
 
@@ -589,6 +592,7 @@ export default function AdminDashboardPage() {
     });
     if (!ok) { showToast(data.error || 'Update failed', 'error'); return; }
     showToast(`Product ${newStatus === 'Published' ? 'published!' : 'unpublished.'}`);
+    broadcastAdminUpdate('PRODUCTS_UPDATED');
     await loadData();
   };
 
@@ -615,6 +619,7 @@ export default function AdminDashboardPage() {
         showToast('Catalog created!');
         setShowAddCatalog(false);
       }
+      broadcastAdminUpdate('PRODUCTS_UPDATED');
       await loadData();
     } finally { setIsSaving(false); }
   };
@@ -624,6 +629,7 @@ export default function AdminDashboardPage() {
     const { ok, data } = await adminFetch(`/api/admin/catalogs/${id}`, { method: 'DELETE' });
     if (!ok) { showToast(data.error || 'Failed', 'error'); return; }
     showToast('Catalog archived.');
+    broadcastAdminUpdate('PRODUCTS_UPDATED');
     await loadData();
   };
 
