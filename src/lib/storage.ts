@@ -339,9 +339,7 @@ export async function updateCatalog(
 // ======================== PRODUCT OPERATIONS ========================
 
 export async function getProducts(): Promise<Product[]> {
-  const products = readFileSafe<Product[]>('products.json', () =>
-    INITIAL_PRODUCTS.map((p) => ({ ...p, status: 'Published' as ProductStatus }))
-  );
+  const products = readFileSafe<Product[]>('products.json', () => []);
   return products.map((p) => ({ ...p, status: p.status || 'Published' }));
 }
 
@@ -468,6 +466,30 @@ export async function updateProductAdmin(
 export async function archiveProduct(id: string): Promise<{ success: boolean; error?: string }> {
   const result = await updateProductFull(id, { status: 'Archived' });
   return { success: result.success, error: result.error };
+}
+
+export async function deleteAllProducts(): Promise<{ success: boolean; count: number; error?: string }> {
+  try {
+    const products = await getProducts();
+    const count = products.length;
+    writeFileSafe('products.json', []);
+    touchSyncVersion('products');
+
+    // Attempt Supabase deletion in background
+    try {
+      const supabase = getSupabaseDbClient();
+      if (supabase) {
+        await supabase.from('products').delete().neq('id', '___none___');
+      }
+    } catch (e) {
+      console.warn('[storage] Notice: Supabase products delete skipped/offline:', e);
+    }
+
+    return { success: true, count };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Failed to delete all products';
+    return { success: false, count: 0, error: errorMsg };
+  }
 }
 
 // ======================== ORDER OPERATIONS ========================

@@ -693,6 +693,23 @@ export default function AdminDashboardPage() {
     await loadData();
   };
 
+  const handleDeleteAllProducts = async () => {
+    if (!confirm('Are you ABSOLUTELY sure you want to delete ALL products? This will empty the catalog.')) return;
+    try {
+      const { ok, data } = await adminFetch('/api/admin/products', { method: 'DELETE' });
+      if (!ok) {
+        showToast(data.error || 'Failed to delete all products', 'error');
+        return;
+      }
+      setProducts([]);
+      showToast('All products deleted successfully.');
+      broadcastAdminUpdate('PRODUCTS_UPDATED');
+      await loadData();
+    } catch {
+      showToast('Failed to delete products', 'error');
+    }
+  };
+
   const handlePublishToggle = async (product: Product) => {
     const newStatus = product.status === 'Published' ? 'Draft' : 'Published';
     const { ok, data } = await adminFetch(`/api/admin/products/${product.id}`, {
@@ -850,11 +867,23 @@ export default function AdminDashboardPage() {
           </span>
           <div className="ml-auto flex items-center gap-2">
             {activeSection === 'products' && (
-              <button onClick={() => setShowAddProduct(true)}
-                className="h-9 px-4 rounded-xl bg-primary text-on-primary font-label-md text-xs font-bold flex items-center gap-1.5 shadow-sm hover:bg-primary-container transition-all">
-                <span className="material-symbols-outlined text-[16px]">add</span>
-                Add Product
-              </button>
+              <>
+                {products.length > 0 && (
+                  <button
+                    onClick={handleDeleteAllProducts}
+                    className="h-9 px-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 font-label-md text-xs font-bold flex items-center gap-1.5 transition-all"
+                    title="Delete all products"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
+                    <span className="hidden sm:inline">Delete All</span>
+                  </button>
+                )}
+                <button onClick={() => setShowAddProduct(true)}
+                  className="h-9 px-4 rounded-xl bg-primary text-on-primary font-label-md text-xs font-bold flex items-center gap-1.5 shadow-sm hover:bg-primary-container transition-all">
+                  <span className="material-symbols-outlined text-[16px]">add</span>
+                  Add Product
+                </button>
+              </>
             )}
             {activeSection === 'catalogs' && (
               <button onClick={() => setShowAddCatalog(true)}

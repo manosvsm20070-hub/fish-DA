@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { verifySessionToken } from '@/lib/auth';
-import { getProducts, createProduct } from '@/lib/storage';
+import { getProducts, createProduct, deleteAllProducts } from '@/lib/storage';
 import { Product } from '@/types';
 
 function adminAuth(req: NextRequest) {
@@ -111,5 +111,35 @@ export async function POST(req: NextRequest) {
   } catch (err: unknown) {
     console.error('POST /api/admin/products error:', err);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+// DELETE /api/admin/products — delete all products
+export async function DELETE(req: NextRequest) {
+  const auth = adminAuth(req);
+  if (!auth) return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+
+  try {
+    const result = await deleteAllProducts();
+    if (!result.success) {
+      return NextResponse.json({ success: false, error: result.error }, { status: 500 });
+    }
+
+    try {
+      revalidatePath('/', 'layout');
+      revalidatePath('/', 'page');
+      revalidatePath('/fish', 'page');
+      revalidatePath('/fish/[category]', 'page');
+      revalidatePath('/tanks', 'page');
+    } catch {}
+
+    return NextResponse.json({
+      success: true,
+      message: `Successfully deleted all products (${result.count} removed).`,
+      count: result.count,
+    });
+  } catch (err: unknown) {
+    console.error('DELETE /api/admin/products error:', err);
+    return NextResponse.json({ success: false, error: 'Failed to delete all products' }, { status: 500 });
   }
 }

@@ -1,0 +1,1165 @@
+[
+  {
+    "id": "prod-desync-test-999",
+    "name": "Desync Upsert Test",
+    "category": "Monster Fish",
+    "subCategory": "",
+    "variety": "",
+    "gender": "Unsexed",
+    "images": [],
+    "primaryImage": "",
+    "price": 999,
+    "currency": "₹",
+    "sizes": [
+      "Standard"
+    ],
+    "stock": 10,
+    "availability": "in_stock",
+    "description": "",
+    "isLiveFish": true,
+    "featured": false,
+    "status": "Published",
+    "tags": [],
+    "createdAt": "2026-10-18T05:36:37.395Z",
+    "updatedAt": "2026-10-18T07:25:46.380Z"
+  },
+  {
+    "id": "gf-oranda-red-cap",
+    "name": "Red Cap Oranda Goldfish",
+    "category": "Goldfish",
+    "subCategory": "Oranda",
+    "variety": "Red Cap",
+    "gender": "Unsexed",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCe6ajzYgPnKEeMg6lfYrC_4AcF7eKah27k-HVdru1NNy-53eUgKBY6z-81QDjo40OuztuQ_9QvErDgpYIigHMtmcesxajymUhWYjkN4_-U1ah6l-GQIgnUN6PWCB18hwKdoIDCB9rXJJICJxkyy3IrwuNA0O0FiRGtPL0Y-NDh5e1OVoTyNA9PuHMAsP-X7HN6X7fqbg9z8ZXhVF45wM2u-jnQCD_TMNAkXDF4r13lSn-YrqWb7ZeJBg",
+      "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuCe6ajzYgPnKEeMg6lfYrC_4AcF7eKah27k-HVdru1NNy-53eUgKBY6z-81QDjo40OuztuQ_9QvErDgpYIigHMtmcesxajymUhWYjkN4_-U1ah6l-GQIgnUN6PWCB18hwKdoIDCB9rXJJICJxkyy3IrwuNA0O0FiRGtPL0Y-NDh5e1OVoTyNA9PuHMAsP-X7HN6X7fqbg9z8ZXhVF45wM2u-jnQCD_TMNAkXDF4r13lSn-YrqWb7ZeJBg",
+    "price": 80,
+    "originalPrice": 100,
+    "currency": "₹",
+    "sizes": [
+      "3.5 inch",
+      "4.5 inch",
+      "5.5 inch Jumbo"
+    ],
+    "stock": 14,
+    "availability": "in_stock",
+    "description": "High-grade Fancy Red Cap Oranda with prominent raspberry-textured crimson wen growth and flowing silky white fins. Quarantined for 14 days and conditioned for local tap water.",
+    "waterParams": {
+      "ph": "7.2 - 7.6",
+      "temp": "20-24°C",
+      "temperament": "Peaceful Community",
+      "careLevel": "Beginner",
+      "tankMinGallons": 30
+    },
+    "isLiveFish": true,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-10-18T07:10:34.574Z",
+    "status": "Published"
+  },
+  {
+    "id": "gf-ryukin-calico",
+    "name": "Calico Ryukin Goldfish",
+    "category": "Goldfish",
+    "subCategory": "Ryukin",
+    "variety": "Calico",
+    "gender": "Unsexed",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDViXqBf6VmELAJvHhUtBwFzZP03nxnfV5CO_8rNpTmIS6VDVCotPqrlxUUA-fuAFYWKfz_A47GNVWVfkq7Vnmrbk5Q5w25hoFnWkRCYgluBxFDCQZMz3kOmsklYw2XWlweTbbI14YqlULjnloPOdjAL6OMFrZEgIRC214TkDbGFpqZiOBEBH6YyIZGKRl__22nmcukeWK3xN_K8pTE644BwnZPMvPHesR1HZI_InK1Wfpj4Ln5rwEq1g"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuDViXqBf6VmELAJvHhUtBwFzZP03nxnfV5CO_8rNpTmIS6VDVCotPqrlxUUA-fuAFYWKfz_A47GNVWVfkq7Vnmrbk5Q5w25hoFnWkRCYgluBxFDCQZMz3kOmsklYw2XWlweTbbI14YqlULjnloPOdjAL6OMFrZEgIRC214TkDbGFpqZiOBEBH6YyIZGKRl__22nmcukeWK3xN_K8pTE644BwnZPMvPHesR1HZI_InK1Wfpj4Ln5rwEq1g",
+    "price": 100,
+    "originalPrice": 850,
+    "currency": "₹",
+    "sizes": [
+      "3 inch",
+      "4 inch",
+      "5 inch"
+    ],
+    "stock": 8,
+    "availability": "in_stock",
+    "description": "High arched shoulder hump with magnificent tri-color calico marbling. Energetic swimmer with wide double fantail.",
+    "waterParams": {
+      "ph": "7.2 - 7.6",
+      "temp": "18-24°C",
+      "temperament": "Peaceful",
+      "careLevel": "Intermediate",
+      "tankMinGallons": 30
+    },
+    "isLiveFish": true,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-10-11T06:50:19.654Z",
+    "status": "Published"
+  },
+  {
+    "id": "gf-black-moor",
+    "name": "Black Moor Goldfish",
+    "category": "Goldfish",
+    "subCategory": "Telescope",
+    "variety": "Black Moor",
+    "gender": "Unsexed",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBQPq6AFXefOzoyBtBguegYM07bV0ThdsntibX5EehzpljNqf4bBoefhyAVwkNDcl_-IrynMuxMEfnDrqUxQ475kSCsGvGD5IGemHKTAELbJzgXuv6i86iL7-yY-R4TiqfIqeuqNzdPFrNknRY2hYyp-Aerdh81m9VqHpCUxQ43DAbFkrdQF6C9eaKVfvDEoE6M3ZYRLV5NOI2U4AEQtIo1aH2zH0deqpyYkr58HcXFX_RhSHn9jcDLug"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuBQPq6AFXefOzoyBtBguegYM07bV0ThdsntibX5EehzpljNqf4bBoefhyAVwkNDcl_-IrynMuxMEfnDrqUxQ475kSCsGvGD5IGemHKTAELbJzgXuv6i86iL7-yY-R4TiqfIqeuqNzdPFrNknRY2hYyp-Aerdh81m9VqHpCUxQ43DAbFkrdQF6C9eaKVfvDEoE6M3ZYRLV5NOI2U4AEQtIo1aH2zH0deqpyYkr58HcXFX_RhSHn9jcDLug",
+    "price": 450,
+    "currency": "₹",
+    "sizes": [
+      "2.5 inch",
+      "3.5 inch"
+    ],
+    "stock": 18,
+    "availability": "in_stock",
+    "description": "Velvety deep matte black scales with protruding telescope eyes and elegant butterfly tail.",
+    "waterParams": {
+      "ph": "7.0 - 7.8",
+      "temp": "18-22°C",
+      "temperament": "Peaceful",
+      "careLevel": "Beginner",
+      "tankMinGallons": 25
+    },
+    "isLiveFish": true,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "gf-ranchu-lionhead",
+    "name": "aaravana",
+    "category": "Monster Fish",
+    "subCategory": "",
+    "variety": "SILVER",
+    "gender": "Unsexed",
+    "images": [
+      "/uploads/img_1792307536894_1jg1bb.webp"
+    ],
+    "primaryImage": "/uploads/img_1792307536894_1jg1bb.webp",
+    "price": 1250,
+    "originalPrice": 1500,
+    "currency": "₹",
+    "sizes": [
+      "5inch"
+    ],
+    "stock": 0,
+    "availability": "in_stock",
+    "description": "",
+    "waterParams": {
+      "ph": "7.2 - 7.6",
+      "temp": "20-24°C",
+      "temperament": "Calm",
+      "careLevel": "Intermediate",
+      "tankMinGallons": 30
+    },
+    "isLiveFish": true,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-10-18T07:12:18.105Z",
+    "status": "Published"
+  },
+  {
+    "id": "gf-shubunkin-comet",
+    "name": "Shubunkin & Sarasa Comet",
+    "category": "Goldfish",
+    "subCategory": "Single Tail",
+    "variety": "Shubunkin",
+    "gender": "Unsexed",
+    "images": [
+      "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=800&q=80",
+    "price": 180,
+    "currency": "₹",
+    "sizes": [
+      "3 inch",
+      "5 inch Pond Ready"
+    ],
+    "stock": 35,
+    "availability": "in_stock",
+    "description": "Hardy calico single-tail goldfish with blue, red, and black specks. Thrives in indoor aquariums and outdoor garden ponds alike.",
+    "waterParams": {
+      "ph": "6.8 - 8.0",
+      "temp": "15-26°C",
+      "temperament": "Very Active",
+      "careLevel": "Beginner",
+      "tankMinGallons": 40
+    },
+    "isLiveFish": true,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "betta-halfmoon-royal-blue",
+    "name": "Royal Blue Halfmoon Betta",
+    "category": "Betta Fish",
+    "subCategory": "Halfmoon",
+    "variety": "Halfmoon",
+    "gender": "Male",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCLAXDObZy5BCxqWWScFhhJUTlUUOtlct7-sRC8RpkZz4_B-ZwDYLPXdA4ddI6Ehm-pCCM1KPUT0gY_13sC-p00tDf_jb7qzkIpnVXKQP9zuQkeGO6uQIDiOJhnhyhXwJBt0aDOn2QBGfDyvFfSRn4_DS-6EYAnz6rS1ltYyicIppLAPJa_v5gqTUUEP8yUDtfjW2sSJR9rm5n9jRFLxq54l8TeQZzI83FKm2x1Qv7xdCPwPMCvENEYXQ"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuCLAXDObZy5BCxqWWScFhhJUTlUUOtlct7-sRC8RpkZz4_B-ZwDYLPXdA4ddI6Ehm-pCCM1KPUT0gY_13sC-p00tDf_jb7qzkIpnVXKQP9zuQkeGO6uQIDiOJhnhyhXwJBt0aDOn2QBGfDyvFfSRn4_DS-6EYAnz6rS1ltYyicIppLAPJa_v5gqTUUEP8yUDtfjW2sSJR9rm5n9jRFLxq54l8TeQZzI83FKm2x1Qv7xdCPwPMCvENEYXQ",
+    "price": 350,
+    "originalPrice": 420,
+    "currency": "₹",
+    "sizes": [
+      "2.5 inch Show Grade"
+    ],
+    "stock": 12,
+    "availability": "in_stock",
+    "description": "Show-grade Royal Blue Halfmoon Betta displaying a perfect 180° caudal spread. Iridescent shimmering scales of cobalt and indigo.",
+    "waterParams": {
+      "ph": "6.5 - 7.4",
+      "temp": "26-28°C",
+      "temperament": "Solitary Male / Aggressive to other males",
+      "careLevel": "Beginner",
+      "tankMinGallons": 5
+    },
+    "isLiveFish": true,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "betta-crowntail-dragon",
+    "name": "Red Dragon Crowntail Betta",
+    "category": "Betta Fish",
+    "subCategory": "Crowntail",
+    "variety": "Crowntail",
+    "gender": "Male",
+    "images": [
+      "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=800&q=80",
+    "price": 280,
+    "currency": "₹",
+    "sizes": [
+      "2.5 inch"
+    ],
+    "stock": 9,
+    "availability": "in_stock",
+    "description": "Distinctive crown-like spiked ray finnage with metallic dragon scale coating and fiery red highlights.",
+    "waterParams": {
+      "ph": "6.5 - 7.5",
+      "temp": "25-28°C",
+      "temperament": "Solitary Male",
+      "careLevel": "Beginner",
+      "tankMinGallons": 5
+    },
+    "isLiveFish": true,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "betta-dumbo-elephant-ear",
+    "name": "Dumbo Ear / Elephant Ear Betta",
+    "category": "Betta Fish",
+    "subCategory": "Dumbo Ear",
+    "variety": "Dumbo Ear",
+    "gender": "Male",
+    "images": [
+      "/uploads/img_1792285264807_vxdx8v.png"
+    ],
+    "primaryImage": "/uploads/img_1792285264807_vxdx8v.png",
+    "price": 499,
+    "originalPrice": 599,
+    "currency": "₹",
+    "sizes": [
+      "2.5 inch Specimen"
+    ],
+    "stock": 5,
+    "availability": "in_stock",
+    "description": "Enlarged snow-white pectoral fins that flap gracefully like elephant ears, coupled with platinum pastel body sheen.",
+    "waterParams": {
+      "ph": "6.5 - 7.2",
+      "temp": "26-29°C",
+      "temperament": "Solitary Male",
+      "careLevel": "Intermediate",
+      "tankMinGallons": 5
+    },
+    "isLiveFish": true,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-10-18T01:01:06.443Z",
+    "status": "Published"
+  },
+  {
+    "id": "fh-king-kamfa",
+    "name": "King Kamfa Flowerhorn",
+    "category": "Flowerhorn",
+    "subCategory": "Kamfa",
+    "variety": "King Kamfa",
+    "gender": "Male",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDIVnKxsMVYD7RdX8mkD1zasVgLb0erZOPBZg8Wd2YtNgn26Ib9-vP3uHIAwjlVpOYEkQ9nTWVc4xLnq2GHIB_T92Uk24dFB2WvUREh-qmI0NnJKCw1Bq0qSkQdHaHooQqlDIS5gkVUqggePM8lTsFUJA1MR61jmpmYNgAmUlHprQ_hRWl-aAIjXiieyvIs5Bik4cnDak42NADRRlauwZAQCSb0aoxR4x-nIz73LOd_15cNfwfPS125Rg"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuDIVnKxsMVYD7RdX8mkD1zasVgLb0erZOPBZg8Wd2YtNgn26Ib9-vP3uHIAwjlVpOYEkQ9nTWVc4xLnq2GHIB_T92Uk24dFB2WvUREh-qmI0NnJKCw1Bq0qSkQdHaHooQqlDIS5gkVUqggePM8lTsFUJA1MR61jmpmYNgAmUlHprQ_hRWl-aAIjXiieyvIs5Bik4cnDak42NADRRlauwZAQCSb0aoxR4x-nIz73LOd_15cNfwfPS125Rg",
+    "price": 3200,
+    "originalPrice": 3800,
+    "currency": "₹",
+    "sizes": [
+      "4.5 inch Specimen"
+    ],
+    "stock": 3,
+    "availability": "in_stock",
+    "description": "Top-tier King Kamfa with heavy metallic pearl coverage, solid water-head kok development, bold flowerline, and energetic interactive temperament.",
+    "waterParams": {
+      "ph": "7.4 - 8.0",
+      "temp": "28-30°C",
+      "temperament": "Aggressive / Single Tank Specimen",
+      "careLevel": "Intermediate",
+      "tankMinGallons": 55
+    },
+    "isLiveFish": true,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "fh-red-dragon",
+    "name": "Red Dragon Flowerhorn",
+    "category": "Flowerhorn",
+    "subCategory": "Zhen Zhu",
+    "variety": "Red Dragon",
+    "gender": "Male",
+    "images": [
+      "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80",
+    "price": 1800,
+    "currency": "₹",
+    "sizes": [
+      "3.5 inch",
+      "5 inch"
+    ],
+    "stock": 4,
+    "availability": "in_stock",
+    "description": "Fiery ruby coloration across chest and cheeks, prominent black marking line, and high-intensity sparkle pearls.",
+    "waterParams": {
+      "ph": "7.4 - 8.0",
+      "temp": "28-30°C",
+      "temperament": "Aggressive",
+      "careLevel": "Intermediate",
+      "tankMinGallons": 50
+    },
+    "isLiveFish": true,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "guppy-blue-moscow-pair",
+    "name": "Blue Moscow Guppy Pair",
+    "category": "Guppy",
+    "subCategory": "Moscow",
+    "variety": "Blue Moscow",
+    "gender": "Pair",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuA7k0AS3mJNsLm5Imcu4v6oo3Fm6gPEst6ptggHyBOlFxVjhN8KosW-FkczY-unL5fTdbfBsvESEP7oLZ5h1iDXf3pezl_QUNnM4h4VBuYSSp3s7OOFFrCKLRRIv_oJcmi4AUQQ3IY3UdkEGlhDhf-cJcv_OcdES6Lp7veTYW2-zyUWkeFvPG2lA6WNKuZDHKvTVnc5R4QSQDDsKJP0l4maK6oicxHzffReyzB0UcIwY_ll4r-n180apg"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuA7k0AS3mJNsLm5Imcu4v6oo3Fm6gPEst6ptggHyBOlFxVjhN8KosW-FkczY-unL5fTdbfBsvESEP7oLZ5h1iDXf3pezl_QUNnM4h4VBuYSSp3s7OOFFrCKLRRIv_oJcmi4AUQQ3IY3UdkEGlhDhf-cJcv_OcdES6Lp7veTYW2-zyUWkeFvPG2lA6WNKuZDHKvTVnc5R4QSQDDsKJP0l4maK6oicxHzffReyzB0UcIwY_ll4r-n180apg",
+    "price": 240,
+    "originalPrice": 300,
+    "currency": "₹",
+    "sizes": [
+      "1.5 inch Breeding Pair"
+    ],
+    "stock": 22,
+    "availability": "in_stock",
+    "description": "Pure breeding strain of solid blue-black metallic sheen from nose to tail fin. Active shoaling in peaceful planted community setups.",
+    "waterParams": {
+      "ph": "7.0 - 7.8",
+      "temp": "24-28°C",
+      "temperament": "Peaceful Community",
+      "careLevel": "Beginner",
+      "tankMinGallons": 10
+    },
+    "isLiveFish": true,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "guppy-koi-dumbo-trio",
+    "name": "Koi Guppy Trio Pack",
+    "category": "Guppy",
+    "subCategory": "Specialty",
+    "variety": "Koi Guppy",
+    "gender": "Trio",
+    "images": [
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80",
+    "price": 320,
+    "currency": "₹",
+    "sizes": [
+      "1 Male + 2 Females"
+    ],
+    "stock": 15,
+    "availability": "in_stock",
+    "description": "Exquisite albino red head koi guppy strain with translucent white body and bright crimson head cap. Trio set ready for breeding.",
+    "waterParams": {
+      "ph": "7.0 - 7.5",
+      "temp": "24-27°C",
+      "temperament": "Peaceful",
+      "careLevel": "Beginner",
+      "tankMinGallons": 10
+    },
+    "isLiveFish": true,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "molly-black-balloon-pair",
+    "name": "Black Balloon Molly Pair",
+    "category": "Molly",
+    "subCategory": "Balloon",
+    "variety": "Black Balloon Molly",
+    "gender": "Pair",
+    "images": [
+      "https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=800&q=80",
+    "price": 140,
+    "currency": "₹",
+    "sizes": [
+      "1.8 inch Pair"
+    ],
+    "stock": 25,
+    "availability": "in_stock",
+    "description": "Plump, round balloon body morphology with deep velvet black coloration. Excellent algae grazer in community tanks.",
+    "waterParams": {
+      "ph": "7.5 - 8.2",
+      "temp": "24-28°C",
+      "temperament": "Peaceful",
+      "careLevel": "Beginner",
+      "tankMinGallons": 15
+    },
+    "isLiveFish": true,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "shark-bala-shark",
+    "name": "Bala Shark (Silver Shark)",
+    "category": "Aquarium Sharks",
+    "subCategory": "Cyprinid",
+    "variety": "Bala Shark",
+    "gender": "Unsexed",
+    "images": [
+      "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=800&q=80",
+    "price": 190,
+    "currency": "₹",
+    "sizes": [
+      "3 inch",
+      "4.5 inch"
+    ],
+    "stock": 20,
+    "availability": "in_stock",
+    "description": "Freshwater schooling fish with sleek torpedo body, reflective silver scales, and black-edged dorsal fins. Peaceful community giant.",
+    "waterParams": {
+      "ph": "6.5 - 7.5",
+      "temp": "23-28°C",
+      "temperament": "Peaceful / Needs Swimming Space",
+      "careLevel": "Intermediate",
+      "tankMinGallons": 75
+    },
+    "isLiveFish": true,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "shark-red-tail-black",
+    "name": "Red Tail Black Shark",
+    "category": "Aquarium Sharks",
+    "subCategory": "Labeo",
+    "variety": "Red Tail Black Shark",
+    "gender": "Unsexed",
+    "images": [
+      "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=800&q=80",
+    "price": 220,
+    "currency": "₹",
+    "sizes": [
+      "2.5 inch",
+      "3.5 inch"
+    ],
+    "stock": 11,
+    "availability": "in_stock",
+    "description": "Dramatic contrast of jet black body with bright vermillion red tail fin. Territorial bottom grazer optimal for semi-aggressive tanks.",
+    "waterParams": {
+      "ph": "6.8 - 7.6",
+      "temp": "24-27°C",
+      "temperament": "Semi-Aggressive / Territorial",
+      "careLevel": "Intermediate",
+      "tankMinGallons": 40
+    },
+    "isLiveFish": true,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "prod-aaravna-silver",
+    "name": "aaravna",
+    "category": "Monster Fish",
+    "subCategory": "Arowana",
+    "variety": "Silver",
+    "gender": "Unsexed",
+    "images": [
+      "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80",
+    "price": 1200,
+    "originalPrice": 1500,
+    "currency": "₹",
+    "sizes": [
+      "5 inch"
+    ],
+    "stock": 3,
+    "availability": "in_stock",
+    "description": "High-grade Silver Arowana juvenile with luminous platinum sheen and magnificent flowing barbels. Highly active surface swimmer.",
+    "waterParams": {
+      "ph": "6.5 - 7.5",
+      "temp": "24-28°C",
+      "temperament": "Predatory Monster Fish",
+      "careLevel": "Intermediate",
+      "tankMinGallons": 100
+    },
+    "isLiveFish": true,
+    "featured": true,
+    "createdAt": "2026-10-18T00:00:00Z",
+    "updatedAt": "2026-10-18T05:36:37.386Z",
+    "status": "Published"
+  },
+  {
+    "id": "monster-alligator-gar",
+    "name": "Alligator Gar (Freshwater Gar)",
+    "category": "Monster Fish",
+    "subCategory": "Gars",
+    "variety": "Alligator Gar",
+    "gender": "Unsexed",
+    "images": [
+      "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80",
+    "price": 950,
+    "currency": "₹",
+    "sizes": [
+      "6 inch Juvenile",
+      "10 inch"
+    ],
+    "stock": 5,
+    "availability": "in_stock",
+    "description": "Prehistoric apex predator with armored ganoid scales and alligator-like snout. Requires massive aquarium setup or custom pond.",
+    "waterParams": {
+      "ph": "6.8 - 7.8",
+      "temp": "22-28°C",
+      "temperament": "Predatory Monster Fish",
+      "careLevel": "Expert",
+      "tankMinGallons": 150
+    },
+    "isLiveFish": true,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "catfish-redtail",
+    "name": "Redtail Catfish (RTC)",
+    "category": "Catfish",
+    "subCategory": "Monster Catfish",
+    "variety": "Redtail Catfish",
+    "gender": "Unsexed",
+    "images": [
+      "https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=800&q=80",
+    "price": 800,
+    "currency": "₹",
+    "sizes": [
+      "4 inch Juvenile",
+      "7 inch"
+    ],
+    "stock": 7,
+    "availability": "in_stock",
+    "description": "Iconic Amazonian bottom titan with wide whiskers, dark charcoal dorsal, ivory white belly, and brilliant orange-red tail.",
+    "waterParams": {
+      "ph": "6.5 - 7.5",
+      "temp": "24-28°C",
+      "temperament": "Peaceful with same-size giants / Predatory",
+      "careLevel": "Expert",
+      "tankMinGallons": 200
+    },
+    "isLiveFish": true,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "danio-glofish-pack",
+    "name": "GloFish & Zebra Danio School",
+    "category": "Zebra Danio",
+    "subCategory": "Danio",
+    "variety": "GloFish Zebra Danio",
+    "gender": "Unsexed",
+    "images": [
+      "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=800&q=80",
+    "price": 250,
+    "currency": "₹",
+    "sizes": [
+      "Pack of 6 Assorted"
+    ],
+    "stock": 40,
+    "availability": "in_stock",
+    "description": "Hyper-active fluorescent colors (Electric Green, Sunburst Orange, Cosmic Blue) shoaling tightly under aquarium LED lights.",
+    "waterParams": {
+      "ph": "6.8 - 7.5",
+      "temp": "22-26°C",
+      "temperament": "Peaceful Schooling",
+      "careLevel": "Beginner",
+      "tankMinGallons": 10
+    },
+    "isLiveFish": true,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "tank-rimless-ultra-clear",
+    "name": "Ultra-Clear Rimless Glass Tank",
+    "category": "Aquarium Tanks",
+    "subCategory": "Rimless",
+    "variety": "Low-Iron Glass",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDGJ5M5Rp1MoTTdC7hdXt-Qr1JBMEbakdFoPayZUxOBsQTCN7g4gi7xALAJoW8vTCqnsdrxtFbsfO_JVwKynfrcniSq2dQ87ZfN1nAaqMdY7T4AFI8uNk10z8cHMV7i8io7NYcTklH7thRrORC_xnIoB_RhowVUWIExAxuDnc8_Vor5uG_KjhqGzW_rMta-QZXysEuKL6WWsEH-MmWhAliyKstzU7Dffy7Hl7w-JDxY5dEuGP1P7JGk1A",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBq7Ze_43gk2q0UeKCJO8P_bHvlZD4wuqXvwJjBICmJ3mzcFm-b2GViIlNHL08E__oLGZS136TrjON2Ntzj7vZaqiEvvWvO1QILqcluAjh5jvPsBPMfJwFszcxhoPW7-_W0EQGVIS2TzDUmT_rkPfYOB7BR4_0jvs--kl7SS5qifL1eAhapC6AGo2clX10Y32gR7mAoXeqTismOhDi8dHMGNXWiNkGJr80G3lpUL0W4lySdAASTdCkjCQ"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuDGJ5M5Rp1MoTTdC7hdXt-Qr1JBMEbakdFoPayZUxOBsQTCN7g4gi7xALAJoW8vTCqnsdrxtFbsfO_JVwKynfrcniSq2dQ87ZfN1nAaqMdY7T4AFI8uNk10z8cHMV7i8io7NYcTklH7thRrORC_xnIoB_RhowVUWIExAxuDnc8_Vor5uG_KjhqGzW_rMta-QZXysEuKL6WWsEH-MmWhAliyKstzU7Dffy7Hl7w-JDxY5dEuGP1P7JGk1A",
+    "price": 2450,
+    "originalPrice": 2800,
+    "currency": "₹",
+    "sizes": [
+      "1.0 ft (30cm)",
+      "1.5 ft (45cm)",
+      "2.0 ft (60cm)",
+      "3.0 ft (90cm)"
+    ],
+    "stock": 10,
+    "availability": "in_stock",
+    "description": "High-transparency low-iron glass for distortion-free aquascaping and vivid natural biotope displays. 45° miter edge with premium German clear silicone.",
+    "specs": {
+      "Glass": "Low-Iron Crystal Clear (91% light transmittance)",
+      "Bevel": "45-Degree Miter Joint",
+      "Silicone": "Wacker High-Tensile Clear",
+      "Mat": "High-density leveling mat included"
+    },
+    "isLiveFish": false,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "tank-custom-made-to-size",
+    "name": "Custom Made-to-Size Aquarium Tank",
+    "category": "Custom Tanks",
+    "subCategory": "Custom Built",
+    "variety": "Custom Spec",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBq7Ze_43gk2q0UeKCJO8P_bHvlZD4wuqXvwJjBICmJ3mzcFm-b2GViIlNHL08E__oLGZS136TrjON2Ntzj7vZaqiEvvWvO1QILqcluAjh5jvPsBPMfJwFszcxhoPW7-_W0EQGVIS2TzDUmT_rkPfYOB7BR4_0jvs--kl7SS5qifL1eAhapC6AGo2clX10Y32gR7mAoXeqTismOhDi8dHMGNXWiNkGJr80G3lpUL0W4lySdAASTdCkjCQ"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuBq7Ze_43gk2q0UeKCJO8P_bHvlZD4wuqXvwJjBICmJ3mzcFm-b2GViIlNHL08E__oLGZS136TrjON2Ntzj7vZaqiEvvWvO1QILqcluAjh5jvPsBPMfJwFszcxhoPW7-_W0EQGVIS2TzDUmT_rkPfYOB7BR4_0jvs--kl7SS5qifL1eAhapC6AGo2clX10Y32gR7mAoXeqTismOhDi8dHMGNXWiNkGJr80G3lpUL0W4lySdAASTdCkjCQ",
+    "price": 4999,
+    "currency": "₹",
+    "sizes": [
+      "Custom 3ft-6ft",
+      "Cabinet Set",
+      "In-Wall Sump Setup"
+    ],
+    "stock": 20,
+    "availability": "in_stock",
+    "description": "Engineered bespoke aquariums built to your exact wall or cabinet dimensions. 8mm to 19mm toughened or low-iron glass with bottom drainage sumps.",
+    "specs": {
+      "Dimensions": "Bespoke to Client Request",
+      "GlassOptions": "Toughened / Low-Iron Float Glass",
+      "Delivery": "Direct store delivery across Sothupakkam & Chengalpattu region"
+    },
+    "isLiveFish": false,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "bowl-high-clarity-glass",
+    "name": "High-Clarity Round Fish Bowl",
+    "category": "Aquarium Bowls",
+    "subCategory": "Glass Bowls",
+    "variety": "Heavy Cast Bubble",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCQBhOPQIUrDTTnHcT8vSB7YeWKDSFrQ08V35U8qZU1pTLLOanb2nuBQP283d62dlRNezVLOjipoxwrHH1nPQlYB0nk9R09PD0fUzheK6wXpCCwA11TAkVj1JFA7JUXjGUJe7mCWi4IoQsjvJtFJnn9AhL-v7CXxS0dxY1DAgrASGW6vcdD9EpgYPRYNdHZ0n3T8nYL6XFjiW_5d1LRiotLDvihTOrla9aABqBn8QuEPmm3Jjw9gwD6Eg"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuCQBhOPQIUrDTTnHcT8vSB7YeWKDSFrQ08V35U8qZU1pTLLOanb2nuBQP283d62dlRNezVLOjipoxwrHH1nPQlYB0nk9R09PD0fUzheK6wXpCCwA11TAkVj1JFA7JUXjGUJe7mCWi4IoQsjvJtFJnn9AhL-v7CXxS0dxY1DAgrASGW6vcdD9EpgYPRYNdHZ0n3T8nYL6XFjiW_5d1LRiotLDvihTOrla9aABqBn8QuEPmm3Jjw9gwD6Eg",
+    "price": 380,
+    "originalPrice": 450,
+    "currency": "₹",
+    "sizes": [
+      "Mini (6\")",
+      "Small (8\")",
+      "Medium (10\")",
+      "Large (12\")",
+      "Extra Large (14\")"
+    ],
+    "stock": 30,
+    "availability": "in_stock",
+    "description": "Seamless crystal bubble bowl optimal for Betta splendens, aquatic moss spheres, and desk aquascapes. Thick weighted base prevents tipping.",
+    "isLiveFish": false,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "eq-silent-air-pump",
+    "name": "Dual Outlet Silent Air Pump",
+    "category": "Motors & Pumps",
+    "subCategory": "Air Pumps",
+    "variety": "Dual Outlet",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBx2NGC_44n_qdxhaH3YhU3_gcKpZSXPcgWn6l_BZjJo8nMaXEiqQnDLzRGPviOi6gq1PrXUTLT0y81Qbqj9y-pXRb1dEskvtXs5G4b1wKcKtqk-0doQLQClnzPZlUH79NIW6SgeCMrSlJ6sOiZuk5XwcUJK2I1Vv-uG5EHfaAr0C3wkKBu5sJVeITlAQFvjvE8zGH59Q_IAL4IovbfYno7br4sfIMnfbTvyOX3Sq1TZVQazN3Cg4bsDQ"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuBx2NGC_44n_qdxhaH3YhU3_gcKpZSXPcgWn6l_BZjJo8nMaXEiqQnDLzRGPviOi6gq1PrXUTLT0y81Qbqj9y-pXRb1dEskvtXs5G4b1wKcKtqk-0doQLQClnzPZlUH79NIW6SgeCMrSlJ6sOiZuk5XwcUJK2I1Vv-uG5EHfaAr0C3wkKBu5sJVeITlAQFvjvE8zGH59Q_IAL4IovbfYno7br4sfIMnfbTvyOX3Sq1TZVQazN3Cg4bsDQ",
+    "price": 130,
+    "originalPrice": 420,
+    "currency": "₹",
+    "sizes": [
+      "Single Outlet (2.5W)",
+      "Dual Outlet (5W)",
+      "High-Power (8W)"
+    ],
+    "stock": 25,
+    "availability": "in_stock",
+    "description": "Ultra-quiet magnetic compression diaphragm air pump with dual adjustable outlets for air stones and sponge filtration.",
+    "specs": {
+      "Power": "5 Watts",
+      "Noise": "< 30 dB",
+      "Airflow": "2 x 3.5 L/min",
+      "Voltage": "220V - 240V 50Hz"
+    },
+    "isLiveFish": false,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-25T06:30:21.122Z",
+    "status": "Published"
+  },
+  {
+    "id": "eq-sponge-filter-bio",
+    "name": "Biochemical Sponge Filter Set",
+    "category": "Filters",
+    "subCategory": "Biological Filtration",
+    "variety": "Bio-Sponge",
+    "images": [
+      "https://images.unsplash.com/photo-1520302630591-fd1c66edc19d?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1520302630591-fd1c66edc19d?auto=format&fit=crop&w=800&q=80",
+    "price": 160,
+    "currency": "₹",
+    "sizes": [
+      "Single Bio-Foam",
+      "Double Bio-Foam with Media Chamber"
+    ],
+    "stock": 35,
+    "availability": "in_stock",
+    "description": "Essential biological filter safe for baby fry, shrimp, and delicate goldfish. Cultivates massive beneficial nitrifying bacteria colonies.",
+    "isLiveFish": false,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "eq-submersible-pump",
+    "name": "Submersible Powerhead Water Pump",
+    "category": "Motors & Pumps",
+    "subCategory": "Water Pumps",
+    "variety": "Internal Submersible",
+    "images": [
+      "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80",
+    "price": 480,
+    "originalPrice": 550,
+    "currency": "₹",
+    "sizes": [
+      "800 L/H",
+      "1200 L/H",
+      "2500 L/H Wavemaker"
+    ],
+    "stock": 14,
+    "availability": "in_stock",
+    "description": "Fully submersible, energy-efficient motor for top filter boxes, fountain heads, and sump circulations.",
+    "isLiveFish": false,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "med-general-fish-cure",
+    "name": "General Fish Care Medicine (200ml)",
+    "category": "Fish Medicines",
+    "subCategory": "General Care",
+    "variety": "Broad Spectrum",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDnOs-S2KcpBg6cKwVHiPleCgJJ-W4xvqjENeqnj2KvDMvS2f0SW2XZO9WO2D0OIhKYDJXKHPetyRbTkuLtiH2PPA7eo8wUYr6TlpAnYVczPHiYFbqEE9l6jclimg2qanvFA7Fp9Ac-m1OCWZpjJ3_C8mikKXhHtyJo4pFRuOjb9puXE3qV7JroUmAqlKpOS2OcWgVICUUHFT3vm461pmx6DaC9Wo6MIPh2AYTHIpoADX4kllnWorhpxw"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuDnOs-S2KcpBg6cKwVHiPleCgJJ-W4xvqjENeqnj2KvDMvS2f0SW2XZO9WO2D0OIhKYDJXKHPetyRbTkuLtiH2PPA7eo8wUYr6TlpAnYVczPHiYFbqEE9l6jclimg2qanvFA7Fp9Ac-m1OCWZpjJ3_C8mikKXhHtyJo4pFRuOjb9puXE3qV7JroUmAqlKpOS2OcWgVICUUHFT3vm461pmx6DaC9Wo6MIPh2AYTHIpoADX4kllnWorhpxw",
+    "price": 160,
+    "currency": "₹",
+    "sizes": [
+      "100 ml Bottle",
+      "200 ml Bottle with Dosage Cap"
+    ],
+    "stock": 45,
+    "availability": "in_stock",
+    "description": "Broad-spectrum general wellness solution for quarantine tanks and routine water balancing. Product details available in store.",
+    "isLiveFish": false,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "med-anti-fungal-bacterial",
+    "name": "Anti-Fungal & Anti-Bacterial Treatment",
+    "category": "Fish Medicines",
+    "subCategory": "Pathogen Control",
+    "variety": "Anti-Fungal",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDOk94jw-fQUCwa_UDYKBt_VaUW0I58287ovu9ms-ZZQyJAE9SAmFiHEskJ2H_2iVhR4ZOAo0TzYXRd1swco33b-fHPnFb0yDr-PY6vPNwGmYONsQEmMHYcPZROxuF8hwUPN77vqV8gTRvkFlq65mUaYLUHi1BjgxWLp3GnCh57KcwNwevcFhBDcqIVQfXKawRzk1-qydMunWCUEujr9_8ciGegtLL5ygW3SRf7XjAtlz8X95pHLp8LTw"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuDOk94jw-fQUCwa_UDYKBt_VaUW0I58287ovu9ms-ZZQyJAE9SAmFiHEskJ2H_2iVhR4ZOAo0TzYXRd1swco33b-fHPnFb0yDr-PY6vPNwGmYONsQEmMHYcPZROxuF8hwUPN77vqV8gTRvkFlq65mUaYLUHi1BjgxWLp3GnCh57KcwNwevcFhBDcqIVQfXKawRzk1-qydMunWCUEujr9_8ciGegtLL5ygW3SRf7XjAtlz8X95pHLp8LTw",
+    "price": 220,
+    "currency": "₹",
+    "sizes": [
+      "150 ml"
+    ],
+    "stock": 28,
+    "availability": "in_stock",
+    "description": "Specialized aquarium care treatment for fin rot, white spots, and fuzzy growth. Product details available in store.",
+    "isLiveFish": false,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "med-water-conditioner-instant",
+    "name": "Instant Water Conditioner & Dechlorinator",
+    "category": "Fish Medicines",
+    "subCategory": "Water Prep",
+    "variety": "Anti-Chlorine",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDmbi-5FMeRwwgCtWCSUdaXe4ZsJThKmRmF6PsubIxVim3buPe49VggMulw5740aGu5FC_JTSjuBAhgIxiEp4gX-jdCIsOk92VNvJHYBsw1fp7T0KTX4AOIiABOn7Sb4f36Gq31GedoP2cDXSdT5Swa0aydTHb-7Lsn0AmcXfxHMNs3NStw7VwCptPTXkKccBq1TH7gEg1X3i-KRYI99wnLQImMcDX-JViOTT6ez-E3k7XI4o2Jd4Zk1g"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuDmbi-5FMeRwwgCtWCSUdaXe4ZsJThKmRmF6PsubIxVim3buPe49VggMulw5740aGu5FC_JTSjuBAhgIxiEp4gX-jdCIsOk92VNvJHYBsw1fp7T0KTX4AOIiABOn7Sb4f36Gq31GedoP2cDXSdT5Swa0aydTHb-7Lsn0AmcXfxHMNs3NStw7VwCptPTXkKccBq1TH7gEg1X3i-KRYI99wnLQImMcDX-JViOTT6ez-E3k7XI4o2Jd4Zk1g",
+    "price": 180,
+    "currency": "₹",
+    "sizes": [
+      "250 ml (Treats 2500 Liters)"
+    ],
+    "stock": 50,
+    "availability": "in_stock",
+    "description": "Instantly removes harmful chlorine and binds heavy metals from fresh tap water. Adds protective slime coat aloe barrier.",
+    "isLiveFish": false,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "med-aquarium-salt-1kg",
+    "name": "Pure Aquarium Mineral Salt (1kg)",
+    "category": "Fish Medicines",
+    "subCategory": "Salts & Minerals",
+    "variety": "Aquarium Salt",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAhTN9w6BbuR1j0Qw0wgIzWGyE4atuIleEzZS_uDrtUGqFL27BuIVp9yZWC6R90A_crw92byq8SPBTmpy3xd1Gr5Djc896vCyLAqC9AzqNy2cPLsBO3QxeaTyg-zd8-w8Xu4sPkGVgxTL8aENnYj4TykdcwuDqeCId59vbMApZzmo9nS0yBeXq_8zDkaDrTcPdxWkTjod5r56ktyYX4S38hsos3uQZt9ib8dRPDrXctV1jEXAFRVnlVyg"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuAhTN9w6BbuR1j0Qw0wgIzWGyE4atuIleEzZS_uDrtUGqFL27BuIVp9yZWC6R90A_crw92byq8SPBTmpy3xd1Gr5Djc896vCyLAqC9AzqNy2cPLsBO3QxeaTyg-zd8-w8Xu4sPkGVgxTL8aENnYj4TykdcwuDqeCId59vbMApZzmo9nS0yBeXq_8zDkaDrTcPdxWkTjod5r56ktyYX4S38hsos3uQZt9ib8dRPDrXctV1jEXAFRVnlVyg",
+    "price": 120,
+    "currency": "₹",
+    "sizes": [
+      "1 kg Tub"
+    ],
+    "stock": 60,
+    "availability": "in_stock",
+    "description": "Non-iodized pure minerals for freshwater gill aeration and osmotic regulation during water changes or recovery.",
+    "isLiveFish": false,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "food-goldfish-pellets",
+    "name": "Goldfish Color Enhancing Pellets",
+    "category": "Fish Food",
+    "subCategory": "Pellets",
+    "variety": "Goldfish Food",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAZSHHhemWL0UObS4S3FVwkgMINj0Wj20qnQRtZGdbaF8aZaPbNp83NhAL6A_la3Am_8505qZ-M1YFRyL_huur9Zqp01AFHO-soWAbPiR1kg-0q0cpLHnVO73yM3cQ2oMgyYKg4PksGl_tFNIHoLYzWOmqeZQSZRDHJ7wwClqRqxrAr0Vih7Q5efcWYuSv6QYXwS_MFzIW2KXmaJCPKUWzMSjVBzKAzDCYuRgnR1dZUrLLSXOXUjwMn7Q"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuAZSHHhemWL0UObS4S3FVwkgMINj0Wj20qnQRtZGdbaF8aZaPbNp83NhAL6A_la3Am_8505qZ-M1YFRyL_huur9Zqp01AFHO-soWAbPiR1kg-0q0cpLHnVO73yM3cQ2oMgyYKg4PksGl_tFNIHoLYzWOmqeZQSZRDHJ7wwClqRqxrAr0Vih7Q5efcWYuSv6QYXwS_MFzIW2KXmaJCPKUWzMSjVBzKAzDCYuRgnR1dZUrLLSXOXUjwMn7Q",
+    "price": 150,
+    "originalPrice": 190,
+    "currency": "₹",
+    "sizes": [
+      "100g Pouch",
+      "250g Pouch",
+      "500g Economy Tub"
+    ],
+    "stock": 40,
+    "availability": "in_stock",
+    "description": "Natural astaxanthin and 12% spirulina to enhance vivid red and golden hues without clouding water. Floating slow-sinking mini pellets.",
+    "isLiveFish": false,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "food-betta-bloodworms",
+    "name": "Betta Micro & Freeze-Dried Bloodworms",
+    "category": "Fish Food",
+    "subCategory": "Specialty Food",
+    "variety": "Betta Food",
+    "images": [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDB3s2Rp54RtjJGmy_4uOcySXsoNZY_DCs5J8b5J8wITLrKhuv7KAX-RaIYAAmochvyRQEIAQZnLHoOn3ZQS3tugKlRDsIeCxcjzUiSR9JGr1VZ5VPXlqgc_nQ0xfYtII0t8cEFeicvHowb_aq1cbvYOOALFBZ8ZUnHtWoozUmllT0pVJb2Hh5RNKjHRLawmqyG7PK2RICmmQEovvl5CXJX3wmGw0AG52ilyX6rSaA6u1A9vJkDg38ksw"
+    ],
+    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuDB3s2Rp54RtjJGmy_4uOcySXsoNZY_DCs5J8b5J8wITLrKhuv7KAX-RaIYAAmochvyRQEIAQZnLHoOn3ZQS3tugKlRDsIeCxcjzUiSR9JGr1VZ5VPXlqgc_nQ0xfYtII0t8cEFeicvHowb_aq1cbvYOOALFBZ8ZUnHtWoozUmllT0pVJb2Hh5RNKjHRLawmqyG7PK2RICmmQEovvl5CXJX3wmGw0AG52ilyX6rSaA6u1A9vJkDg38ksw",
+    "price": 130,
+    "currency": "₹",
+    "sizes": [
+      "40g Micro Pellets",
+      "20g Freeze Dried Worm Cubes"
+    ],
+    "stock": 35,
+    "availability": "in_stock",
+    "description": "High protein insect-based micro pellets sized perfectly for the upturned mouth of Betta fish. Promotes fin growth and intense coloration.",
+    "isLiveFish": false,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "hardscape-dragon-stone",
+    "name": "Natural Dragon Stone (Ohko Stone)",
+    "category": "Aquarium Stones",
+    "subCategory": "Aquascaping Rock",
+    "variety": "Dragon Stone",
+    "images": [
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80",
+    "price": 320,
+    "currency": "₹",
+    "sizes": [
+      "1 kg Pack",
+      "3 kg Pack",
+      "5 kg Aquascaper Box"
+    ],
+    "stock": 30,
+    "availability": "in_stock",
+    "description": "Clay-like cratered textures with dramatic holes for planting aquatic mosses and creating miniature mountain scapes. 100% inert and water safe.",
+    "isLiveFish": false,
+    "featured": true,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "hardscape-colored-gravel-blue",
+    "name": "Premium Aquascape Colored Gravel",
+    "category": "Colored Gravel",
+    "subCategory": "Substrate",
+    "variety": "Blue Gravel",
+    "images": [
+      "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=80",
+    "price": 90,
+    "currency": "₹",
+    "sizes": [
+      "1 kg Bag",
+      "2 kg Bag",
+      "5 kg Bag (Multi-Color / Black / White / Blue)"
+    ],
+    "stock": 50,
+    "availability": "in_stock",
+    "description": "Smooth polymer-coated aquarium gravel with zero sharp edges. Non-toxic color fast coating that will not alter water pH or hardness.",
+    "isLiveFish": false,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "gear-aquarium-nets",
+    "name": "Fine Mesh Aquarium Fish Catch Net",
+    "category": "Aquarium Nets",
+    "subCategory": "Tools",
+    "variety": "Fish Net",
+    "images": [
+      "https://images.unsplash.com/photo-1546026423-cc4642628d2b?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1546026423-cc4642628d2b?auto=format&fit=crop&w=800&q=80",
+    "price": 60,
+    "currency": "₹",
+    "sizes": [
+      "3\" Betta Net",
+      "5\" Medium Net",
+      "8\" Large Net",
+      "12\" Monster Fish Net"
+    ],
+    "stock": 40,
+    "availability": "in_stock",
+    "description": "Soft nylon mesh woven tightly to prevent snagging delicate fish fins. Sturdy vinyl-wrapped steel wire handle for easy reach.",
+    "isLiveFish": false,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "decor-driftwood-aquascaping",
+    "name": "Natural Bogwood & Driftwood Roots",
+    "category": "Decorations",
+    "subCategory": "Hardscape",
+    "variety": "Driftwood",
+    "images": [
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80",
+    "price": 450,
+    "currency": "₹",
+    "sizes": [
+      "Small (6-8\")",
+      "Medium (10-14\")",
+      "Large Centerpiece Branch"
+    ],
+    "stock": 12,
+    "availability": "in_stock",
+    "description": "Pre-cured natural hardwood branches providing beneficial natural tannins and hideouts for plecos, catfish, and dwarf cichlids.",
+    "isLiveFish": false,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "plant-live-anubias-moss",
+    "name": "Live Anubias Barteri on Lava Rock",
+    "category": "Aquarium Plants",
+    "subCategory": "Live Plants",
+    "variety": "Anubias",
+    "images": [
+      "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=800&q=80",
+    "price": 250,
+    "currency": "₹",
+    "sizes": [
+      "Attached to Red Lava Stone"
+    ],
+    "stock": 18,
+    "availability": "in_stock",
+    "description": "Hardy low-tech aquatic plant that does not require CO2 or high lighting. Rooted firmly onto porous lava stone ready to place in tank.",
+    "isLiveFish": false,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "acc-full-spectrum-led-light",
+    "name": "Full Spectrum Aquascaping LED Clip Light",
+    "category": "Accessories",
+    "subCategory": "Lighting",
+    "variety": "LED Lighting",
+    "images": [
+      "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80",
+    "price": 550,
+    "originalPrice": 650,
+    "currency": "₹",
+    "sizes": [
+      "Nano (10W)",
+      "Mid Tank 1.5ft (18W)",
+      "Extendable 2ft-3ft (24W)"
+    ],
+    "stock": 16,
+    "availability": "in_stock",
+    "description": "High PAR output daylight LEDs with dedicated RGB diodes to illuminate live fish scales and promote aquatic plant photosynthesis.",
+    "isLiveFish": false,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "acc-submersible-heater-100w",
+    "name": "Auto-Thermostat Submersible Aquarium Heater",
+    "category": "Accessories",
+    "subCategory": "Heating",
+    "variety": "Heater",
+    "images": [
+      "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80",
+    "price": 390,
+    "currency": "₹",
+    "sizes": [
+      "50W (For bowls/small tanks)",
+      "100W",
+      "200W (Large aquariums)"
+    ],
+    "stock": 22,
+    "availability": "in_stock",
+    "description": "Shock-resistant quartz glass tube with calibrated temperature dial (20°C to 34°C) and automatic shut-off safety sensor.",
+    "isLiveFish": false,
+    "featured": false,
+    "createdAt": "2026-09-01T00:00:00Z",
+    "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  }
+]
