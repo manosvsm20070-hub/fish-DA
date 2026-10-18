@@ -25,5 +25,32 @@
     "tags": [],
     "createdAt": "2026-10-18T07:41:56.060Z",
     "updatedAt": "2026-10-18T07:43:09.342Z"
+  },
+  {
+    "id": "prod-betta-fish-1792309818850",
+    "name": "betta fish",
+    "category": "Betta Fish",
+    "subCategory": "male",
+    "variety": "halfmoon",
+    "gender": "Unsexed",
+    "images": [
+      "/uploads/img_1792309828490_y1x2py.webp"
+    ],
+    "primaryImage": "/uploads/img_1792309828490_y1x2py.webp",
+    "price": 150,
+    "originalPrice": 160,
+    "currency": "₹",
+    "sizes": [
+      "Standard"
+    ],
+    "stock": 10,
+    "availability": "in_stock",
+    "description": "",
+    "isLiveFish": true,
+    "featured": false,
+    "status": "Published",
+    "tags": [],
+    "createdAt": "2026-10-18T07:50:18.850Z",
+    "updatedAt": "2026-10-18T07:50:31.073Z"
   }
 ]

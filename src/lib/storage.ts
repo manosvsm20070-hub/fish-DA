@@ -556,6 +556,29 @@ export async function updateOrderNotificationStatus(
   }
 }
 
+export async function deleteAllOrders(): Promise<{ success: boolean; count: number; error?: string }> {
+  try {
+    const orders = await getOrders();
+    const count = orders.length;
+    writeFileSafe('orders.json', []);
+
+    // Attempt Supabase deletion in background if connected
+    try {
+      const supabase = getSupabaseDbClient();
+      if (supabase) {
+        await supabase.from('orders').delete().neq('id', '___none___');
+      }
+    } catch (e) {
+      console.warn('[storage] Notice: Supabase orders delete skipped/offline:', e);
+    }
+
+    return { success: true, count };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Failed to delete all orders';
+    return { success: false, count: 0, error: errorMsg };
+  }
+}
+
 // ======================== PRICE HISTORY ========================
 
 export async function getPriceHistory(): Promise<PriceHistory[]> {

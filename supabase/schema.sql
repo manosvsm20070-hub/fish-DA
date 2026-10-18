@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- Dolphin Aquarium - Complete Supabase Database Schema & Data Migration
--- Generated: 2026-10-18T07:46:48.276Z
+-- Generated: 2026-10-18T07:56:39.478Z
 -- Tables: catalogs, products, orders, price_history, settings
 -- Features: Idempotent (safe to re-run), RLS enabled, Performance Indexes
 -- ==============================================================================
@@ -688,7 +688,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = EXCLUDED.updated_at;
 
 -- ==============================================================================
--- 8. SEED DATA: PRODUCTS (1 items)
+-- 8. SEED DATA: PRODUCTS (2 items)
 -- ==============================================================================
 INSERT INTO public.products (
     id, name, category, sub_category, variety, gender, images, primary_image,
@@ -742,352 +742,61 @@ ON CONFLICT (id) DO UPDATE SET
     tags = EXCLUDED.tags,
     updated_at = EXCLUDED.updated_at;
 
+INSERT INTO public.products (
+    id, name, category, sub_category, variety, gender, images, primary_image,
+    price, original_price, currency, sizes, stock, availability, description,
+    water_params, is_live_fish, featured, specs, status, tags, created_at, updated_at
+) VALUES (
+    'prod-betta-fish-1792309818850',
+    'betta fish',
+    'Betta Fish',
+    'male',
+    'halfmoon',
+    'Unsexed',
+    '["/uploads/img_1792309828490_y1x2py.webp"]'::jsonb,
+    '/uploads/img_1792309828490_y1x2py.webp',
+    150,
+    160,
+    '₹',
+    '["Standard"]'::jsonb,
+    10,
+    'in_stock',
+    '',
+    NULL,
+    TRUE,
+    FALSE,
+    NULL,
+    'Published',
+    '[]'::jsonb,
+    '2026-10-18T07:50:18.850Z',
+    '2026-10-18T07:50:31.073Z'
+)
+ON CONFLICT (id) DO UPDATE SET
+    name = EXCLUDED.name,
+    category = EXCLUDED.category,
+    sub_category = EXCLUDED.sub_category,
+    variety = EXCLUDED.variety,
+    gender = EXCLUDED.gender,
+    images = EXCLUDED.images,
+    primary_image = EXCLUDED.primary_image,
+    price = EXCLUDED.price,
+    original_price = EXCLUDED.original_price,
+    currency = EXCLUDED.currency,
+    sizes = EXCLUDED.sizes,
+    stock = EXCLUDED.stock,
+    availability = EXCLUDED.availability,
+    description = EXCLUDED.description,
+    water_params = EXCLUDED.water_params,
+    is_live_fish = EXCLUDED.is_live_fish,
+    featured = EXCLUDED.featured,
+    specs = EXCLUDED.specs,
+    status = EXCLUDED.status,
+    tags = EXCLUDED.tags,
+    updated_at = EXCLUDED.updated_at;
+
 -- ==============================================================================
--- 9. SEED DATA: ORDERS (7 items)
+-- 9. SEED DATA: ORDERS (0 items)
 -- ==============================================================================
-INSERT INTO public.orders (
-    id, order_number, customer_id, customer_name, house, city, district, state,
-    pin_code, phone_number, items, subtotal, delivery_charge, total, grand_total,
-    status, payment_status, notes, email_sent, whatsapp_sent, created_at, updated_at
-) VALUES (
-    'ord_1792298317524_5779',
-    'AQ-20261018-5779',
-    NULL,
-    'WhatsApp Customer',
-    'WhatsApp Order',
-    'Sothupakkam',
-    'Chengalpattu',
-    'Tamil Nadu',
-    '603319',
-    '+917845637566',
-    '[{"productId":"gf-oranda-red-cap","productName":"Red Cap Oranda Goldfish","variety":"Red Cap","size":"3.5 inch","quantity":1,"unitPrice":850,"price":850,"subtotal":850,"image":"https://lh3.googleusercontent.com/aida-public/AB6AXuCe6ajzYgPnKEeMg6lfYrC_4AcF7eKah27k-HVdru1NNy-53eUgKBY6z-81QDjo40OuztuQ_9QvErDgpYIigHMtmcesxajymUhWYjkN4_-U1ah6l-GQIgnUN6PWCB18hwKdoIDCB9rXJJICJxkyy3IrwuNA0O0FiRGtPL0Y-NDh5e1OVoTyNA9PuHMAsP-X7HN6X7fqbg9z8ZXhVF45wM2u-jnQCD_TMNAkXDF4r13lSn-YrqWb7ZeJBg"}]'::jsonb,
-    850,
-    100,
-    950,
-    950,
-    'Cancelled',
-    'Pending',
-    NULL,
-    TRUE,
-    TRUE,
-    '2026-10-18T04:38:37.524Z',
-    '2026-10-18T07:12:56.850Z'
-)
-ON CONFLICT (id) DO UPDATE SET
-    order_number = EXCLUDED.order_number,
-    customer_name = EXCLUDED.customer_name,
-    house = EXCLUDED.house,
-    city = EXCLUDED.city,
-    district = EXCLUDED.district,
-    state = EXCLUDED.state,
-    pin_code = EXCLUDED.pin_code,
-    phone_number = EXCLUDED.phone_number,
-    items = EXCLUDED.items,
-    subtotal = EXCLUDED.subtotal,
-    delivery_charge = EXCLUDED.delivery_charge,
-    total = EXCLUDED.total,
-    grand_total = EXCLUDED.grand_total,
-    status = EXCLUDED.status,
-    payment_status = EXCLUDED.payment_status,
-    notes = EXCLUDED.notes,
-    email_sent = EXCLUDED.email_sent,
-    whatsapp_sent = EXCLUDED.whatsapp_sent,
-    updated_at = EXCLUDED.updated_at;
-
-INSERT INTO public.orders (
-    id, order_number, customer_id, customer_name, house, city, district, state,
-    pin_code, phone_number, items, subtotal, delivery_charge, total, grand_total,
-    status, payment_status, notes, email_sent, whatsapp_sent, created_at, updated_at
-) VALUES (
-    'ord_1791701577869_2708',
-    'AQ-20261011-2708',
-    NULL,
-    'mugulusukuuuu',
-    'ellapakkam road palli pettai EB colony acharapakkam',
-    'acharapakkalm',
-    'Chengalpattu',
-    'Tamil Nadu',
-    '603319',
-    '+918015568894',
-    '[{"productId":"gf-oranda-red-cap","productName":"Red Cap Oranda Goldfish","variety":"Red Cap","size":"3.5 inch","quantity":1,"unitPrice":1,"price":1,"subtotal":1,"image":"https://lh3.googleusercontent.com/aida-public/AB6AXuCe6ajzYgPnKEeMg6lfYrC_4AcF7eKah27k-HVdru1NNy-53eUgKBY6z-81QDjo40OuztuQ_9QvErDgpYIigHMtmcesxajymUhWYjkN4_-U1ah6l-GQIgnUN6PWCB18hwKdoIDCB9rXJJICJxkyy3IrwuNA0O0FiRGtPL0Y-NDh5e1OVoTyNA9PuHMAsP-X7HN6X7fqbg9z8ZXhVF45wM2u-jnQCD_TMNAkXDF4r13lSn-YrqWb7ZeJBg"},{"productId":"gf-ryukin-calico","productName":"Calico Ryukin Goldfish","variety":"Calico","size":"3 inch","quantity":13,"unitPrice":100,"price":100,"subtotal":1300,"image":"https://lh3.googleusercontent.com/aida-public/AB6AXuDViXqBf6VmELAJvHhUtBwFzZP03nxnfV5CO_8rNpTmIS6VDVCotPqrlxUUA-fuAFYWKfz_A47GNVWVfkq7Vnmrbk5Q5w25hoFnWkRCYgluBxFDCQZMz3kOmsklYw2XWlweTbbI14YqlULjnloPOdjAL6OMFrZEgIRC214TkDbGFpqZiOBEBH6YyIZGKRl__22nmcukeWK3xN_K8pTE644BwnZPMvPHesR1HZI_InK1Wfpj4Ln5rwEq1g"},{"productId":"gf-black-moor","productName":"Black Moor Goldfish","variety":"Black Moor","size":"2.5 inch","quantity":13,"unitPrice":450,"price":450,"subtotal":5850,"image":"https://lh3.googleusercontent.com/aida-public/AB6AXuBQPq6AFXefOzoyBtBguegYM07bV0ThdsntibX5EehzpljNqf4bBoefhyAVwkNDcl_-IrynMuxMEfnDrqUxQ475kSCsGvGD5IGemHKTAELbJzgXuv6i86iL7-yY-R4TiqfIqeuqNzdPFrNknRY2hYyp-Aerdh81m9VqHpCUxQ43DAbFkrdQF6C9eaKVfvDEoE6M3ZYRLV5NOI2U4AEQtIo1aH2zH0deqpyYkr58HcXFX_RhSHn9jcDLug"}]'::jsonb,
-    7151,
-    0,
-    7151,
-    7151,
-    'Cancelled',
-    'Pending',
-    NULL,
-    TRUE,
-    TRUE,
-    '2026-10-11T06:52:57.869Z',
-    '2026-10-11T06:53:12.713Z'
-)
-ON CONFLICT (id) DO UPDATE SET
-    order_number = EXCLUDED.order_number,
-    customer_name = EXCLUDED.customer_name,
-    house = EXCLUDED.house,
-    city = EXCLUDED.city,
-    district = EXCLUDED.district,
-    state = EXCLUDED.state,
-    pin_code = EXCLUDED.pin_code,
-    phone_number = EXCLUDED.phone_number,
-    items = EXCLUDED.items,
-    subtotal = EXCLUDED.subtotal,
-    delivery_charge = EXCLUDED.delivery_charge,
-    total = EXCLUDED.total,
-    grand_total = EXCLUDED.grand_total,
-    status = EXCLUDED.status,
-    payment_status = EXCLUDED.payment_status,
-    notes = EXCLUDED.notes,
-    email_sent = EXCLUDED.email_sent,
-    whatsapp_sent = EXCLUDED.whatsapp_sent,
-    updated_at = EXCLUDED.updated_at;
-
-INSERT INTO public.orders (
-    id, order_number, customer_id, customer_name, house, city, district, state,
-    pin_code, phone_number, items, subtotal, delivery_charge, total, grand_total,
-    status, payment_status, notes, email_sent, whatsapp_sent, created_at, updated_at
-) VALUES (
-    'ord_1790828771803_6783',
-    'AQ-20261001-6783',
-    NULL,
-    'Manorajankumar S',
-    'ellapakkam road palli pettai EB colony acharapakkam',
-    'Sothupakkam',
-    'Chengalpattu',
-    'Tamil Nadu',
-    '603319',
-    '+918015568894',
-    '[{"productId":"gf-oranda-red-cap","productName":"Red Cap Oranda Goldfish","variety":"Red Cap","size":"3.5 inch","quantity":1,"unitPrice":100,"price":100,"subtotal":100,"image":"https://lh3.googleusercontent.com/aida-public/AB6AXuCe6ajzYgPnKEeMg6lfYrC_4AcF7eKah27k-HVdru1NNy-53eUgKBY6z-81QDjo40OuztuQ_9QvErDgpYIigHMtmcesxajymUhWYjkN4_-U1ah6l-GQIgnUN6PWCB18hwKdoIDCB9rXJJICJxkyy3IrwuNA0O0FiRGtPL0Y-NDh5e1OVoTyNA9PuHMAsP-X7HN6X7fqbg9z8ZXhVF45wM2u-jnQCD_TMNAkXDF4r13lSn-YrqWb7ZeJBg"},{"productId":"gf-ryukin-calico","productName":"Calico Ryukin Goldfish","variety":"Calico","size":"3 inch","quantity":1,"unitPrice":750,"price":750,"subtotal":750,"image":"https://lh3.googleusercontent.com/aida-public/AB6AXuDViXqBf6VmELAJvHhUtBwFzZP03nxnfV5CO_8rNpTmIS6VDVCotPqrlxUUA-fuAFYWKfz_A47GNVWVfkq7Vnmrbk5Q5w25hoFnWkRCYgluBxFDCQZMz3kOmsklYw2XWlweTbbI14YqlULjnloPOdjAL6OMFrZEgIRC214TkDbGFpqZiOBEBH6YyIZGKRl__22nmcukeWK3xN_K8pTE644BwnZPMvPHesR1HZI_InK1Wfpj4Ln5rwEq1g"},{"productId":"gf-black-moor","productName":"Black Moor Goldfish","variety":"Black Moor","size":"2.5 inch","quantity":1,"unitPrice":450,"price":450,"subtotal":450,"image":"https://lh3.googleusercontent.com/aida-public/AB6AXuBQPq6AFXefOzoyBtBguegYM07bV0ThdsntibX5EehzpljNqf4bBoefhyAVwkNDcl_-IrynMuxMEfnDrqUxQ475kSCsGvGD5IGemHKTAELbJzgXuv6i86iL7-yY-R4TiqfIqeuqNzdPFrNknRY2hYyp-Aerdh81m9VqHpCUxQ43DAbFkrdQF6C9eaKVfvDEoE6M3ZYRLV5NOI2U4AEQtIo1aH2zH0deqpyYkr58HcXFX_RhSHn9jcDLug"},{"productId":"betta-halfmoon-royal-blue","productName":"Royal Blue Halfmoon Betta","variety":"Halfmoon","size":"2.5 inch Show Grade","quantity":1,"unitPrice":350,"price":350,"subtotal":350,"image":"https://lh3.googleusercontent.com/aida-public/AB6AXuCLAXDObZy5BCxqWWScFhhJUTlUUOtlct7-sRC8RpkZz4_B-ZwDYLPXdA4ddI6Ehm-pCCM1KPUT0gY_13sC-p00tDf_jb7qzkIpnVXKQP9zuQkeGO6uQIDiOJhnhyhXwJBt0aDOn2QBGfDyvFfSRn4_DS-6EYAnz6rS1ltYyicIppLAPJa_v5gqTUUEP8yUDtfjW2sSJR9rm5n9jRFLxq54l8TeQZzI83FKm2x1Qv7xdCPwPMCvENEYXQ"}]'::jsonb,
-    1650,
-    0,
-    1650,
-    1650,
-    'Cancelled',
-    'Pending',
-    NULL,
-    TRUE,
-    TRUE,
-    '2026-10-01T04:26:11.803Z',
-    '2026-10-06T05:01:54.456Z'
-)
-ON CONFLICT (id) DO UPDATE SET
-    order_number = EXCLUDED.order_number,
-    customer_name = EXCLUDED.customer_name,
-    house = EXCLUDED.house,
-    city = EXCLUDED.city,
-    district = EXCLUDED.district,
-    state = EXCLUDED.state,
-    pin_code = EXCLUDED.pin_code,
-    phone_number = EXCLUDED.phone_number,
-    items = EXCLUDED.items,
-    subtotal = EXCLUDED.subtotal,
-    delivery_charge = EXCLUDED.delivery_charge,
-    total = EXCLUDED.total,
-    grand_total = EXCLUDED.grand_total,
-    status = EXCLUDED.status,
-    payment_status = EXCLUDED.payment_status,
-    notes = EXCLUDED.notes,
-    email_sent = EXCLUDED.email_sent,
-    whatsapp_sent = EXCLUDED.whatsapp_sent,
-    updated_at = EXCLUDED.updated_at;
-
-INSERT INTO public.orders (
-    id, order_number, customer_id, customer_name, house, city, district, state,
-    pin_code, phone_number, items, subtotal, delivery_charge, total, grand_total,
-    status, payment_status, notes, email_sent, whatsapp_sent, created_at, updated_at
-) VALUES (
-    'ord_1790342868664_7618',
-    'AQ-20260925-7618',
-    NULL,
-    'jbgflv seigfeiuw vf',
-    'ybfhics',
-    'Sothupakkam',
-    'Chengalpattu',
-    'Tamil Nadu',
-    '603319',
-    '+919709777972',
-    '[{"productId":"gf-black-moor","productName":"Black Moor Goldfish","variety":"Black Moor","size":"2.5 inch","quantity":1,"unitPrice":450,"price":450,"subtotal":450,"image":"https://lh3.googleusercontent.com/aida-public/AB6AXuBQPq6AFXefOzoyBtBguegYM07bV0ThdsntibX5EehzpljNqf4bBoefhyAVwkNDcl_-IrynMuxMEfnDrqUxQ475kSCsGvGD5IGemHKTAELbJzgXuv6i86iL7-yY-R4TiqfIqeuqNzdPFrNknRY2hYyp-Aerdh81m9VqHpCUxQ43DAbFkrdQF6C9eaKVfvDEoE6M3ZYRLV5NOI2U4AEQtIo1aH2zH0deqpyYkr58HcXFX_RhSHn9jcDLug"},{"productId":"gf-ranchu-lionhead","productName":"Lionchu / Ranchu Goldfish","variety":"Lionhead Ranchu","size":"3.0 inch","quantity":1,"unitPrice":1100,"price":1100,"subtotal":1100,"image":"https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80"},{"productId":"gf-ryukin-calico","productName":"Calico Ryukin Goldfish","variety":"Calico","size":"3 inch","quantity":1,"unitPrice":750,"price":750,"subtotal":750,"image":"https://lh3.googleusercontent.com/aida-public/AB6AXuDViXqBf6VmELAJvHhUtBwFzZP03nxnfV5CO_8rNpTmIS6VDVCotPqrlxUUA-fuAFYWKfz_A47GNVWVfkq7Vnmrbk5Q5w25hoFnWkRCYgluBxFDCQZMz3kOmsklYw2XWlweTbbI14YqlULjnloPOdjAL6OMFrZEgIRC214TkDbGFpqZiOBEBH6YyIZGKRl__22nmcukeWK3xN_K8pTE644BwnZPMvPHesR1HZI_InK1Wfpj4Ln5rwEq1g"},{"productId":"gf-oranda-red-cap","productName":"Red Cap Oranda Goldfish","variety":"Red Cap","size":"3.5 inch","quantity":1,"unitPrice":100,"price":100,"subtotal":100,"image":"https://lh3.googleusercontent.com/aida-public/AB6AXuCe6ajzYgPnKEeMg6lfYrC_4AcF7eKah27k-HVdru1NNy-53eUgKBY6z-81QDjo40OuztuQ_9QvErDgpYIigHMtmcesxajymUhWYjkN4_-U1ah6l-GQIgnUN6PWCB18hwKdoIDCB9rXJJICJxkyy3IrwuNA0O0FiRGtPL0Y-NDh5e1OVoTyNA9PuHMAsP-X7HN6X7fqbg9z8ZXhVF45wM2u-jnQCD_TMNAkXDF4r13lSn-YrqWb7ZeJBg"},{"productId":"gf-shubunkin-comet","productName":"Shubunkin & Sarasa Comet","variety":"Shubunkin","size":"3 inch","quantity":1,"unitPrice":180,"price":180,"subtotal":180,"image":"https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=800&q=80"}]'::jsonb,
-    2580,
-    0,
-    2580,
-    2580,
-    'Cancelled',
-    'Pending',
-    NULL,
-    TRUE,
-    TRUE,
-    '2026-09-25T13:27:48.664Z',
-    '2026-10-18T07:12:52.857Z'
-)
-ON CONFLICT (id) DO UPDATE SET
-    order_number = EXCLUDED.order_number,
-    customer_name = EXCLUDED.customer_name,
-    house = EXCLUDED.house,
-    city = EXCLUDED.city,
-    district = EXCLUDED.district,
-    state = EXCLUDED.state,
-    pin_code = EXCLUDED.pin_code,
-    phone_number = EXCLUDED.phone_number,
-    items = EXCLUDED.items,
-    subtotal = EXCLUDED.subtotal,
-    delivery_charge = EXCLUDED.delivery_charge,
-    total = EXCLUDED.total,
-    grand_total = EXCLUDED.grand_total,
-    status = EXCLUDED.status,
-    payment_status = EXCLUDED.payment_status,
-    notes = EXCLUDED.notes,
-    email_sent = EXCLUDED.email_sent,
-    whatsapp_sent = EXCLUDED.whatsapp_sent,
-    updated_at = EXCLUDED.updated_at;
-
-INSERT INTO public.orders (
-    id, order_number, customer_id, customer_name, house, city, district, state,
-    pin_code, phone_number, items, subtotal, delivery_charge, total, grand_total,
-    status, payment_status, notes, email_sent, whatsapp_sent, created_at, updated_at
-) VALUES (
-    'ord_1790314849751_2161',
-    'AQ-20260925-2161',
-    NULL,
-    'Karthik Raja',
-    '12 Gandhi Salai',
-    'Madurantakam',
-    'Chengalpattu',
-    'Tamil Nadu',
-    '603306',
-    '+919840123456',
-    '[{"productId":"prod-pro-canister-filter-1500l-h-1790314849731-1790314849737","productName":"Pro Ultra Canister Filter 1500L/H 1790314849731","variety":"Canister Biological","size":"1500 L/H (Up to 300L)","quantity":1,"unitPrice":4800,"price":4800,"subtotal":4800,"image":"https://images.unsplash.com/photo-1544943910-4c1dc44a0558?w=800"}]'::jsonb,
-    4800,
-    0,
-    4800,
-    4800,
-    'Cancelled',
-    'Pending',
-    NULL,
-    TRUE,
-    TRUE,
-    '2026-09-25T05:40:49.751Z',
-    '2026-09-25T06:00:43.244Z'
-)
-ON CONFLICT (id) DO UPDATE SET
-    order_number = EXCLUDED.order_number,
-    customer_name = EXCLUDED.customer_name,
-    house = EXCLUDED.house,
-    city = EXCLUDED.city,
-    district = EXCLUDED.district,
-    state = EXCLUDED.state,
-    pin_code = EXCLUDED.pin_code,
-    phone_number = EXCLUDED.phone_number,
-    items = EXCLUDED.items,
-    subtotal = EXCLUDED.subtotal,
-    delivery_charge = EXCLUDED.delivery_charge,
-    total = EXCLUDED.total,
-    grand_total = EXCLUDED.grand_total,
-    status = EXCLUDED.status,
-    payment_status = EXCLUDED.payment_status,
-    notes = EXCLUDED.notes,
-    email_sent = EXCLUDED.email_sent,
-    whatsapp_sent = EXCLUDED.whatsapp_sent,
-    updated_at = EXCLUDED.updated_at;
-
-INSERT INTO public.orders (
-    id, order_number, customer_id, customer_name, house, city, district, state,
-    pin_code, phone_number, items, subtotal, delivery_charge, total, grand_total,
-    status, payment_status, notes, email_sent, whatsapp_sent, created_at, updated_at
-) VALUES (
-    'ord_1790314726576_9574',
-    'AQ-20260925-9574',
-    NULL,
-    'Ramesh Babu',
-    'Plot 42, River View Street',
-    'Chennai',
-    'Chengalpattu',
-    'Tamil Nadu',
-    '603302',
-    '+919840123456',
-    '[{"productId":"prod-full-spectrum-wrgb-led-light-60cm-1790314726564","productName":"Full Spectrum WRGB Pro LED Light 60cm","variety":"WRGB Smart App Control","size":"60cm (for 2ft tank)","quantity":2,"unitPrice":2850,"subtotal":5700,"image":"https://images.unsplash.com/photo-1544943910-4c1dc44a0558?w=800"}]'::jsonb,
-    5700,
-    0,
-    5700,
-    5700,
-    'Cancelled',
-    'Pending',
-    NULL,
-    TRUE,
-    TRUE,
-    '2026-09-25T05:38:46.576Z',
-    '2026-09-25T05:53:45.912Z'
-)
-ON CONFLICT (id) DO UPDATE SET
-    order_number = EXCLUDED.order_number,
-    customer_name = EXCLUDED.customer_name,
-    house = EXCLUDED.house,
-    city = EXCLUDED.city,
-    district = EXCLUDED.district,
-    state = EXCLUDED.state,
-    pin_code = EXCLUDED.pin_code,
-    phone_number = EXCLUDED.phone_number,
-    items = EXCLUDED.items,
-    subtotal = EXCLUDED.subtotal,
-    delivery_charge = EXCLUDED.delivery_charge,
-    total = EXCLUDED.total,
-    grand_total = EXCLUDED.grand_total,
-    status = EXCLUDED.status,
-    payment_status = EXCLUDED.payment_status,
-    notes = EXCLUDED.notes,
-    email_sent = EXCLUDED.email_sent,
-    whatsapp_sent = EXCLUDED.whatsapp_sent,
-    updated_at = EXCLUDED.updated_at;
-
-INSERT INTO public.orders (
-    id, order_number, customer_id, customer_name, house, city, district, state,
-    pin_code, phone_number, items, subtotal, delivery_charge, total, grand_total,
-    status, payment_status, notes, email_sent, whatsapp_sent, created_at, updated_at
-) VALUES (
-    'ord_1790306329244_2244',
-    'AQ-20260925-2244',
-    NULL,
-    'Karthik Raja',
-    'Plot 45, Sothupakkam Main Road',
-    'Sothupakkam',
-    'Chengalpattu',
-    'Tamil Nadu',
-    '603319',
-    '+919876543210',
-    '[{"productId":"gf-oranda-red-cap","productName":"Red Cap Oranda Goldfish","variety":"Red Cap","size":"3.5 inch","quantity":2,"unitPrice":900,"subtotal":1800,"image":"https://lh3.googleusercontent.com/aida-public/AB6AXuCe6ajzYgPnKEeMg6lfYrC_4AcF7eKah27k-HVdru1NNy-53eUgKBY6z-81QDjo40OuztuQ_9QvErDgpYIigHMtmcesxajymUhWYjkN4_-U1ah6l-GQIgnUN6PWCB18hwKdoIDCB9rXJJICJxkyy3IrwuNA0O0FiRGtPL0Y-NDh5e1OVoTyNA9PuHMAsP-X7HN6X7fqbg9z8ZXhVF45wM2u-jnQCD_TMNAkXDF4r13lSn-YrqWb7ZeJBg"}]'::jsonb,
-    1800,
-    0,
-    1800,
-    1800,
-    'Cancelled',
-    'Pending',
-    NULL,
-    TRUE,
-    TRUE,
-    '2026-09-25T03:18:49.244Z',
-    '2026-09-25T13:26:06.612Z'
-)
-ON CONFLICT (id) DO UPDATE SET
-    order_number = EXCLUDED.order_number,
-    customer_name = EXCLUDED.customer_name,
-    house = EXCLUDED.house,
-    city = EXCLUDED.city,
-    district = EXCLUDED.district,
-    state = EXCLUDED.state,
-    pin_code = EXCLUDED.pin_code,
-    phone_number = EXCLUDED.phone_number,
-    items = EXCLUDED.items,
-    subtotal = EXCLUDED.subtotal,
-    delivery_charge = EXCLUDED.delivery_charge,
-    total = EXCLUDED.total,
-    grand_total = EXCLUDED.grand_total,
-    status = EXCLUDED.status,
-    payment_status = EXCLUDED.payment_status,
-    notes = EXCLUDED.notes,
-    email_sent = EXCLUDED.email_sent,
-    whatsapp_sent = EXCLUDED.whatsapp_sent,
-    updated_at = EXCLUDED.updated_at;
-
 -- ==============================================================================
 -- 10. SEED DATA: PRICE HISTORY (27 items)
 -- ==============================================================================
