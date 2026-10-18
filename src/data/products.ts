@@ -501,6 +501,39 @@ export const INITIAL_PRODUCTS: Product[] = [
 
   // ===================== MONSTER FISH, GARS & CATFISH =====================
   {
+    id: 'prod-aaravna-silver',
+    name: 'aaravna',
+    category: 'Monster Fish',
+    subCategory: 'Arowana',
+    variety: 'Silver',
+    gender: 'Unsexed',
+    images: [
+      'https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80',
+    ],
+    primaryImage:
+      'https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80',
+    price: 1200,
+    originalPrice: 1500,
+    currency: '₹',
+    sizes: ['5 inch'],
+    stock: 3,
+    availability: 'in_stock',
+    description:
+      'High-grade Silver Arowana juvenile with luminous platinum sheen and magnificent flowing barbels. Highly active surface swimmer.',
+    waterParams: {
+      ph: '6.5 - 7.5',
+      temp: '24-28°C',
+      temperament: 'Predatory Monster Fish',
+      careLevel: 'Intermediate',
+      tankMinGallons: 100,
+    },
+    isLiveFish: true,
+    featured: true,
+    createdAt: '2026-10-18T00:00:00Z',
+    updatedAt: '2026-10-18T00:00:00Z',
+    status: 'Published',
+  },
+  {
     id: 'monster-alligator-gar',
     name: 'Alligator Gar (Freshwater Gar)',
     category: 'Monster Fish',

@@ -1,5 +1,29 @@
 [
   {
+    "id": "prod-desync-test-999",
+    "name": "Desync Upsert Test",
+    "category": "Monster Fish",
+    "subCategory": "",
+    "variety": "",
+    "gender": "Unsexed",
+    "images": [],
+    "primaryImage": "",
+    "price": 999,
+    "currency": "₹",
+    "sizes": [
+      "Standard"
+    ],
+    "stock": 10,
+    "availability": "in_stock",
+    "description": "",
+    "isLiveFish": true,
+    "featured": false,
+    "status": "Archived",
+    "tags": [],
+    "createdAt": "2026-10-18T05:36:37.395Z",
+    "updatedAt": "2026-10-18T05:36:37.407Z"
+  },
+  {
     "id": "gf-oranda-red-cap",
     "name": "Red Cap Oranda Goldfish",
     "category": "Goldfish",
@@ -495,6 +519,39 @@
     "featured": false,
     "createdAt": "2026-09-01T00:00:00Z",
     "updatedAt": "2026-09-24T00:00:00Z",
+    "status": "Published"
+  },
+  {
+    "id": "prod-aaravna-silver",
+    "name": "aaravna",
+    "category": "Monster Fish",
+    "subCategory": "Arowana",
+    "variety": "Silver",
+    "gender": "Unsexed",
+    "images": [
+      "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80"
+    ],
+    "primaryImage": "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=800&q=80",
+    "price": 1200,
+    "originalPrice": 1500,
+    "currency": "₹",
+    "sizes": [
+      "5 inch"
+    ],
+    "stock": 3,
+    "availability": "in_stock",
+    "description": "High-grade Silver Arowana juvenile with luminous platinum sheen and magnificent flowing barbels. Highly active surface swimmer.",
+    "waterParams": {
+      "ph": "6.5 - 7.5",
+      "temp": "24-28°C",
+      "temperament": "Predatory Monster Fish",
+      "careLevel": "Intermediate",
+      "tankMinGallons": 100
+    },
+    "isLiveFish": true,
+    "featured": true,
+    "createdAt": "2026-10-18T00:00:00Z",
+    "updatedAt": "2026-10-18T05:36:37.386Z",
     "status": "Published"
   },
   {

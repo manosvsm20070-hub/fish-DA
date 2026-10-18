@@ -25,7 +25,8 @@ export async function PATCH(
   if (!auth) return NextResponse.json({ success: false, error: 'Forbidden: Admin privilege required' }, { status: 403 });
 
   try {
-    const { id } = await params;
+    const rawId = (await params).id;
+    const cleanId = decodeURIComponent(rawId).trim();
     const body = await req.json();
 
     // Strip server-only immutable fields — everything else is editable by admin
@@ -47,7 +48,7 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: 'Images must be an array' }, { status: 400 });
     }
 
-    const result = await updateProductFull(id, updates, auth.phone);
+    const result = await updateProductFull(cleanId, updates, auth.phone);
     if (!result.success) {
       return NextResponse.json({ success: false, error: result.error }, { status: 400 });
     }
@@ -61,7 +62,7 @@ export async function PATCH(
       revalidatePath('/bowls');
       revalidatePath('/food');
       revalidatePath('/equipment');
-      revalidatePath(`/product/${id}`);
+      revalidatePath(`/product/${cleanId}`);
     } catch {}
 
     return NextResponse.json(
@@ -89,8 +90,9 @@ export async function DELETE(
   if (!auth) return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
 
   try {
-    const { id } = await params;
-    const result = await archiveProduct(id);
+    const rawId = (await params).id;
+    const cleanId = decodeURIComponent(rawId).trim();
+    const result = await archiveProduct(cleanId);
     if (!result.success) return NextResponse.json({ success: false, error: result.error }, { status: 400 });
 
     try {

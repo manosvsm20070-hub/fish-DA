@@ -339,12 +339,46 @@ export async function updateProductFull(
 ): Promise<{ success: boolean; product?: Product; error?: string }> {
   try {
     const products = await getProducts();
-    const index = products.findIndex((p) => p.id === id);
+    const cleanId = decodeURIComponent(id).trim();
+    const index = products.findIndex((p) => p.id === cleanId || p.id === id);
 
-    if (index === -1) return { success: false, error: 'Product not found' };
+    const now = new Date().toISOString();
+
+    // If product does not exist on this serverless instance (multi-worker divergence),
+    // seamlessly upsert it so the user's edits and new products are never lost!
+    if (index === -1) {
+      const newProduct: Product = {
+        id: cleanId,
+        name: updates.name?.trim() || 'Product',
+        category: updates.category?.trim() || 'Fish',
+        subCategory: updates.subCategory?.trim() || '',
+        variety: updates.variety?.trim() || '',
+        gender: updates.gender || 'Unsexed',
+        images: Array.isArray(updates.images) ? updates.images : (updates.primaryImage ? [updates.primaryImage] : []),
+        primaryImage: updates.primaryImage || (updates.images && updates.images[0]) || '',
+        price: typeof updates.price === 'number' ? updates.price : 0,
+        originalPrice: updates.originalPrice,
+        currency: '₹',
+        sizes: Array.isArray(updates.sizes) ? updates.sizes : ['Standard'],
+        stock: typeof updates.stock === 'number' ? updates.stock : 10,
+        availability: updates.availability || 'in_stock',
+        description: updates.description?.trim() || '',
+        waterParams: updates.waterParams,
+        isLiveFish: updates.isLiveFish !== undefined ? updates.isLiveFish : true,
+        featured: updates.featured || false,
+        specs: updates.specs,
+        status: updates.status || 'Published',
+        tags: updates.tags || [],
+        createdAt: now,
+        updatedAt: now,
+      };
+      products.unshift(newProduct);
+      writeFileSafe('products.json', products);
+      touchSyncVersion('products');
+      return { success: true, product: newProduct };
+    }
 
     const currentProduct = products[index];
-    const now = new Date().toISOString();
 
     // Audit price changes
     if (typeof updates.price === 'number' && updates.price !== currentProduct.price) {
@@ -352,7 +386,7 @@ export async function updateProductFull(
         const history = await getPriceHistory();
         history.push({
           id: `ph_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-          productId: id,
+          productId: cleanId,
           oldPrice: currentProduct.price,
           newPrice: updates.price,
           changedAt: now,
@@ -362,7 +396,7 @@ export async function updateProductFull(
       } catch {}
     }
 
-    products[index] = { ...currentProduct, ...updates, id, createdAt: currentProduct.createdAt, updatedAt: now };
+    products[index] = { ...currentProduct, ...updates, id: cleanId, createdAt: currentProduct.createdAt, updatedAt: now };
     writeFileSafe('products.json', products);
     touchSyncVersion('products');
     return { success: true, product: products[index] };
