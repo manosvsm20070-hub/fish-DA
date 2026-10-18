@@ -51,8 +51,13 @@ export async function PATCH(
 
     try {
       revalidatePath('/', 'layout');
+      revalidatePath('/');
       revalidatePath('/fish');
       revalidatePath('/tanks');
+      revalidatePath('/medicines');
+      revalidatePath('/bowls');
+      revalidatePath('/food');
+      revalidatePath('/equipment');
       revalidatePath(`/product/${id}`);
     } catch {}
 

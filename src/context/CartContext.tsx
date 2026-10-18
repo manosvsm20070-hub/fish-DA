@@ -49,6 +49,44 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isLoaded]);
 
+  // Synchronize cart item prices when admin updates product pricing
+  useEffect(() => {
+    const syncCartPrices = async () => {
+      try {
+        const res = await fetch('/api/products', { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.products && Array.isArray(data.products)) {
+          const productMap = new Map<string, Product>(
+            data.products.map((p: Product) => [p.id, p])
+          );
+          setItems((prev) => {
+            let changed = false;
+            const updated = prev.map((item) => {
+              const live = productMap.get(item.productId);
+              if (live && live.price !== item.price) {
+                changed = true;
+                return {
+                  ...item,
+                  price: live.price,
+                  productName: live.name,
+                  primaryImage: live.primaryImage || item.primaryImage,
+                };
+              }
+              return item;
+            });
+            return changed ? updated : prev;
+          });
+        }
+      } catch {}
+    };
+
+    window.addEventListener('dolphin_products_updated', syncCartPrices);
+    return () => {
+      window.removeEventListener('dolphin_products_updated', syncCartPrices);
+    };
+  }, []);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/types';
@@ -14,9 +14,34 @@ interface ProductDetailClientProps {
 }
 
 export default function ProductDetailClient({
-  product,
+  product: initialProduct,
   relatedProducts,
 }: ProductDetailClientProps) {
+  const [product, setProduct] = useState<Product>(initialProduct);
+
+  useEffect(() => {
+    setProduct(initialProduct);
+  }, [initialProduct]);
+
+  useEffect(() => {
+    const handleProductsUpdated = async () => {
+      try {
+        const res = await fetch(`/api/products/${initialProduct.id}`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.product) {
+            setProduct(data.product);
+          }
+        }
+      } catch {}
+    };
+
+    window.addEventListener('dolphin_products_updated', handleProductsUpdated);
+    return () => {
+      window.removeEventListener('dolphin_products_updated', handleProductsUpdated);
+    };
+  }, [initialProduct.id]);
+
   const validImages = (product.images || []).filter(
     (img) => typeof img === 'string' && img.trim().length > 0
   );

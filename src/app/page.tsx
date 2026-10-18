@@ -5,6 +5,8 @@ import { getPublishedProducts as getProducts, getSettings } from '@/lib/storage'
 import { SHOP_INFO } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import LiveHeroBanner from '@/components/LiveHeroBanner';
+import LiveCuratedExotics from '@/components/LiveCuratedExotics';
+import LiveGearEssentials from '@/components/LiveGearEssentials';
 import Footer from '@/components/Footer';
 
 export const dynamic = 'force-dynamic';
@@ -89,88 +91,11 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Live Showcase Grid — Curated Exotic Arrivals */}
-        <section className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
-              <h2 className="font-headline-sm font-bold text-on-surface">Curated Exotic Arrivals</h2>
-            </div>
-            <Link href="/fish" className="font-label-sm text-primary font-bold text-xs">
-              Live in Sothupakkam
-            </Link>
-          </div>
+        {/* Live Showcase Grid — Curated Exotic Arrivals (Real-time price sync) */}
+        <LiveCuratedExotics initialProducts={featuredFish} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {featuredFish.map((fish) => (
-              <ProductCard key={fish.id} product={fish} aspectRatio="4/5" />
-            ))}
-          </div>
-        </section>
-
-        {/* Tanks, Filters & Care Essentials Strip */}
-        <section className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h2 className="font-headline-sm font-bold text-on-surface">Tanks, Filters & Care Essentials</h2>
-            <Link href="/tanks" className="font-label-sm text-secondary text-xs hover:text-primary">
-              View Store Supplies →
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {gearEssentials.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center gap-3 p-3 rounded-2xl bg-surface-container-lowest shadow-sm border border-surface-container/60 hover:shadow-md transition-all"
-              >
-                <div className="relative w-24 h-24 rounded-xl overflow-hidden shrink-0 bg-surface-container">
-                  <Image
-                    src={item.primaryImage}
-                    alt={item.name}
-                    fill
-                    unoptimized={Boolean(item.primaryImage?.startsWith('data:') || item.primaryImage?.startsWith('/api/uploads/') || item.primaryImage?.startsWith('/uploads/'))}
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex flex-col flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-label-sm text-[10px] px-1.5 py-0.2 rounded bg-surface-container text-primary font-bold">
-                      {item.category}
-                    </span>
-                    <span className="font-label-sm text-[10px] text-secondary">
-                      {item.variety}
-                    </span>
-                  </div>
-                  <h3 className="font-label-lg font-bold text-on-surface truncate mt-0.5">
-                    {item.name}
-                  </h3>
-                  <p className="font-body-sm text-xs text-on-surface-variant line-clamp-1">
-                    {item.description}
-                  </p>
-                  <div className="flex items-center justify-between mt-2 pt-1 border-t border-surface-container/50">
-                    <span className="font-headline-sm text-sm font-bold text-primary">
-                      ₹{item.price.toLocaleString('en-IN')}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <Link
-                        href={`/product/${item.id}`}
-                        className="px-2.5 py-1 rounded-lg bg-surface-container-high text-primary font-label-sm text-xs font-semibold hover:bg-surface-container"
-                      >
-                        Details
-                      </Link>
-                      <Link
-                        href="/cart"
-                        className="px-2.5 py-1 rounded-lg bg-[#cc4729] text-white font-label-sm text-xs font-bold hover:bg-[#b03b20]"
-                      >
-                        Order
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Tanks, Filters & Care Essentials Strip (Real-time price sync) */}
+        <LiveGearEssentials initialGear={gearEssentials} />
 
         {/* Custom Rimless Aquariums Banner */}
         <section className="rounded-2xl p-6 bg-gradient-to-r from-[#004e59] to-[#028090] text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">

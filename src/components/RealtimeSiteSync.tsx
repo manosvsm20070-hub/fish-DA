@@ -24,14 +24,22 @@ export function useLiveSettings() {
 interface RealtimeSiteSyncProps {
   children?: React.ReactNode;
   initialSettings: SiteSettings;
+  initialSyncVersion?: {
+    settingsUpdatedAt: number;
+    productsUpdatedAt: number;
+  };
 }
 
-export default function RealtimeSiteSync({ children, initialSettings }: RealtimeSiteSyncProps) {
+export default function RealtimeSiteSync({
+  children,
+  initialSettings,
+  initialSyncVersion,
+}: RealtimeSiteSyncProps) {
   const router = useRouter();
 
   const [settings, setSettings] = useState<SiteSettings>(initialSettings);
-  const lastSettingsTs = useRef<number>(Date.now());
-  const lastProductsTs = useRef<number>(Date.now());
+  const lastSettingsTs = useRef<number>(initialSyncVersion?.settingsUpdatedAt || Date.now());
+  const lastProductsTs = useRef<number>(initialSyncVersion?.productsUpdatedAt || Date.now());
 
   // Apply CSS theme variables & dark mode directly to document.documentElement
   const applyTheme = useCallback((theme?: SiteSettings['theme']) => {

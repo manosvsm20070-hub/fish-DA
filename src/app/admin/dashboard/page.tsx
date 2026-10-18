@@ -486,6 +486,44 @@ export default function AdminDashboardPage() {
   const [editingCatalog, setEditingCatalog] = useState<Catalog | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Quick Inline Price Editing
+  const [quickPriceEditingId, setQuickPriceEditingId] = useState<string | null>(null);
+  const [quickPriceVal, setQuickPriceVal] = useState<string>('');
+
+  const startQuickPrice = (p: Product) => {
+    setQuickPriceEditingId(p.id);
+    setQuickPriceVal(p.price.toString());
+  };
+
+  const saveQuickPrice = async (p: Product) => {
+    const num = parseFloat(quickPriceVal);
+    if (isNaN(num) || num < 0) {
+      showToast('Please enter a valid price', 'error');
+      return;
+    }
+    // Optimistic UI update
+    setProducts((prev) =>
+      prev.map((item) => (item.id === p.id ? { ...item, price: num } : item))
+    );
+    setQuickPriceEditingId(null);
+
+    const { ok, data } = await adminFetch(`/api/admin/products/${p.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ price: num }),
+    });
+
+    if (!ok) {
+      showToast(data.error || 'Failed to update price', 'error');
+      await loadData();
+      return;
+    }
+
+    showToast(`Updated price for "${p.name}" to ₹${num.toLocaleString('en-IN')}`);
+    broadcastAdminUpdate('PRODUCTS_UPDATED');
+    await loadData();
+  };
+
   // Auth Check
   useEffect(() => {
     (async () => {
@@ -873,7 +911,55 @@ export default function AdminDashboardPage() {
                           <StatusBadge status={p.status} />
                         </div>
                         <div className="text-xs text-on-surface-variant">{p.category}{p.variety ? ` · ${p.variety}` : ''}</div>
-                        <div className="font-bold text-primary text-sm">₹{p.price.toLocaleString('en-IN')}</div>
+                        {quickPriceEditingId === p.id ? (
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-primary font-bold text-sm">₹</span>
+                            <input
+                              type="number"
+                              min="0"
+                              step="1"
+                              value={quickPriceVal}
+                              onChange={(e) => setQuickPriceVal(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveQuickPrice(p);
+                                if (e.key === 'Escape') setQuickPriceEditingId(null);
+                              }}
+                              autoFocus
+                              className="w-24 h-7 px-2 rounded-lg bg-surface-container border border-primary font-bold text-sm text-on-surface focus:outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => saveQuickPrice(p)}
+                              className="w-7 h-7 rounded-lg bg-primary text-white flex items-center justify-center hover:bg-primary-container transition-all"
+                              title="Save price"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">check</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickPriceEditingId(null)}
+                              className="w-7 h-7 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center hover:bg-surface-container-high transition-all"
+                              title="Cancel"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">close</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 mt-0.5 group/price">
+                            <div className="font-bold text-primary text-sm">
+                              ₹{p.price.toLocaleString('en-IN')}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => startQuickPrice(p)}
+                              className="opacity-75 hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded text-on-surface-variant hover:text-primary hover:bg-surface-container text-[11px] font-medium flex items-center gap-0.5 cursor-pointer"
+                              title="Quick edit price"
+                            >
+                              <span className="material-symbols-outlined text-[13px]">edit</span>
+                              <span>Edit</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         <button onClick={() => setEditingProduct(p)} title="Edit"

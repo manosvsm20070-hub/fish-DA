@@ -112,21 +112,44 @@ function getWorkingDataDir(): string {
   }
 }
 
-// In-Memory cache for speed and consistency
+// In-Memory cache for speed, validated against filesystem mtime
 let memoryProducts: Product[] | null = null;
 let memoryOrders: Order[] | null = null;
 let memoryCatalogs: Catalog[] | null = null;
 let memorySettings: SiteSettings | null = null;
 let memoryPriceHistory: PriceHistory[] | null = null;
 
+let lastProductsMtime = 0;
+let lastOrdersMtime = 0;
+let lastCatalogsMtime = 0;
+let lastSettingsMtime = 0;
+let lastPriceHistoryMtime = 0;
+
 // Realtime sync version timestamps
 let lastSettingsUpdate = Date.now();
 let lastProductsUpdate = Date.now();
 
+export function getFileMtime(filename: string): number {
+  try {
+    const workingDir = getWorkingDataDir();
+    const workingPath = path.join(/*turbopackIgnore: true*/ workingDir, filename);
+    if (fs.existsSync(/*turbopackIgnore: true*/ workingPath)) {
+      return fs.statSync(/*turbopackIgnore: true*/ workingPath).mtimeMs;
+    }
+    const bundledPath = path.join(BUNDLED_DATA_DIR, filename);
+    if (fs.existsSync(bundledPath)) {
+      return fs.statSync(bundledPath).mtimeMs;
+    }
+  } catch {}
+  return 0;
+}
+
 export function getSyncVersion() {
+  const productsMtime = getFileMtime('products.json');
+  const settingsMtime = getFileMtime('settings.json');
   return {
-    settingsUpdatedAt: lastSettingsUpdate,
-    productsUpdatedAt: lastProductsUpdate,
+    settingsUpdatedAt: Math.max(lastSettingsUpdate, Math.floor(settingsMtime)),
+    productsUpdatedAt: Math.max(lastProductsUpdate, Math.floor(productsMtime)),
   };
 }
 
@@ -210,9 +233,13 @@ export function ensureDataFiles() {
 // ======================== CATALOG OPERATIONS ========================
 
 export async function getCatalogs(): Promise<Catalog[]> {
-  if (memoryCatalogs) return memoryCatalogs;
+  const mtime = getFileMtime('catalogs.json');
+  if (memoryCatalogs && lastCatalogsMtime && mtime && mtime <= lastCatalogsMtime) {
+    return memoryCatalogs;
+  }
   const catalogs = readFileSafe<Catalog[]>('catalogs.json', () => DEFAULT_CATALOGS);
   memoryCatalogs = catalogs;
+  lastCatalogsMtime = mtime || Date.now();
   return memoryCatalogs;
 }
 
@@ -267,11 +294,15 @@ export async function updateCatalog(
 // ======================== PRODUCT OPERATIONS ========================
 
 export async function getProducts(): Promise<Product[]> {
-  if (memoryProducts) return memoryProducts;
+  const mtime = getFileMtime('products.json');
+  if (memoryProducts && lastProductsMtime && mtime && mtime <= lastProductsMtime) {
+    return memoryProducts;
+  }
   const products = readFileSafe<Product[]>('products.json', () =>
     INITIAL_PRODUCTS.map((p) => ({ ...p, status: 'Published' as ProductStatus }))
   );
   memoryProducts = products.map((p) => ({ ...p, status: p.status || 'Published' }));
+  lastProductsMtime = mtime || Date.now();
   return memoryProducts;
 }
 
@@ -299,8 +330,9 @@ export async function createProduct(
     const newProduct: Product = { ...product, createdAt: now, updatedAt: now };
     products.push(newProduct);
     memoryProducts = products;
-    lastProductsUpdate = Date.now();
     writeFileSafe('products.json', products);
+    lastProductsMtime = getFileMtime('products.json') || Date.now();
+    lastProductsUpdate = Date.now();
     return { success: true, product: newProduct };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to create product';
@@ -341,8 +373,9 @@ export async function updateProductFull(
 
     products[index] = { ...currentProduct, ...updates, id, createdAt: currentProduct.createdAt, updatedAt: now };
     memoryProducts = products;
-    lastProductsUpdate = Date.now();
     writeFileSafe('products.json', products);
+    lastProductsMtime = getFileMtime('products.json') || Date.now();
+    lastProductsUpdate = Date.now();
     return { success: true, product: products[index] };
   } catch (err: unknown) {
     console.error('[storage] Failed to update product:', err);
@@ -367,9 +400,13 @@ export async function archiveProduct(id: string): Promise<{ success: boolean; er
 // ======================== ORDER OPERATIONS ========================
 
 export async function getOrders(): Promise<Order[]> {
-  if (memoryOrders) return memoryOrders;
+  const mtime = getFileMtime('orders.json');
+  if (memoryOrders && lastOrdersMtime && mtime && mtime <= lastOrdersMtime) {
+    return memoryOrders;
+  }
   const orders = readFileSafe<Order[]>('orders.json', () => []);
   memoryOrders = orders;
+  lastOrdersMtime = mtime || Date.now();
   return memoryOrders;
 }
 
@@ -435,16 +472,23 @@ export async function updateOrderNotificationStatus(
 // ======================== PRICE HISTORY ========================
 
 export async function getPriceHistory(): Promise<PriceHistory[]> {
-  if (memoryPriceHistory) return memoryPriceHistory;
+  const mtime = getFileMtime('price_history.json');
+  if (memoryPriceHistory && lastPriceHistoryMtime && mtime && mtime <= lastPriceHistoryMtime) {
+    return memoryPriceHistory;
+  }
   const history = readFileSafe<PriceHistory[]>('price_history.json', () => []);
   memoryPriceHistory = history;
+  lastPriceHistoryMtime = mtime || Date.now();
   return memoryPriceHistory;
 }
 
 // ======================== SETTINGS & THEME OPERATIONS ========================
 
 export async function getSettings(): Promise<SiteSettings> {
-  if (memorySettings) return memorySettings;
+  const mtime = getFileMtime('settings.json');
+  if (memorySettings && lastSettingsMtime && mtime && mtime <= lastSettingsMtime) {
+    return memorySettings;
+  }
   const parsed = readFileSafe<Partial<SiteSettings>>('settings.json', () => DEFAULT_SETTINGS);
   const resolved: SiteSettings = {
     ...DEFAULT_SETTINGS,
@@ -468,6 +512,7 @@ export async function getSettings(): Promise<SiteSettings> {
     },
   };
   memorySettings = resolved;
+  lastSettingsMtime = mtime || Date.now();
   return memorySettings;
 }
 

@@ -54,7 +54,7 @@ export const metadata: Metadata = {
 
 import ThemeApplier from '@/components/ThemeApplier';
 import RealtimeSiteSync from '@/components/RealtimeSiteSync';
-import { getSettings } from '@/lib/storage';
+import { getSettings, getSyncVersion } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -64,7 +64,10 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await getSettings();
+  const [settings, syncVersion] = await Promise.all([
+    getSettings(),
+    Promise.resolve(getSyncVersion()),
+  ]);
   const primaryColor = settings.theme?.primaryColor || '#006572';
   const accentColor = settings.theme?.accentColor || '#cc4729';
   const darkMode = !!settings.theme?.darkMode;
@@ -108,7 +111,7 @@ export default async function RootLayout({
       </head>
       <body className="bg-surface font-body-md text-on-surface flex flex-col min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
         <ThemeApplier primaryColor={primaryColor} accentColor={accentColor} darkMode={darkMode} />
-        <RealtimeSiteSync initialSettings={settings}>
+        <RealtimeSiteSync initialSettings={settings} initialSyncVersion={syncVersion}>
           <CartProvider>
             <Header
               announcement={settings.customerInterface?.announcement}
