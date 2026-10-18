@@ -127,14 +127,22 @@ export default function CartPage() {
       msg += `• City / Town: ${validated.city}\n`;
       msg += `• PIN Code: ${validated.pincode}\n`;
       msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      const hasLiveFish = items.some((i) => i.isLiveFish);
       msg += `📦 *Items Ordered (${items.reduce((acc, i) => acc + i.quantity, 0)}):*\n`;
       items.forEach((item, idx) => {
-        msg += `${idx + 1}. *${item.productName}*\n   ${item.variety ? item.variety + ' • ' : ''}Size: ${item.selectedSize}\n   Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')} = ₹${(item.price * item.quantity).toLocaleString('en-IN')}\n`;
+        if (item.isLiveFish) {
+          msg += `${idx + 1}. *${item.productName}* (Live Stock)\n   ${item.variety ? item.variety + ' • ' : ''}Size: ${item.selectedSize}\n   Qty: ${item.quantity} (Price on inquiry)\n`;
+        } else {
+          msg += `${idx + 1}. *${item.productName}*\n   ${item.variety ? item.variety + ' • ' : ''}Size: ${item.selectedSize}\n   Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')} = ₹${(item.price * item.quantity).toLocaleString('en-IN')}\n`;
+        }
       });
       msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-      msg += `💰 *Subtotal:* ₹${subtotal.toLocaleString('en-IN')}\n`;
+      msg += `💰 *Subtotal (Gear & Essentials):* ₹${subtotal.toLocaleString('en-IN')}\n`;
       msg += `🚚 *Delivery:* ${deliveryCharge === 0 ? 'FREE' : '₹' + deliveryCharge}\n`;
-      msg += `⭐ *Grand Total: ₹${grandTotal.toLocaleString('en-IN')}*\n`;
+      msg += `⭐ *Grand Total: ₹${grandTotal.toLocaleString('en-IN')}${hasLiveFish ? ' (+ Live Fish)' : ''}*\n`;
+      if (hasLiveFish) {
+        msg += `🐠 *Live Fish Note:* Prices and availability confirmed on WhatsApp.\n`;
+      }
       msg += `━━━━━━━━━━━━━━━━━━━━\n`;
       msg += `🏪 *Store:* Sothupakkam, Chengalpattu\nPlease confirm order acceptance and dispatch timing. Thank you!`;
 
@@ -270,12 +278,25 @@ export default function CartPage() {
                     </div>
 
                     <div className="text-right">
-                      <span className="font-body-sm text-[11px] text-on-surface-variant block">
-                        ₹{item.price} each
-                      </span>
-                      <span className="font-headline-sm font-bold text-primary text-base">
-                        ₹{(item.price * item.quantity).toLocaleString('en-IN')}
-                      </span>
+                      {item.isLiveFish ? (
+                        <div className="flex flex-col items-end">
+                          <span className="font-label-sm text-xs font-bold text-primary">
+                            Price on Request
+                          </span>
+                          <span className="text-[10px] text-on-surface-variant/80">
+                            Live stock
+                          </span>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="font-body-sm text-[11px] text-on-surface-variant block">
+                            ₹{item.price} each
+                          </span>
+                          <span className="font-headline-sm font-bold text-primary text-base">
+                            ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -323,6 +344,13 @@ export default function CartPage() {
                   )}
                 </span>
               </div>
+
+              {items.some((i) => i.isLiveFish) && (
+                <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 text-xs text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-900/40 flex items-start gap-1.5">
+                  <span className="material-symbols-outlined text-[16px] shrink-0 mt-0.5">info</span>
+                  <span>Includes live fish — prices and availability are verified and confirmed directly via WhatsApp.</span>
+                </div>
+              )}
 
               {subtotal < 1500 && (
                 <div className="p-2.5 rounded-xl bg-surface-container text-xs text-on-surface-variant">

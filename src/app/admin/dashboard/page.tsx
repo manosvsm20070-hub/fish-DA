@@ -221,7 +221,9 @@ function ProductForm({ initial, catalogs, onSave, onCancel, isSaving, mode }: Pr
       {/* Price */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelCls}>Price (₹) *</label>
+          <label className={labelCls}>
+            Price (₹) * {form.isLiveFish && <span className="text-amber-600 font-normal text-[11px]">(Hidden on storefront for live fish)</span>}
+          </label>
           <input required type="number" min="0" step="1" value={form.price} onChange={(e) => set('price', e.target.value)} className={inputCls} placeholder="850" />
         </div>
         <div>
@@ -968,6 +970,11 @@ export default function AdminDashboardPage() {
                             <div className="font-bold text-primary text-sm">
                               ₹{p.price.toLocaleString('en-IN')}
                             </div>
+                            {p.isLiveFish && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold">
+                                Storefront: WhatsApp Inquiry Only
+                              </span>
+                            )}
                             <button
                               type="button"
                               onClick={() => startQuickPrice(p)}

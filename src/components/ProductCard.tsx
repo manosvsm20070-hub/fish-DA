@@ -154,45 +154,71 @@ export default function ProductCard({
 
         {/* Pricing & Cart Action Bar */}
         <div className="pt-2 border-t border-surface-container/80 flex flex-col gap-2">
-          <div className="flex items-baseline justify-between">
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-headline-sm font-bold text-on-surface">
-                ₹{product.price.toLocaleString('en-IN')}
+          {product.isLiveFish ? (
+            <div className="flex items-center justify-between">
+              <span className="font-label-md font-bold text-primary flex items-center gap-1.5 text-sm">
+                <span className="material-symbols-outlined text-[17px] text-[#25D366]">chat</span>
+                Price on Request
               </span>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <span className="font-body-sm text-on-surface-variant line-through text-xs">
-                  ₹{product.originalPrice.toLocaleString('en-IN')}
-                </span>
-              )}
+              <span className="font-label-sm text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold text-xs">
+                Live in Sothupakkam
+              </span>
             </div>
-            <span className="font-label-sm text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-semibold">
-              Live in Sothupakkam
-            </span>
-          </div>
+          ) : (
+            <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-headline-sm font-bold text-on-surface">
+                  ₹{product.price.toLocaleString('en-IN')}
+                </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className="font-body-sm text-on-surface-variant line-through text-xs">
+                    ₹{product.originalPrice.toLocaleString('en-IN')}
+                  </span>
+                )}
+              </div>
+              <span className="font-label-sm text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-semibold">
+                Live in Sothupakkam
+              </span>
+            </div>
+          )}
 
-          {/* Action Buttons: Add to Cart + WhatsApp */}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => addToCart(product, quantity, selectedSize)}
-              className="h-10 rounded-xl bg-[#cc4729] hover:bg-[#b03b20] active:scale-95 text-white font-label-md flex items-center justify-center gap-1 transition-all shadow-sm cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px]">add_shopping_cart</span>
-              <span>Add to Cart</span>
-            </button>
-
+          {/* Action Buttons: If live fish, direct WhatsApp Inquiry button. Otherwise, Add to Cart + WhatsApp */}
+          {product.isLiveFish ? (
             <a
               href={`${SHOP_INFO.whatsappDirect}?text=Hello%20Dolphin%20Aquarium,%20I%20am%20interested%20in%20${encodeURIComponent(
                 product.name
-              )}%20(Price:%20₹${product.price})`}
+              )}%20(Size:%20${encodeURIComponent(selectedSize)}).%20Please%20share%20current%20price%20and%20availability.`}
               target="_blank"
               rel="noopener noreferrer"
-              className="h-10 rounded-xl bg-[#25D366] hover:bg-[#1ebd59] active:scale-95 text-white font-label-md font-bold flex items-center justify-center gap-1 transition-all shadow-sm"
+              className="w-full h-10 rounded-xl bg-[#25D366] hover:bg-[#1ebd59] active:scale-95 text-white font-label-md font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm"
             >
               <span className="material-symbols-outlined text-[18px]">chat</span>
-              <span>WhatsApp</span>
+              <span>WhatsApp Inquiry</span>
             </a>
-          </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => addToCart(product, quantity, selectedSize)}
+                className="h-10 rounded-xl bg-[#cc4729] hover:bg-[#b03b20] active:scale-95 text-white font-label-md flex items-center justify-center gap-1 transition-all shadow-sm cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                <span>Add to Cart</span>
+              </button>
+
+              <a
+                href={`${SHOP_INFO.whatsappDirect}?text=Hello%20Dolphin%20Aquarium,%20I%20am%20interested%20in%20${encodeURIComponent(
+                  product.name
+                )}%20(Price:%20₹${product.price})`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-10 rounded-xl bg-[#25D366] hover:bg-[#1ebd59] active:scale-95 text-white font-label-md font-bold flex items-center justify-center gap-1 transition-all shadow-sm"
+              >
+                <span className="material-symbols-outlined text-[18px]">chat</span>
+                <span>WhatsApp</span>
+              </a>
+            </div>
+          )}
 
           {product.isLiveFish && (
             <p className="text-[11px] text-on-surface-variant/80 text-center italic">
