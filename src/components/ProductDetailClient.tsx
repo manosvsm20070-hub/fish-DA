@@ -166,17 +166,7 @@ export default function ProductDetailClient({
             </h1>
 
             {/* Price Display */}
-            {product.isLiveFish ? (
-              <div className="mt-3 flex items-center gap-3">
-                <span className="font-headline-lg font-extrabold text-primary flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[24px] text-[#25D366]">chat</span>
-                  Price on Request
-                </span>
-                <span className="font-label-sm text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold">
-                  Direct WhatsApp Inquiry
-                </span>
-              </div>
-            ) : (
+            {product.price > 0 ? (
               <div className="mt-3 flex items-baseline gap-3">
                 <span className="font-headline-xl font-extrabold text-primary">
                   ₹{product.price.toLocaleString('en-IN')}
@@ -188,6 +178,16 @@ export default function ProductDetailClient({
                 )}
                 <span className="font-label-sm text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold">
                   Direct Store Price
+                </span>
+              </div>
+            ) : (
+              <div className="mt-3 flex items-center gap-3">
+                <span className="font-headline-lg font-extrabold text-primary flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[24px] text-[#25D366]">chat</span>
+                  Price on Request
+                </span>
+                <span className="font-label-sm text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold">
+                  Direct WhatsApp Inquiry
                 </span>
               </div>
             )}
@@ -249,46 +249,30 @@ export default function ProductDetailClient({
           </div>
 
           {/* Add to Cart & Primary Action Buttons */}
-          {product.isLiveFish ? (
-            <div className="pt-3">
-              <a
-                href={`${SHOP_INFO.whatsappDirect}?text=Hello%20Dolphin%20Aquarium,%20I%20am%20interested%20in%20${encodeURIComponent(
-                  product.name
-                )}%20(Size:%20${encodeURIComponent(selectedSize)}${
-                  quantity > 1 ? ', Qty: ' + quantity : ''
-                }).%20Please%20share%20current%20price%20and%20availability.`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1ebd59] active:scale-95 text-white font-label-lg font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
-              >
-                <span className="material-symbols-outlined text-[20px]">chat</span>
-                <span>WhatsApp Inquiry</span>
-              </a>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3">
-              <button
-                type="button"
-                onClick={() => addToCart(product, quantity, selectedSize)}
-                className="h-12 rounded-xl bg-[#cc4729] hover:bg-[#b03b20] active:scale-95 text-white font-label-lg font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
-                <span>Add to Cart</span>
-              </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3">
+            <button
+              type="button"
+              onClick={() => addToCart(product, quantity, selectedSize)}
+              className="h-12 rounded-xl bg-[#cc4729] hover:bg-[#b03b20] active:scale-95 text-white font-label-lg font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+              <span>Add to Cart</span>
+            </button>
 
-              <a
-                href={`${SHOP_INFO.whatsappDirect}?text=Hello%20Dolphin%20Aquarium,%20I%20am%20interested%20in%20${encodeURIComponent(
-                  product.name
-                )}%20(Size:%20${encodeURIComponent(selectedSize)},%20Price:%20₹${product.price})`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="h-12 rounded-xl bg-[#25D366] hover:bg-[#1ebd59] active:scale-95 text-white font-label-lg font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
-              >
-                <span className="material-symbols-outlined text-[20px]">chat</span>
-                <span>WhatsApp Inquiry</span>
-              </a>
-            </div>
-          )}
+            <a
+              href={`${SHOP_INFO.whatsappDirect}?text=Hello%20Dolphin%20Aquarium,%20I%20am%20interested%20in%20${encodeURIComponent(
+                product.name
+              )}%20(Size:%20${encodeURIComponent(selectedSize)}${
+                product.price > 0 ? ', Price: ₹' + product.price : ''
+              }${quantity > 1 ? ', Qty: ' + quantity : ''})`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-12 rounded-xl bg-[#25D366] hover:bg-[#1ebd59] active:scale-95 text-white font-label-lg font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
+            >
+              <span className="material-symbols-outlined text-[20px]">chat</span>
+              <span>WhatsApp Inquiry</span>
+            </a>
+          </div>
 
           <div className="pt-2">
             <a

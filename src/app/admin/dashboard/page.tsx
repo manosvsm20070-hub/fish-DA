@@ -1065,11 +1065,6 @@ export default function AdminDashboardPage() {
                             <div className="font-bold text-primary text-sm">
                               ₹{p.price.toLocaleString('en-IN')}
                             </div>
-                            {p.isLiveFish && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold">
-                                Storefront: WhatsApp Inquiry Only
-                              </span>
-                            )}
                             <button
                               type="button"
                               onClick={() => startQuickPrice(p)}

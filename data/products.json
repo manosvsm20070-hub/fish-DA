@@ -52,5 +52,32 @@
     "tags": [],
     "createdAt": "2026-10-18T07:50:18.850Z",
     "updatedAt": "2026-10-18T07:50:31.073Z"
+  },
+  {
+    "id": "prod-common-goldfish-pair-1792310900742",
+    "name": "Common Goldfish Pair",
+    "category": "Fish",
+    "subCategory": "",
+    "variety": "gold fish",
+    "gender": "Unsexed",
+    "images": [
+      "/uploads/img_1792310892691_pasfbw.webp"
+    ],
+    "primaryImage": "/uploads/img_1792310892691_pasfbw.webp",
+    "price": 50,
+    "originalPrice": 60,
+    "currency": "₹",
+    "sizes": [
+      "Standard"
+    ],
+    "stock": 10,
+    "availability": "in_stock",
+    "description": "",
+    "isLiveFish": true,
+    "featured": false,
+    "status": "Published",
+    "tags": [],
+    "createdAt": "2026-10-18T08:08:20.744Z",
+    "updatedAt": "2026-10-18T08:08:20.744Z"
   }
 ]

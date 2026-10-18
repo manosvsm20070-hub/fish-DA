@@ -278,16 +278,7 @@ export default function CartPage() {
                     </div>
 
                     <div className="text-right">
-                      {item.isLiveFish ? (
-                        <div className="flex flex-col items-end">
-                          <span className="font-label-sm text-xs font-bold text-primary">
-                            Price on Request
-                          </span>
-                          <span className="text-[10px] text-on-surface-variant/80">
-                            Live stock
-                          </span>
-                        </div>
-                      ) : (
+                      {item.price > 0 ? (
                         <>
                           <span className="font-body-sm text-[11px] text-on-surface-variant block">
                             ₹{item.price} each
@@ -296,6 +287,12 @@ export default function CartPage() {
                             ₹{(item.price * item.quantity).toLocaleString('en-IN')}
                           </span>
                         </>
+                      ) : (
+                        <div className="flex flex-col items-end">
+                          <span className="font-label-sm text-xs font-bold text-primary">
+                            Price on Request
+                          </span>
+                        </div>
                       )}
                     </div>
                   </div>

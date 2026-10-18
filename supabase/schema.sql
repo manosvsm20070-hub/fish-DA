@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- Dolphin Aquarium - Complete Supabase Database Schema & Data Migration
--- Generated: 2026-10-18T07:56:39.478Z
+-- Generated: 2026-10-18T08:16:41.479Z
 -- Tables: catalogs, products, orders, price_history, settings
 -- Features: Idempotent (safe to re-run), RLS enabled, Performance Indexes
 -- ==============================================================================
@@ -688,7 +688,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = EXCLUDED.updated_at;
 
 -- ==============================================================================
--- 8. SEED DATA: PRODUCTS (2 items)
+-- 8. SEED DATA: PRODUCTS (3 items)
 -- ==============================================================================
 INSERT INTO public.products (
     id, name, category, sub_category, variety, gender, images, primary_image,
@@ -770,6 +770,58 @@ INSERT INTO public.products (
     '[]'::jsonb,
     '2026-10-18T07:50:18.850Z',
     '2026-10-18T07:50:31.073Z'
+)
+ON CONFLICT (id) DO UPDATE SET
+    name = EXCLUDED.name,
+    category = EXCLUDED.category,
+    sub_category = EXCLUDED.sub_category,
+    variety = EXCLUDED.variety,
+    gender = EXCLUDED.gender,
+    images = EXCLUDED.images,
+    primary_image = EXCLUDED.primary_image,
+    price = EXCLUDED.price,
+    original_price = EXCLUDED.original_price,
+    currency = EXCLUDED.currency,
+    sizes = EXCLUDED.sizes,
+    stock = EXCLUDED.stock,
+    availability = EXCLUDED.availability,
+    description = EXCLUDED.description,
+    water_params = EXCLUDED.water_params,
+    is_live_fish = EXCLUDED.is_live_fish,
+    featured = EXCLUDED.featured,
+    specs = EXCLUDED.specs,
+    status = EXCLUDED.status,
+    tags = EXCLUDED.tags,
+    updated_at = EXCLUDED.updated_at;
+
+INSERT INTO public.products (
+    id, name, category, sub_category, variety, gender, images, primary_image,
+    price, original_price, currency, sizes, stock, availability, description,
+    water_params, is_live_fish, featured, specs, status, tags, created_at, updated_at
+) VALUES (
+    'prod-common-goldfish-pair-1792310900742',
+    'Common Goldfish Pair',
+    'Fish',
+    '',
+    'gold fish',
+    'Unsexed',
+    '["/uploads/img_1792310892691_pasfbw.webp"]'::jsonb,
+    '/uploads/img_1792310892691_pasfbw.webp',
+    50,
+    60,
+    '₹',
+    '["Standard"]'::jsonb,
+    10,
+    'in_stock',
+    '',
+    NULL,
+    TRUE,
+    FALSE,
+    NULL,
+    'Published',
+    '[]'::jsonb,
+    '2026-10-18T08:08:20.744Z',
+    '2026-10-18T08:08:20.744Z'
 )
 ON CONFLICT (id) DO UPDATE SET
     name = EXCLUDED.name,

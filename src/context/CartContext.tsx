@@ -156,7 +156,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
-  const subtotal = items.reduce((acc, item) => (item.isLiveFish ? acc : acc + item.price * item.quantity), 0);
+  const subtotal = items.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0);
 
   return (
     <CartContext.Provider
