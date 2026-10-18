@@ -145,9 +145,6 @@ export default function CheckoutPage() {
         .join('\n');
       const whatsappMsg = `🐠 *NEW ORDER — ${data.orderNumber}*\n━━━━━━━━━━━━━━━━━━━━\n📍 *DELIVERY ADDRESS:*\n• Name: ${customerDetails.name}\n• Mobile: +91 ${phone10}\n• Address: ${customerDetails.house}\n• City: ${customerDetails.city}\n• PIN Code: ${customerDetails.pinCode}\n━━━━━━━━━━━━━━━━━━━━\n📦 *Items Ordered:*\n${itemsList}\n━━━━━━━━━━━━━━━━━━━━\n💰 Subtotal: ₹${subtotal.toLocaleString('en-IN')}\n🚚 Delivery: ${deliveryCharge === 0 ? 'FREE' : '₹' + deliveryCharge}\n⭐ *Total Amount: ₹${grandTotal.toLocaleString('en-IN')}*\n━━━━━━━━━━━━━━━━━━━━\n🏪 *Store:* Sothupakkam, Chengalpattu\nPlease confirm order acceptance and delivery timing. Thank you!`;
 
-      const whatsappUrl = `https://wa.me/917845637566?text=${encodeURIComponent(whatsappMsg)}`;
-      window.open(whatsappUrl, '_blank');
-
       setIsOrderPlaced(true);
       clearCart();
       router.push(`/order-success/${data.orderNumber}`);
@@ -161,10 +158,12 @@ export default function CheckoutPage() {
   if (isOrderPlaced) {
     return (
       <main className="flex-1 flex flex-col items-center justify-center py-20 px-4 text-center">
-        <div className="w-14 h-14 border-4 border-[#cc4729] border-t-transparent rounded-full animate-spin mb-4" />
-        <h2 className="font-headline-sm font-bold text-on-surface">Order Placed Successfully!</h2>
+        <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+          <span className="material-symbols-outlined text-[40px] animate-bounce">check_circle</span>
+        </div>
+        <h2 className="font-headline-lg font-bold text-on-surface">Your Order is Confirmed!</h2>
         <p className="font-body-sm text-xs text-on-surface-variant mt-1">
-          Redirecting to order confirmation...
+          Opening your order confirmation...
         </p>
       </main>
     );

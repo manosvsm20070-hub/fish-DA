@@ -24,13 +24,13 @@ export default async function OrderSuccessPage({
             <span className="material-symbols-outlined text-[32px]">check_circle</span>
           </div>
           <span className="font-label-sm text-xs font-bold text-emerald-800 uppercase tracking-widest">
-            Order Request Confirmed
+            Order Confirmed
           </span>
-          <h1 className="font-headline-lg font-bold text-on-surface">
-            Order Placed Successfully!
+          <h1 className="font-headline-lg font-bold text-emerald-700 dark:text-emerald-400">
+            Your Order is Confirmed!
           </h1>
           <p className="font-body-md text-sm text-on-surface-variant max-w-lg">
-            Your order has been received. Our team will contact you on your verified phone number to coordinate safe transit and pickup.
+            Thank you! Your order has been placed successfully. Our shop team at Sothupakkam will contact your mobile number to coordinate delivery and timing.
           </p>
         </div>
 
@@ -47,10 +47,10 @@ export default async function OrderSuccessPage({
               href={`${SHOP_INFO.whatsappDirect}?text=Hello%20Dolphin%20Aquarium,%20I%20placed%20order%20${orderNumber}.%20Please%20provide%20status`}
               target="_blank"
               rel="noopener noreferrer"
-              className="h-10 px-4 rounded-xl bg-[#25D366] text-white font-label-md font-bold flex items-center gap-1.5 shadow-sm text-xs"
+              className="h-10 px-4 rounded-xl bg-[#25D366] hover:bg-[#1ebd59] text-white font-label-md font-bold flex items-center gap-1.5 shadow-sm text-xs transition-all"
             >
               <span className="material-symbols-outlined text-[16px]">chat</span>
-              <span>WhatsApp Store Tracking</span>
+              <span>Need Help? Chat on WhatsApp</span>
             </a>
           </div>
         </div>

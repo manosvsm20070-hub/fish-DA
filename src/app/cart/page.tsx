@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
@@ -9,6 +10,7 @@ import { useLiveSettings } from '@/components/RealtimeSiteSync';
 import Footer from '@/components/Footer';
 
 export default function CartPage() {
+  const router = useRouter();
   const { items, updateQuantity, removeFromCart, subtotal, cartCount, clearCart } = useCart();
   const live = useLiveSettings();
 
@@ -20,7 +22,7 @@ export default function CartPage() {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [orderSent, setOrderSent] = useState(false);
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false);
 
   // Load previously saved delivery address from localStorage
   useEffect(() => {
@@ -96,7 +98,7 @@ export default function CartPage() {
     };
   };
 
-  const handleWhatsAppOrder = async () => {
+  const handlePlaceOrder = async () => {
     if (items.length === 0 || isSubmitting) return;
 
     // Address and contact details are required to place order
@@ -110,6 +112,7 @@ export default function CartPage() {
     }
 
     setIsSubmitting(true);
+    setGeneralError(null);
 
     try {
       // Save address for user convenience in future
@@ -117,64 +120,55 @@ export default function CartPage() {
         localStorage.setItem('da_delivery_address', JSON.stringify(validated));
       } catch {}
 
-      // 1. Format clean WhatsApp order text with verified delivery address
-      let msg = `🐠 *NEW ORDER — ${storeName}*\n`;
-      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-      msg += `📍 *DELIVERY ADDRESS:*\n`;
-      msg += `• Name: ${validated.name}\n`;
-      msg += `• Mobile: +91 ${validated.phone}\n`;
-      msg += `• Address: ${validated.address}\n`;
-      msg += `• City / Town: ${validated.city}\n`;
-      msg += `• PIN Code: ${validated.pincode}\n`;
-      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-      const hasUnpricedItems = items.some((i) => !i.price || i.price <= 0);
-      msg += `📦 *Items Ordered (${items.reduce((acc, i) => acc + i.quantity, 0)}):*\n`;
-      items.forEach((item, idx) => {
-        if (!item.price || item.price <= 0) {
-          msg += `${idx + 1}. *${item.productName}*${item.isLiveFish ? ' (Live Stock)' : ''}\n   ${item.variety ? item.variety + ' • ' : ''}Size: ${item.selectedSize}\n   Qty: ${item.quantity} (Price on inquiry)\n`;
-        } else {
-          msg += `${idx + 1}. *${item.productName}*${item.isLiveFish ? ' (Live Stock)' : ''}\n   ${item.variety ? item.variety + ' • ' : ''}Size: ${item.selectedSize}\n   Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')} = ₹${(item.price * item.quantity).toLocaleString('en-IN')}\n`;
-        }
+      // Save order record to database for store logging
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerDetails: {
+            name: validated.name,
+            phoneNumber: validated.phone,
+            house: validated.address,
+            city: validated.city,
+            district: validated.city,
+            state: 'Tamil Nadu',
+            pinCode: validated.pincode,
+          },
+          items,
+        }),
       });
-      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-      msg += `💰 *Subtotal:* ₹${subtotal.toLocaleString('en-IN')}\n`;
-      msg += `🚚 *Delivery:* ${deliveryCharge === 0 ? 'FREE' : '₹' + deliveryCharge}\n`;
-      msg += `⭐ *Grand Total: ₹${grandTotal.toLocaleString('en-IN')}${hasUnpricedItems ? ' (+ Inquired Items)' : ''}*\n`;
-      if (hasUnpricedItems) {
-        msg += `🐠 *Note:* Availability and unpriced items confirmed on WhatsApp.\n`;
+
+      const data = await res.json();
+      if (!res.ok || !data.success || !data.orderNumber) {
+        setGeneralError(data.error || 'Failed to place order. Please try again.');
+        setIsSubmitting(false);
+        return;
       }
-      msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-      msg += `🏪 *Store:* Sothupakkam, Chengalpattu\nPlease confirm order acceptance and dispatch timing. Thank you!`;
 
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
-
-      // 2. Asynchronously save order record to database for store logging
-      try {
-        fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customerDetails: {
-              name: validated.name,
-              phoneNumber: validated.phone,
-              house: validated.address,
-              city: validated.city,
-              district: validated.city,
-              state: 'Tamil Nadu',
-              pinCode: validated.pincode,
-            },
-            items,
-          }),
-        }).catch(() => {});
-      } catch {}
-
-      // 3. Launch WhatsApp directly
-      setOrderSent(true);
-      window.open(whatsappUrl, '_blank');
-    } finally {
+      // Order confirmed! Clear cart and redirect to order success page
+      setIsOrderPlaced(true);
+      clearCart();
+      router.push(`/order-success/${data.orderNumber}`);
+    } catch {
+      setGeneralError('Network error while placing order. Please try again.');
       setIsSubmitting(false);
     }
   };
+
+  // State: Order placed redirecting
+  if (isOrderPlaced) {
+    return (
+      <main className="flex-1 flex flex-col items-center justify-center py-24 px-4 text-center">
+        <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+          <span className="material-symbols-outlined text-[40px] animate-bounce">check_circle</span>
+        </div>
+        <h2 className="font-headline-lg font-bold text-on-surface">Your Order is Confirmed!</h2>
+        <p className="font-body-md text-sm text-on-surface-variant mt-1">
+          Opening your order confirmation details...
+        </p>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 flex flex-col w-full px-4 md:px-8 max-w-7xl mx-auto">
@@ -524,52 +518,33 @@ export default function CartPage() {
               </div>
             )}
 
-            {/* WhatsApp Direct Notice */}
+            {/* Direct Confirmation Notice */}
             <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 text-xs flex items-start gap-2">
               <span className="material-symbols-outlined text-[18px] text-emerald-700 shrink-0 mt-0.5">verified</span>
               <p>
-                <strong>Direct WhatsApp Ordering:</strong> Once your address is entered, your order will open on WhatsApp (+91 78456 37566) for instant confirmation and dispatch timing.
+                <strong>Direct Store Dispatch & Cash on Delivery:</strong> Click &quot;Place Order&quot; below to confirm your order immediately. You will receive your confirmation details and order number on the next screen.
               </p>
             </div>
 
             {/* Primary Order Action Button */}
             <button
               type="button"
-              onClick={handleWhatsAppOrder}
+              onClick={handlePlaceOrder}
               disabled={isSubmitting || items.length === 0}
-              className="w-full h-14 rounded-xl bg-[#25D366] hover:bg-[#1ebd59] active:scale-[0.98] text-white font-label-lg font-bold flex items-center justify-center gap-2.5 shadow-md transition-all disabled:opacity-50 text-base cursor-pointer"
+              className="w-full h-14 rounded-xl bg-[#cc4729] hover:bg-[#b03b20] active:scale-[0.98] text-white font-label-lg font-bold flex items-center justify-center gap-2.5 shadow-md transition-all disabled:opacity-50 text-base cursor-pointer"
             >
               {isSubmitting ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Preparing WhatsApp Order...</span>
+                  <span>Confirming Order...</span>
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[24px]">chat</span>
-                  <span>Order via WhatsApp &bull; ₹{grandTotal.toLocaleString('en-IN')}</span>
+                  <span className="material-symbols-outlined text-[24px]">check_circle</span>
+                  <span>Place Order &bull; ₹{grandTotal.toLocaleString('en-IN')}</span>
                 </>
               )}
             </button>
-
-            {orderSent && (
-              <div className="p-3 rounded-xl bg-surface-container-high border border-primary/30 text-center flex flex-col gap-2">
-                <span className="font-label-md text-xs font-bold text-primary flex items-center justify-center gap-1">
-                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                  <span>WhatsApp Opened!</span>
-                </span>
-                <p className="text-[11px] text-on-surface-variant">
-                  If WhatsApp didn&apos;t open automatically, click below:
-                </p>
-                <button
-                  type="button"
-                  onClick={handleWhatsAppOrder}
-                  className="text-xs text-primary font-bold underline cursor-pointer"
-                >
-                  Click here to re-open WhatsApp
-                </button>
-              </div>
-            )}
           </div>
         </div>
       )}
