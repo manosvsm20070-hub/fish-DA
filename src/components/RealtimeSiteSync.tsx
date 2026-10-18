@@ -144,13 +144,19 @@ export default function RealtimeSiteSync({
     };
     window.addEventListener('storage', handleStorage);
 
-    // 3. Polling check for remote devices / other browsers (heartbeat every 3.5s)
+    // 3. Polling check for remote devices / other browsers (heartbeat every 2s)
     let isChecking = false;
     const checkSync = async () => {
       if (isChecking) return;
       isChecking = true;
       try {
-        const res = await fetch('/api/sync', { cache: 'no-store' });
+        const res = await fetch(`/api/sync?_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+          },
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.success) {
@@ -188,7 +194,7 @@ export default function RealtimeSiteSync({
       }
     };
 
-    const interval = setInterval(checkSync, 3500);
+    const interval = setInterval(checkSync, 2000);
 
     // Immediate sync on tab focus or visibility change
     const handleVisibility = () => {

@@ -19,7 +19,10 @@ export default function LiveGearEssentials({ initialGear }: LiveGearEssentialsPr
   useEffect(() => {
     const handleProductsUpdated = async () => {
       try {
-        const res = await fetch('/api/products', { cache: 'no-store' });
+        const res = await fetch(`/api/products?_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', Pragma: 'no-cache' },
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.products && Array.isArray(data.products)) {

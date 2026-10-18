@@ -26,7 +26,10 @@ export default function ProductDetailClient({
   useEffect(() => {
     const handleProductsUpdated = async () => {
       try {
-        const res = await fetch(`/api/products/${initialProduct.id}`, { cache: 'no-store' });
+        const res = await fetch(`/api/products/${initialProduct.id}?_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', Pragma: 'no-cache' },
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.product) {

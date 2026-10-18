@@ -16,7 +16,16 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, product });
+    return NextResponse.json(
+      { success: true, product },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
+    );
   } catch (err: unknown) {
     console.error('API /api/products/[id] error:', err);
     return NextResponse.json({ success: false, error: 'Failed to retrieve product' }, { status: 500 });

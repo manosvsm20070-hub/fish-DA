@@ -13,6 +13,9 @@ function adminAuth(req: NextRequest) {
   return verified;
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // PATCH /api/admin/products/[id] — update any product fields (full CMS)
 export async function PATCH(
   req: NextRequest,
@@ -61,7 +64,16 @@ export async function PATCH(
       revalidatePath(`/product/${id}`);
     } catch {}
 
-    return NextResponse.json({ success: true, message: 'Product updated successfully.', product: result.product });
+    return NextResponse.json(
+      { success: true, message: 'Product updated successfully.', product: result.product },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
+    );
   } catch (err: unknown) {
     console.error('PATCH /api/admin/products/[id] error:', err);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });

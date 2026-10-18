@@ -17,7 +17,16 @@ type AdminSection = 'dashboard' | 'products' | 'catalogs' | 'orders' | 'settings
 // HELPER: Admin fetch with error
 // ─────────────────────────────────────────────────────────────
 async function adminFetch(url: string, opts?: RequestInit) {
-  const res = await fetch(url, { ...opts });
+  const sep = url.includes('?') ? '&' : '?';
+  const res = await fetch(`${url}${sep}_t=${Date.now()}`, {
+    cache: 'no-store',
+    ...opts,
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      Pragma: 'no-cache',
+      ...(opts?.headers || {}),
+    },
+  });
   const data = await res.json();
   return { ok: res.ok, data };
 }
@@ -519,6 +528,11 @@ export default function AdminDashboardPage() {
       return;
     }
 
+    if (data.product) {
+      setProducts((prev) =>
+        prev.map((item) => (item.id === data.product.id ? data.product : item))
+      );
+    }
     showToast(`Updated price for "${p.name}" to ₹${num.toLocaleString('en-IN')}`);
     broadcastAdminUpdate('PRODUCTS_UPDATED');
     await loadData();
@@ -591,6 +605,11 @@ export default function AdminDashboardPage() {
           showToast(data.error || 'Update failed', 'error');
           await loadData();
           return;
+        }
+        if (data.product) {
+          setProducts((prev) =>
+            prev.map((p) => (p.id === data.product.id ? data.product : p))
+          );
         }
         showToast('Product updated successfully!');
         setEditingProduct(null);

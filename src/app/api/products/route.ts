@@ -35,7 +35,16 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true, count: products.length, products });
+    return NextResponse.json(
+      { success: true, count: products.length, products },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
+    );
   } catch (err: unknown) {
     console.error('API /api/products error:', err);
     return NextResponse.json({ success: false, error: 'Failed to retrieve products' }, { status: 500 });

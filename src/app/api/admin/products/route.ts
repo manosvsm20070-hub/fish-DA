@@ -14,6 +14,9 @@ function adminAuth(req: NextRequest) {
   return verified;
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // GET /api/admin/products — list all products for admin (all statuses)
 export async function GET(req: NextRequest) {
   const auth = adminAuth(req);
@@ -31,7 +34,16 @@ export async function GET(req: NextRequest) {
       filtered = filtered.filter((p) => p.category.toLowerCase().includes(category.toLowerCase()));
     }
 
-    return NextResponse.json({ success: true, count: filtered.length, products: filtered });
+    return NextResponse.json(
+      { success: true, count: filtered.length, products: filtered },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
+    );
   } catch {
     return NextResponse.json({ success: false, error: 'Failed to load products' }, { status: 500 });
   }

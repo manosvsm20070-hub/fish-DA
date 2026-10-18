@@ -53,7 +53,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const syncCartPrices = async () => {
       try {
-        const res = await fetch('/api/products', { cache: 'no-store' });
+        const res = await fetch(`/api/products?_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', Pragma: 'no-cache' },
+        });
         if (!res.ok) return;
         const data = await res.json();
         if (data.products && Array.isArray(data.products)) {

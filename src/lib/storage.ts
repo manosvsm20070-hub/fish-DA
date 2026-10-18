@@ -112,45 +112,43 @@ function getWorkingDataDir(): string {
   }
 }
 
-// In-Memory cache for speed, validated against filesystem mtime
-let memoryProducts: Product[] | null = null;
-let memoryOrders: Order[] | null = null;
-let memoryCatalogs: Catalog[] | null = null;
-let memorySettings: SiteSettings | null = null;
-let memoryPriceHistory: PriceHistory[] | null = null;
+// ======================== SYNC VERSION & DISK ENGINE ========================
 
-let lastProductsMtime = 0;
-let lastOrdersMtime = 0;
-let lastCatalogsMtime = 0;
-let lastSettingsMtime = 0;
-let lastPriceHistoryMtime = 0;
-
-// Realtime sync version timestamps
-let lastSettingsUpdate = Date.now();
-let lastProductsUpdate = Date.now();
-
-export function getFileMtime(filename: string): number {
-  try {
-    const workingDir = getWorkingDataDir();
-    const workingPath = path.join(/*turbopackIgnore: true*/ workingDir, filename);
-    if (fs.existsSync(/*turbopackIgnore: true*/ workingPath)) {
-      return fs.statSync(/*turbopackIgnore: true*/ workingPath).mtimeMs;
-    }
-    const bundledPath = path.join(BUNDLED_DATA_DIR, filename);
-    if (fs.existsSync(bundledPath)) {
-      return fs.statSync(bundledPath).mtimeMs;
-    }
-  } catch {}
-  return 0;
+interface SyncVersionData {
+  productsUpdatedAt: number;
+  settingsUpdatedAt: number;
 }
 
-export function getSyncVersion() {
-  const productsMtime = getFileMtime('products.json');
-  const settingsMtime = getFileMtime('settings.json');
-  return {
-    settingsUpdatedAt: Math.max(lastSettingsUpdate, Math.floor(settingsMtime)),
-    productsUpdatedAt: Math.max(lastProductsUpdate, Math.floor(productsMtime)),
-  };
+export function getSyncVersion(): SyncVersionData {
+  try {
+    const raw = readFileSafe<SyncVersionData>('sync_version.json', () => ({
+      productsUpdatedAt: Date.now(),
+      settingsUpdatedAt: Date.now(),
+    }));
+    return {
+      productsUpdatedAt: raw.productsUpdatedAt || Date.now(),
+      settingsUpdatedAt: raw.settingsUpdatedAt || Date.now(),
+    };
+  } catch {
+    return {
+      productsUpdatedAt: Date.now(),
+      settingsUpdatedAt: Date.now(),
+    };
+  }
+}
+
+export function touchSyncVersion(type: 'products' | 'settings') {
+  try {
+    const current = getSyncVersion();
+    const now = Date.now();
+    const next: SyncVersionData = {
+      ...current,
+      [type === 'products' ? 'productsUpdatedAt' : 'settingsUpdatedAt']: now,
+    };
+    writeFileSafe('sync_version.json', next);
+  } catch (err) {
+    console.warn('[storage] touchSyncVersion error:', err);
+  }
 }
 
 function readFileSafe<T>(filename: string, fallbackFactory: () => T): T {
@@ -202,11 +200,22 @@ function writeFileSafe(filename: string, data: unknown): boolean {
       fs.mkdirSync(/*turbopackIgnore: true*/ workingDir, { recursive: true });
     }
     const workingPath = path.join(/*turbopackIgnore: true*/ workingDir, filename);
-    fs.writeFileSync(/*turbopackIgnore: true*/ workingPath, JSON.stringify(data, null, 2), 'utf-8');
+    const serialized = JSON.stringify(data, null, 2);
+    fs.writeFileSync(/*turbopackIgnore: true*/ workingPath, serialized, 'utf-8');
+
+    // Also mirror to bundled data directory if writable and working dir differs
+    const bundledPath = path.join(BUNDLED_DATA_DIR, filename);
+    if (workingPath !== bundledPath) {
+      try {
+        if (!fs.existsSync(BUNDLED_DATA_DIR)) {
+          fs.mkdirSync(BUNDLED_DATA_DIR, { recursive: true });
+        }
+        fs.writeFileSync(bundledPath, serialized, 'utf-8');
+      } catch {}
+    }
     return true;
   } catch (err) {
     console.warn(`[storage] writeFileSafe to ${filename} in working dir failed:`, err);
-    // Emergency attempt directly in os.tmpdir()
     try {
       const emergencyPath = path.join(/*turbopackIgnore: true*/ os.tmpdir(), filename);
       fs.writeFileSync(/*turbopackIgnore: true*/ emergencyPath, JSON.stringify(data, null, 2), 'utf-8');
@@ -233,14 +242,7 @@ export function ensureDataFiles() {
 // ======================== CATALOG OPERATIONS ========================
 
 export async function getCatalogs(): Promise<Catalog[]> {
-  const mtime = getFileMtime('catalogs.json');
-  if (memoryCatalogs && lastCatalogsMtime && mtime && mtime <= lastCatalogsMtime) {
-    return memoryCatalogs;
-  }
-  const catalogs = readFileSafe<Catalog[]>('catalogs.json', () => DEFAULT_CATALOGS);
-  memoryCatalogs = catalogs;
-  lastCatalogsMtime = mtime || Date.now();
-  return memoryCatalogs;
+  return readFileSafe<Catalog[]>('catalogs.json', () => DEFAULT_CATALOGS);
 }
 
 export async function getActiveCatalogs(): Promise<Catalog[]> {
@@ -261,9 +263,8 @@ export async function createCatalog(
 
     const newCatalog: Catalog = { ...catalog, createdAt: now, updatedAt: now };
     catalogs.push(newCatalog);
-    memoryCatalogs = catalogs;
-    lastProductsUpdate = Date.now();
     writeFileSafe('catalogs.json', catalogs);
+    touchSyncVersion('products');
     return { success: true, catalog: newCatalog };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to create catalog';
@@ -281,9 +282,8 @@ export async function updateCatalog(
     if (index === -1) return { success: false, error: 'Catalog not found' };
 
     catalogs[index] = { ...catalogs[index], ...updates, updatedAt: new Date().toISOString() };
-    memoryCatalogs = catalogs;
-    lastProductsUpdate = Date.now();
     writeFileSafe('catalogs.json', catalogs);
+    touchSyncVersion('products');
     return { success: true, catalog: catalogs[index] };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to update catalog';
@@ -294,16 +294,10 @@ export async function updateCatalog(
 // ======================== PRODUCT OPERATIONS ========================
 
 export async function getProducts(): Promise<Product[]> {
-  const mtime = getFileMtime('products.json');
-  if (memoryProducts && lastProductsMtime && mtime && mtime <= lastProductsMtime) {
-    return memoryProducts;
-  }
   const products = readFileSafe<Product[]>('products.json', () =>
     INITIAL_PRODUCTS.map((p) => ({ ...p, status: 'Published' as ProductStatus }))
   );
-  memoryProducts = products.map((p) => ({ ...p, status: p.status || 'Published' }));
-  lastProductsMtime = mtime || Date.now();
-  return memoryProducts;
+  return products.map((p) => ({ ...p, status: p.status || 'Published' }));
 }
 
 export async function getPublishedProducts(): Promise<Product[]> {
@@ -329,10 +323,8 @@ export async function createProduct(
     const now = new Date().toISOString();
     const newProduct: Product = { ...product, createdAt: now, updatedAt: now };
     products.push(newProduct);
-    memoryProducts = products;
     writeFileSafe('products.json', products);
-    lastProductsMtime = getFileMtime('products.json') || Date.now();
-    lastProductsUpdate = Date.now();
+    touchSyncVersion('products');
     return { success: true, product: newProduct };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to create product';
@@ -366,16 +358,13 @@ export async function updateProductFull(
           changedAt: now,
           adminId,
         });
-        memoryPriceHistory = history;
         writeFileSafe('price_history.json', history);
       } catch {}
     }
 
     products[index] = { ...currentProduct, ...updates, id, createdAt: currentProduct.createdAt, updatedAt: now };
-    memoryProducts = products;
     writeFileSafe('products.json', products);
-    lastProductsMtime = getFileMtime('products.json') || Date.now();
-    lastProductsUpdate = Date.now();
+    touchSyncVersion('products');
     return { success: true, product: products[index] };
   } catch (err: unknown) {
     console.error('[storage] Failed to update product:', err);
@@ -400,14 +389,7 @@ export async function archiveProduct(id: string): Promise<{ success: boolean; er
 // ======================== ORDER OPERATIONS ========================
 
 export async function getOrders(): Promise<Order[]> {
-  const mtime = getFileMtime('orders.json');
-  if (memoryOrders && lastOrdersMtime && mtime && mtime <= lastOrdersMtime) {
-    return memoryOrders;
-  }
-  const orders = readFileSafe<Order[]>('orders.json', () => []);
-  memoryOrders = orders;
-  lastOrdersMtime = mtime || Date.now();
-  return memoryOrders;
+  return readFileSafe<Order[]>('orders.json', () => []);
 }
 
 export async function getOrderByNumber(orderNumber: string): Promise<Order | null> {
@@ -424,7 +406,6 @@ export async function createOrder(order: Order): Promise<{ success: boolean; ord
     }
 
     orders.unshift(order);
-    memoryOrders = orders;
     writeFileSafe('orders.json', orders);
     return { success: true, order };
   } catch (err: unknown) {
@@ -443,7 +424,6 @@ export async function updateOrderStatus(
     const index = orders.findIndex((o) => o.orderNumber === orderNumber);
     if (index === -1) return { success: false, error: 'Order not found' };
     orders[index] = { ...orders[index], status: status as OrderStatus, updatedAt: new Date().toISOString() };
-    memoryOrders = orders;
     writeFileSafe('orders.json', orders);
     return { success: true };
   } catch (err: unknown) {
@@ -461,7 +441,6 @@ export async function updateOrderNotificationStatus(
     const index = orders.findIndex((o) => o.orderNumber === orderNumber);
     if (index !== -1) {
       orders[index] = { ...orders[index], ...status, updatedAt: new Date().toISOString() };
-      memoryOrders = orders;
       writeFileSafe('orders.json', orders);
     }
   } catch (err) {
@@ -472,23 +451,12 @@ export async function updateOrderNotificationStatus(
 // ======================== PRICE HISTORY ========================
 
 export async function getPriceHistory(): Promise<PriceHistory[]> {
-  const mtime = getFileMtime('price_history.json');
-  if (memoryPriceHistory && lastPriceHistoryMtime && mtime && mtime <= lastPriceHistoryMtime) {
-    return memoryPriceHistory;
-  }
-  const history = readFileSafe<PriceHistory[]>('price_history.json', () => []);
-  memoryPriceHistory = history;
-  lastPriceHistoryMtime = mtime || Date.now();
-  return memoryPriceHistory;
+  return readFileSafe<PriceHistory[]>('price_history.json', () => []);
 }
 
 // ======================== SETTINGS & THEME OPERATIONS ========================
 
 export async function getSettings(): Promise<SiteSettings> {
-  const mtime = getFileMtime('settings.json');
-  if (memorySettings && lastSettingsMtime && mtime && mtime <= lastSettingsMtime) {
-    return memorySettings;
-  }
   const parsed = readFileSafe<Partial<SiteSettings>>('settings.json', () => DEFAULT_SETTINGS);
   const resolved: SiteSettings = {
     ...DEFAULT_SETTINGS,
@@ -511,9 +479,7 @@ export async function getSettings(): Promise<SiteSettings> {
       },
     },
   };
-  memorySettings = resolved;
-  lastSettingsMtime = mtime || Date.now();
-  return memorySettings;
+  return resolved;
 }
 
 export async function updateSettings(
@@ -542,9 +508,8 @@ export async function updateSettings(
         },
       },
     };
-    memorySettings = next;
-    lastSettingsUpdate = Date.now();
     writeFileSafe('settings.json', next);
+    touchSyncVersion('settings');
     return { success: true, settings: next };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to update settings';
@@ -571,9 +536,8 @@ export async function updateAdminPassword(
     }
     const current = await getSettings();
     current.adminPassword = newPassword.trim();
-    memorySettings = current;
-    lastSettingsUpdate = Date.now();
     writeFileSafe('settings.json', current);
+    touchSyncVersion('settings');
     return { success: true };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to update password';
