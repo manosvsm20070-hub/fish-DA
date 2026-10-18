@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- Dolphin Aquarium - Complete Supabase Database Schema & Data Migration
--- Generated: 2026-10-18T07:40:03.374Z
+-- Generated: 2026-10-18T07:46:48.276Z
 -- Tables: catalogs, products, orders, price_history, settings
 -- Features: Idempotent (safe to re-run), RLS enabled, Performance Indexes
 -- ==============================================================================
@@ -688,8 +688,60 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = EXCLUDED.updated_at;
 
 -- ==============================================================================
--- 8. SEED DATA: PRODUCTS (0 items)
+-- 8. SEED DATA: PRODUCTS (1 items)
 -- ==============================================================================
+INSERT INTO public.products (
+    id, name, category, sub_category, variety, gender, images, primary_image,
+    price, original_price, currency, sizes, stock, availability, description,
+    water_params, is_live_fish, featured, specs, status, tags, created_at, updated_at
+) VALUES (
+    'prod-betta-1792309316059',
+    'betta',
+    'Fish',
+    'male betta',
+    'full moon',
+    'Unsexed',
+    '["/uploads/img_1792309387729_qtdx8a.webp"]'::jsonb,
+    '/uploads/img_1792309387729_qtdx8a.webp',
+    150,
+    160,
+    '₹',
+    '["2.5inch"]'::jsonb,
+    15,
+    'in_stock',
+    '',
+    NULL,
+    TRUE,
+    FALSE,
+    NULL,
+    'Published',
+    '[]'::jsonb,
+    '2026-10-18T07:41:56.060Z',
+    '2026-10-18T07:43:09.342Z'
+)
+ON CONFLICT (id) DO UPDATE SET
+    name = EXCLUDED.name,
+    category = EXCLUDED.category,
+    sub_category = EXCLUDED.sub_category,
+    variety = EXCLUDED.variety,
+    gender = EXCLUDED.gender,
+    images = EXCLUDED.images,
+    primary_image = EXCLUDED.primary_image,
+    price = EXCLUDED.price,
+    original_price = EXCLUDED.original_price,
+    currency = EXCLUDED.currency,
+    sizes = EXCLUDED.sizes,
+    stock = EXCLUDED.stock,
+    availability = EXCLUDED.availability,
+    description = EXCLUDED.description,
+    water_params = EXCLUDED.water_params,
+    is_live_fish = EXCLUDED.is_live_fish,
+    featured = EXCLUDED.featured,
+    specs = EXCLUDED.specs,
+    status = EXCLUDED.status,
+    tags = EXCLUDED.tags,
+    updated_at = EXCLUDED.updated_at;
+
 -- ==============================================================================
 -- 9. SEED DATA: ORDERS (7 items)
 -- ==============================================================================
