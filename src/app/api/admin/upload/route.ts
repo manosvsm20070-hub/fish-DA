@@ -1,9 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { verifySessionToken } from '@/lib/auth';
 
-const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
+const LOCAL_UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
+const TMP_UPLOADS_DIR = path.join(os.tmpdir(), 'dolphin_uploads');
+
+function getWritableUploadsDir(): { dir: string; isTmp: boolean } {
+  // If running on Vercel or Lambda, cwd is read-only
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    if (!fs.existsSync(TMP_UPLOADS_DIR)) {
+      try {
+        fs.mkdirSync(TMP_UPLOADS_DIR, { recursive: true });
+      } catch {}
+    }
+    return { dir: TMP_UPLOADS_DIR, isTmp: true };
+  }
+
+  // Locally, test if public/uploads is writable
+  try {
+    if (!fs.existsSync(LOCAL_UPLOADS_DIR)) {
+      fs.mkdirSync(LOCAL_UPLOADS_DIR, { recursive: true });
+    }
+    const testFile = path.join(LOCAL_UPLOADS_DIR, '.write_test');
+    fs.writeFileSync(testFile, 'ok', 'utf-8');
+    fs.unlinkSync(testFile);
+    return { dir: LOCAL_UPLOADS_DIR, isTmp: false };
+  } catch {
+    // Read-only fallback
+    if (!fs.existsSync(TMP_UPLOADS_DIR)) {
+      try {
+        fs.mkdirSync(TMP_UPLOADS_DIR, { recursive: true });
+      } catch {}
+    }
+    return { dir: TMP_UPLOADS_DIR, isTmp: true };
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,56 +71,79 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Validate File Size (max 5MB)
-    const MAX_SIZE = 5 * 1024 * 1024;
+    // 3. Validate File Size (allow up to 25MB for high-res camera photos)
+    const MAX_SIZE = 25 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
-        { success: false, error: 'File is too large. Maximum size allowed is 5MB.' },
+        { success: false, error: 'File is too large. Maximum size allowed is 25MB.' },
         { status: 400 }
       );
     }
 
-    // 4. Validate MIME Type & Extension
-    const mimeType = file.type.toLowerCase();
+    // 4. Validate MIME Type & determine extension
+    const mimeType = (file.type || '').toLowerCase();
     const allowedMimes: Record<string, string> = {
       'image/jpeg': 'jpg',
       'image/jpg': 'jpg',
       'image/png': 'png',
       'image/webp': 'webp',
+      'image/gif': 'gif',
+      'image/avif': 'avif',
+      'image/heic': 'jpg',
+      'image/heif': 'jpg',
     };
 
-    const extension = allowedMimes[mimeType];
+    let extension = allowedMimes[mimeType];
     if (!extension) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Unsupported image format. Allowed formats: JPG, JPEG, PNG, WEBP.',
-        },
-        { status: 400 }
-      );
+      // Fallback: check file name extension if mimeType is generic image/* or octet-stream
+      const nameExt = path.extname(file.name).toLowerCase().replace('.', '');
+      if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif', 'heic', 'heif'].includes(nameExt)) {
+        extension = nameExt === 'jpeg' || nameExt === 'heic' || nameExt === 'heif' ? 'jpg' : nameExt;
+      } else {
+        extension = 'webp'; // default fallback for image data
+      }
     }
-
-    // 5. Ensure storage directory exists
-    if (!fs.existsSync(UPLOADS_DIR)) {
-      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-    }
-
-    // 6. Generate safe unique filename
-    const safeName = `img_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
-    const filePath = path.join(UPLOADS_DIR, safeName);
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    await fs.promises.writeFile(filePath, buffer);
+    // 5. Generate safe unique filename
+    const safeName = `img_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
 
-    const publicUrl = `/uploads/${safeName}`;
+    // 6. Save to storage
+    const { dir, isTmp } = getWritableUploadsDir();
+    const filePath = path.join(dir, safeName);
+
+    try {
+      if (!fs.existsSync(/*turbopackIgnore: true*/ dir)) {
+        fs.mkdirSync(/*turbopackIgnore: true*/ dir, { recursive: true });
+      }
+      await fs.promises.writeFile(/*turbopackIgnore: true*/ filePath, buffer);
+    } catch (writeErr) {
+      console.warn('[upload] Primary write failed, attempting /tmp emergency:', writeErr);
+      try {
+        const emergencyPath = path.join(/*turbopackIgnore: true*/ os.tmpdir(), safeName);
+        await fs.promises.writeFile(/*turbopackIgnore: true*/ emergencyPath, buffer);
+      } catch (e2) {
+        console.error('[upload] Emergency write failed:', e2);
+      }
+    }
+
+    // Public URL served either directly or via the dynamic streaming route
+    const publicUrl = isTmp ? `/api/uploads/${safeName}` : `/uploads/${safeName}`;
+
+    // Also generate data URL as an ultra-reliable embed option
+    const base64Data = buffer.toString('base64');
+    const effectiveMime = mimeType && mimeType.startsWith('image/') ? mimeType : `image/${extension}`;
+    const dataUrl = `data:${effectiveMime};base64,${base64Data}`;
 
     return NextResponse.json({
       success: true,
       message: 'Image uploaded successfully.',
       url: publicUrl,
+      dataUrl,
       fileName: safeName,
+      size: file.size,
     });
   } catch (err: unknown) {
     console.error('Image upload failed:', err);

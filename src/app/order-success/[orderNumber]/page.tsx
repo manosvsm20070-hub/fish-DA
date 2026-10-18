@@ -93,7 +93,13 @@ export default async function OrderSuccessPage({
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-surface-container">
-                      <Image src={it.image} alt={it.productName} fill className="object-cover" />
+                      <Image
+                        src={it.image}
+                        alt={it.productName}
+                        fill
+                        unoptimized={Boolean(it.image?.startsWith('data:') || it.image?.startsWith('/api/uploads/') || it.image?.startsWith('/uploads/'))}
+                        className="object-cover"
+                      />
                     </div>
                     <div>
                       <p className="font-bold text-on-surface text-sm">{it.productName}</p>

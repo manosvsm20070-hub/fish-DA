@@ -1,14 +1,8 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { Product, Order, PriceHistory, Catalog, ProductStatus, OrderStatus, SiteSettings } from '@/types';
 import { INITIAL_PRODUCTS, SHOP_INFO } from '@/data/products';
-
-const DATA_DIR = path.join(process.cwd(), 'data');
-const PRODUCTS_FILE = path.join(DATA_DIR, 'products.json');
-const ORDERS_FILE = path.join(DATA_DIR, 'orders.json');
-const PRICE_HISTORY_FILE = path.join(DATA_DIR, 'price_history.json');
-const CATALOGS_FILE = path.join(DATA_DIR, 'catalogs.json');
-const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 
 export const DEFAULT_SETTINGS: SiteSettings = {
   adminPassword: process.env.ADMIN_PASSWORD || 'bestfish',
@@ -72,46 +66,143 @@ const DEFAULT_CATALOGS: Catalog[] = [
   { id: 'cat-accessories', name: 'Accessories', slug: 'accessories', description: 'Aquarium accessories and tools', displayOrder: 23, status: 'Active', createdAt: '2026-09-01T00:00:00Z', updatedAt: '2026-09-01T00:00:00Z' },
 ];
 
-// Ensure data directory and files exist
-function ensureDataFiles() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+// ======================== STORAGE ENGINE ========================
+const BUNDLED_DATA_DIR = path.join(process.cwd(), 'data');
+
+let resolvedDataDir: string | null = null;
+
+// Determine writable directory (uses /tmp on Vercel/Lambda to avoid EROFS)
+function getWorkingDataDir(): string {
+  if (resolvedDataDir) return resolvedDataDir;
+
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    const tmpDir = path.join(os.tmpdir(), 'dolphin_data');
+    try {
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir, { recursive: true });
+      }
+      resolvedDataDir = tmpDir;
+      return resolvedDataDir;
+    } catch {
+      resolvedDataDir = os.tmpdir();
+      return resolvedDataDir;
+    }
   }
 
-  if (!fs.existsSync(PRODUCTS_FILE)) {
-    // Seed initial products with Published status
-    const seeded = INITIAL_PRODUCTS.map((p) => ({ ...p, status: 'Published' as ProductStatus }));
-    fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(seeded, null, 2), 'utf-8');
+  // Local environment: test write permission on BUNDLED_DATA_DIR
+  try {
+    if (!fs.existsSync(BUNDLED_DATA_DIR)) {
+      fs.mkdirSync(BUNDLED_DATA_DIR, { recursive: true });
+    }
+    const testFile = path.join(BUNDLED_DATA_DIR, '.write_test');
+    fs.writeFileSync(testFile, 'ok', 'utf-8');
+    fs.unlinkSync(testFile);
+    resolvedDataDir = BUNDLED_DATA_DIR;
+    return resolvedDataDir;
+  } catch {
+    // Read-only environment fallback to /tmp
+    const tmpDir = path.join(os.tmpdir(), 'dolphin_data');
+    try {
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir, { recursive: true });
+      }
+    } catch {}
+    resolvedDataDir = tmpDir;
+    return resolvedDataDir;
+  }
+}
+
+// In-Memory cache for speed and consistency
+let memoryProducts: Product[] | null = null;
+let memoryOrders: Order[] | null = null;
+let memoryCatalogs: Catalog[] | null = null;
+let memorySettings: SiteSettings | null = null;
+let memoryPriceHistory: PriceHistory[] | null = null;
+
+function readFileSafe<T>(filename: string, fallbackFactory: () => T): T {
+  const workingDir = getWorkingDataDir();
+  const workingPath = path.join(/*turbopackIgnore: true*/ workingDir, filename);
+  const bundledPath = path.join(BUNDLED_DATA_DIR, filename);
+
+  // 1. Try reading from working directory (/tmp/dolphin_data/...)
+  if (fs.existsSync(/*turbopackIgnore: true*/ workingPath)) {
+    try {
+      const raw = fs.readFileSync(/*turbopackIgnore: true*/ workingPath, 'utf-8');
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn(`[storage] Failed reading from ${workingPath}:`, e);
+    }
   }
 
-  if (!fs.existsSync(ORDERS_FILE)) {
-    fs.writeFileSync(ORDERS_FILE, JSON.stringify([], null, 2), 'utf-8');
+  // 2. Try reading from bundled directory (/data/...)
+  if (fs.existsSync(bundledPath)) {
+    try {
+      const raw = fs.readFileSync(bundledPath, 'utf-8');
+      const parsed = JSON.parse(raw);
+      // Copy to working path for safe future writes
+      if (workingPath !== bundledPath) {
+        try {
+          if (!fs.existsSync(/*turbopackIgnore: true*/ workingDir)) fs.mkdirSync(/*turbopackIgnore: true*/ workingDir, { recursive: true });
+          fs.writeFileSync(/*turbopackIgnore: true*/ workingPath, raw, 'utf-8');
+        } catch {}
+      }
+      return parsed;
+    } catch (e) {
+      console.warn(`[storage] Failed reading bundled ${bundledPath}:`, e);
+    }
   }
 
-  if (!fs.existsSync(PRICE_HISTORY_FILE)) {
-    fs.writeFileSync(PRICE_HISTORY_FILE, JSON.stringify([], null, 2), 'utf-8');
-  }
+  // 3. Fallback to default factory
+  const defaultVal = fallbackFactory();
+  try {
+    if (!fs.existsSync(/*turbopackIgnore: true*/ workingDir)) fs.mkdirSync(/*turbopackIgnore: true*/ workingDir, { recursive: true });
+    fs.writeFileSync(/*turbopackIgnore: true*/ workingPath, JSON.stringify(defaultVal, null, 2), 'utf-8');
+  } catch {}
+  return defaultVal;
+}
 
-  if (!fs.existsSync(CATALOGS_FILE)) {
-    fs.writeFileSync(CATALOGS_FILE, JSON.stringify(DEFAULT_CATALOGS, null, 2), 'utf-8');
+function writeFileSafe(filename: string, data: unknown): boolean {
+  try {
+    const workingDir = getWorkingDataDir();
+    if (!fs.existsSync(/*turbopackIgnore: true*/ workingDir)) {
+      fs.mkdirSync(/*turbopackIgnore: true*/ workingDir, { recursive: true });
+    }
+    const workingPath = path.join(/*turbopackIgnore: true*/ workingDir, filename);
+    fs.writeFileSync(/*turbopackIgnore: true*/ workingPath, JSON.stringify(data, null, 2), 'utf-8');
+    return true;
+  } catch (err) {
+    console.warn(`[storage] writeFileSafe to ${filename} in working dir failed:`, err);
+    // Emergency attempt directly in os.tmpdir()
+    try {
+      const emergencyPath = path.join(/*turbopackIgnore: true*/ os.tmpdir(), filename);
+      fs.writeFileSync(/*turbopackIgnore: true*/ emergencyPath, JSON.stringify(data, null, 2), 'utf-8');
+      return true;
+    } catch (e2) {
+      console.error(`[storage] Emergency write failed for ${filename}:`, e2);
+      return false;
+    }
   }
+}
 
-  if (!fs.existsSync(SETTINGS_FILE)) {
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2), 'utf-8');
+// Backwards-compatible ensureDataFiles (safe in all environments)
+export function ensureDataFiles() {
+  try {
+    const workingDir = getWorkingDataDir();
+    if (!fs.existsSync(/*turbopackIgnore: true*/ workingDir)) {
+      fs.mkdirSync(/*turbopackIgnore: true*/ workingDir, { recursive: true });
+    }
+  } catch (e) {
+    console.warn('[storage] ensureDataFiles notice:', e);
   }
 }
 
 // ======================== CATALOG OPERATIONS ========================
 
 export async function getCatalogs(): Promise<Catalog[]> {
-  try {
-    ensureDataFiles();
-    const data = fs.readFileSync(CATALOGS_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (err) {
-    console.error('Failed reading catalogs:', err);
-    return DEFAULT_CATALOGS;
-  }
+  if (memoryCatalogs) return memoryCatalogs;
+  const catalogs = readFileSafe<Catalog[]>('catalogs.json', () => DEFAULT_CATALOGS);
+  memoryCatalogs = catalogs;
+  return memoryCatalogs;
 }
 
 export async function getActiveCatalogs(): Promise<Catalog[]> {
@@ -119,9 +210,10 @@ export async function getActiveCatalogs(): Promise<Catalog[]> {
   return all.filter((c) => c.status === 'Active').sort((a, b) => a.displayOrder - b.displayOrder);
 }
 
-export async function createCatalog(catalog: Omit<Catalog, 'createdAt' | 'updatedAt'>): Promise<{ success: boolean; catalog?: Catalog; error?: string }> {
+export async function createCatalog(
+  catalog: Omit<Catalog, 'createdAt' | 'updatedAt'>
+): Promise<{ success: boolean; catalog?: Catalog; error?: string }> {
   try {
-    ensureDataFiles();
     const catalogs = await getCatalogs();
     const now = new Date().toISOString();
 
@@ -131,7 +223,8 @@ export async function createCatalog(catalog: Omit<Catalog, 'createdAt' | 'update
 
     const newCatalog: Catalog = { ...catalog, createdAt: now, updatedAt: now };
     catalogs.push(newCatalog);
-    fs.writeFileSync(CATALOGS_FILE, JSON.stringify(catalogs, null, 2), 'utf-8');
+    memoryCatalogs = catalogs;
+    writeFileSafe('catalogs.json', catalogs);
     return { success: true, catalog: newCatalog };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to create catalog';
@@ -139,15 +232,18 @@ export async function createCatalog(catalog: Omit<Catalog, 'createdAt' | 'update
   }
 }
 
-export async function updateCatalog(id: string, updates: Partial<Omit<Catalog, 'id' | 'createdAt'>>): Promise<{ success: boolean; catalog?: Catalog; error?: string }> {
+export async function updateCatalog(
+  id: string,
+  updates: Partial<Omit<Catalog, 'id' | 'createdAt'>>
+): Promise<{ success: boolean; catalog?: Catalog; error?: string }> {
   try {
-    ensureDataFiles();
     const catalogs = await getCatalogs();
     const index = catalogs.findIndex((c) => c.id === id);
     if (index === -1) return { success: false, error: 'Catalog not found' };
 
     catalogs[index] = { ...catalogs[index], ...updates, updatedAt: new Date().toISOString() };
-    fs.writeFileSync(CATALOGS_FILE, JSON.stringify(catalogs, null, 2), 'utf-8');
+    memoryCatalogs = catalogs;
+    writeFileSafe('catalogs.json', catalogs);
     return { success: true, catalog: catalogs[index] };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to update catalog';
@@ -158,16 +254,12 @@ export async function updateCatalog(id: string, updates: Partial<Omit<Catalog, '
 // ======================== PRODUCT OPERATIONS ========================
 
 export async function getProducts(): Promise<Product[]> {
-  try {
-    ensureDataFiles();
-    const data = fs.readFileSync(PRODUCTS_FILE, 'utf-8');
-    const products: Product[] = JSON.parse(data);
-    // Backfill status for old products that don't have it
-    return products.map((p) => ({ ...p, status: p.status || 'Published' }));
-  } catch (err) {
-    console.error('Failed reading products file, returning initial products:', err);
-    return INITIAL_PRODUCTS.map((p) => ({ ...p, status: 'Published' as ProductStatus }));
-  }
+  if (memoryProducts) return memoryProducts;
+  const products = readFileSafe<Product[]>('products.json', () =>
+    INITIAL_PRODUCTS.map((p) => ({ ...p, status: 'Published' as ProductStatus }))
+  );
+  memoryProducts = products.map((p) => ({ ...p, status: p.status || 'Published' }));
+  return memoryProducts;
 }
 
 export async function getPublishedProducts(): Promise<Product[]> {
@@ -180,10 +272,10 @@ export async function getProductById(id: string): Promise<Product | null> {
   return products.find((p) => p.id === id) || null;
 }
 
-// Full product create (Admin CMS)
-export async function createProduct(product: Omit<Product, 'createdAt' | 'updatedAt'>): Promise<{ success: boolean; product?: Product; error?: string }> {
+export async function createProduct(
+  product: Omit<Product, 'createdAt' | 'updatedAt'>
+): Promise<{ success: boolean; product?: Product; error?: string }> {
   try {
-    ensureDataFiles();
     const products = await getProducts();
 
     if (products.some((p) => p.id === product.id)) {
@@ -193,7 +285,8 @@ export async function createProduct(product: Omit<Product, 'createdAt' | 'update
     const now = new Date().toISOString();
     const newProduct: Product = { ...product, createdAt: now, updatedAt: now };
     products.push(newProduct);
-    fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(products, null, 2), 'utf-8');
+    memoryProducts = products;
+    writeFileSafe('products.json', products);
     return { success: true, product: newProduct };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to create product';
@@ -201,14 +294,12 @@ export async function createProduct(product: Omit<Product, 'createdAt' | 'update
   }
 }
 
-// Full product update (Admin CMS) — all fields except id/createdAt
 export async function updateProductFull(
   id: string,
   updates: Partial<Omit<Product, 'id' | 'createdAt'>>,
   adminId: string = '+917845637566'
 ): Promise<{ success: boolean; product?: Product; error?: string }> {
   try {
-    ensureDataFiles();
     const products = await getProducts();
     const index = products.findIndex((p) => p.id === id);
 
@@ -220,9 +311,7 @@ export async function updateProductFull(
     // Audit price changes
     if (typeof updates.price === 'number' && updates.price !== currentProduct.price) {
       try {
-        const history: PriceHistory[] = JSON.parse(
-          fs.readFileSync(PRICE_HISTORY_FILE, 'utf-8') || '[]'
-        );
+        const history = await getPriceHistory();
         history.push({
           id: `ph_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
           productId: id,
@@ -231,21 +320,22 @@ export async function updateProductFull(
           changedAt: now,
           adminId,
         });
-        fs.writeFileSync(PRICE_HISTORY_FILE, JSON.stringify(history, null, 2), 'utf-8');
+        memoryPriceHistory = history;
+        writeFileSafe('price_history.json', history);
       } catch {}
     }
 
     products[index] = { ...currentProduct, ...updates, id, createdAt: currentProduct.createdAt, updatedAt: now };
-    fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(products, null, 2), 'utf-8');
+    memoryProducts = products;
+    writeFileSafe('products.json', products);
     return { success: true, product: products[index] };
   } catch (err: unknown) {
-    console.error('Failed to update product:', err);
+    console.error('[storage] Failed to update product:', err);
     const errorMsg = err instanceof Error ? err.message : 'Database update failed';
     return { success: false, error: errorMsg };
   }
 }
 
-// Legacy restricted admin update (price + images only) — kept for backward compat
 export async function updateProductAdmin(
   id: string,
   updates: { price?: number; images?: string[]; primaryImage?: string },
@@ -254,7 +344,6 @@ export async function updateProductAdmin(
   return updateProductFull(id, updates, adminId);
 }
 
-// Archive a product
 export async function archiveProduct(id: string): Promise<{ success: boolean; error?: string }> {
   const result = await updateProductFull(id, { status: 'Archived' });
   return { success: result.success, error: result.error };
@@ -263,14 +352,10 @@ export async function archiveProduct(id: string): Promise<{ success: boolean; er
 // ======================== ORDER OPERATIONS ========================
 
 export async function getOrders(): Promise<Order[]> {
-  try {
-    ensureDataFiles();
-    const data = fs.readFileSync(ORDERS_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (err) {
-    console.error('Failed reading orders file:', err);
-    return [];
-  }
+  if (memoryOrders) return memoryOrders;
+  const orders = readFileSafe<Order[]>('orders.json', () => []);
+  memoryOrders = orders;
+  return memoryOrders;
 }
 
 export async function getOrderByNumber(orderNumber: string): Promise<Order | null> {
@@ -280,7 +365,6 @@ export async function getOrderByNumber(orderNumber: string): Promise<Order | nul
 
 export async function createOrder(order: Order): Promise<{ success: boolean; order?: Order; error?: string }> {
   try {
-    ensureDataFiles();
     const orders = await getOrders();
 
     if (orders.some((o) => o.id === order.id || o.orderNumber === order.orderNumber)) {
@@ -288,23 +372,27 @@ export async function createOrder(order: Order): Promise<{ success: boolean; ord
     }
 
     orders.unshift(order);
-    fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf-8');
+    memoryOrders = orders;
+    writeFileSafe('orders.json', orders);
     return { success: true, order };
   } catch (err: unknown) {
-    console.error('Failed creating order:', err);
+    console.error('[storage] Failed creating order:', err);
     const errorMsg = err instanceof Error ? err.message : 'Failed to save order';
     return { success: false, error: errorMsg };
   }
 }
 
-export async function updateOrderStatus(orderNumber: string, status: string): Promise<{ success: boolean; error?: string }> {
+export async function updateOrderStatus(
+  orderNumber: string,
+  status: string
+): Promise<{ success: boolean; error?: string }> {
   try {
-    ensureDataFiles();
     const orders = await getOrders();
     const index = orders.findIndex((o) => o.orderNumber === orderNumber);
     if (index === -1) return { success: false, error: 'Order not found' };
     orders[index] = { ...orders[index], status: status as OrderStatus, updatedAt: new Date().toISOString() };
-    fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf-8');
+    memoryOrders = orders;
+    writeFileSafe('orders.json', orders);
     return { success: true };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to update order status';
@@ -317,57 +405,61 @@ export async function updateOrderNotificationStatus(
   status: { emailSent?: boolean; whatsappSent?: boolean }
 ) {
   try {
-    ensureDataFiles();
     const orders = await getOrders();
     const index = orders.findIndex((o) => o.orderNumber === orderNumber);
     if (index !== -1) {
       orders[index] = { ...orders[index], ...status, updatedAt: new Date().toISOString() };
-      fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf-8');
+      memoryOrders = orders;
+      writeFileSafe('orders.json', orders);
     }
   } catch (err) {
-    console.error('Failed to update order notification status:', err);
+    console.error('[storage] Failed to update order notification status:', err);
   }
+}
+
+// ======================== PRICE HISTORY ========================
+
+export async function getPriceHistory(): Promise<PriceHistory[]> {
+  if (memoryPriceHistory) return memoryPriceHistory;
+  const history = readFileSafe<PriceHistory[]>('price_history.json', () => []);
+  memoryPriceHistory = history;
+  return memoryPriceHistory;
 }
 
 // ======================== SETTINGS & THEME OPERATIONS ========================
 
 export async function getSettings(): Promise<SiteSettings> {
-  try {
-    ensureDataFiles();
-    const data = fs.readFileSync(SETTINGS_FILE, 'utf-8');
-    const parsed = JSON.parse(data);
-    return {
-      ...DEFAULT_SETTINGS,
-      ...parsed,
-      theme: { ...DEFAULT_SETTINGS.theme, ...(parsed.theme || {}) },
-      customerInterface: {
-        ...DEFAULT_SETTINGS.customerInterface,
-        ...(parsed.customerInterface || {}),
-        announcement: {
-          ...DEFAULT_SETTINGS.customerInterface.announcement,
-          ...(parsed.customerInterface?.announcement || {}),
-        },
-        hero: {
-          ...DEFAULT_SETTINGS.customerInterface.hero,
-          ...(parsed.customerInterface?.hero || {}),
-        },
-        contact: {
-          ...DEFAULT_SETTINGS.customerInterface.contact,
-          ...(parsed.customerInterface?.contact || {}),
-        },
+  if (memorySettings) return memorySettings;
+  const parsed = readFileSafe<Partial<SiteSettings>>('settings.json', () => DEFAULT_SETTINGS);
+  const resolved: SiteSettings = {
+    ...DEFAULT_SETTINGS,
+    ...parsed,
+    theme: { ...DEFAULT_SETTINGS.theme, ...(parsed.theme || {}) },
+    customerInterface: {
+      ...DEFAULT_SETTINGS.customerInterface,
+      ...(parsed.customerInterface || {}),
+      announcement: {
+        ...DEFAULT_SETTINGS.customerInterface.announcement,
+        ...(parsed.customerInterface?.announcement || {}),
       },
-    };
-  } catch (err) {
-    console.error('Failed reading settings file, returning defaults:', err);
-    return DEFAULT_SETTINGS;
-  }
+      hero: {
+        ...DEFAULT_SETTINGS.customerInterface.hero,
+        ...(parsed.customerInterface?.hero || {}),
+      },
+      contact: {
+        ...DEFAULT_SETTINGS.customerInterface.contact,
+        ...(parsed.customerInterface?.contact || {}),
+      },
+    },
+  };
+  memorySettings = resolved;
+  return memorySettings;
 }
 
 export async function updateSettings(
   updates: Partial<SiteSettings>
 ): Promise<{ success: boolean; settings?: SiteSettings; error?: string }> {
   try {
-    ensureDataFiles();
     const current = await getSettings();
     const next: SiteSettings = {
       ...current,
@@ -390,7 +482,8 @@ export async function updateSettings(
         },
       },
     };
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(next, null, 2), 'utf-8');
+    memorySettings = next;
+    writeFileSafe('settings.json', next);
     return { success: true, settings: next };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to update settings';
@@ -408,7 +501,6 @@ export async function updateAdminPassword(
   newPassword: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    ensureDataFiles();
     const existing = await getAdminPassword();
     if (currentPassword !== existing) {
       return { success: false, error: 'Current password is incorrect.' };
@@ -418,7 +510,8 @@ export async function updateAdminPassword(
     }
     const current = await getSettings();
     current.adminPassword = newPassword.trim();
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(current, null, 2), 'utf-8');
+    memorySettings = current;
+    writeFileSafe('settings.json', current);
     return { success: true };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to update password';

@@ -5,25 +5,20 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "lh3.googleusercontent.com",
+        hostname: "**",
       },
       {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "contribution.usercontent.google.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.googleusercontent.com",
+        protocol: "http",
+        hostname: "**",
       },
     ],
-    // Allow unoptimized local uploads served from /uploads/
+    // Allow local and dynamic API uploads
     localPatterns: [
       {
         pathname: '/uploads/**',
+      },
+      {
+        pathname: '/api/uploads/**',
       },
     ],
   },

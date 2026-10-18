@@ -196,6 +196,7 @@ export default async function HomePage() {
                     src={item.primaryImage}
                     alt={item.name}
                     fill
+                    unoptimized={Boolean(item.primaryImage?.startsWith('data:') || item.primaryImage?.startsWith('/api/uploads/') || item.primaryImage?.startsWith('/uploads/'))}
                     className="object-cover"
                   />
                 </div>

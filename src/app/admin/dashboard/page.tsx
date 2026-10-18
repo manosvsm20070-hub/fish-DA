@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Product, Order, Catalog, SiteSettings } from '@/types';
 import SettingsManager from '@/components/admin/SettingsManager';
+import { compressImage } from '@/lib/imageCompression';
 
 // ─────────────────────────────────────────────────────────────
 // SECTION TYPES
@@ -72,28 +73,54 @@ function ProductForm({ initial, catalogs, onSave, onCancel, isSaving, mode }: Pr
   const [images, setImages] = useState<string[]>(initial?.images || (initial?.primaryImage ? [initial.primaryImage] : []));
   const [newImgUrl, setNewImgUrl] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
 
   const set = (key: string, val: unknown) => setForm((p) => ({ ...p, [key]: val }));
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { alert('Max 5MB'); return; }
+
     setUploading(true);
-    const fd = new FormData();
-    fd.append('file', file);
+    setUploadStatus('Optimizing photo...');
+
     try {
+      // Auto-compress high-resolution camera photos (2MB - 20MB) to fast web-optimized format (~100-250KB)
+      const compressed = await compressImage(file, { maxWidth: 1280, maxHeight: 1280, quality: 0.82 });
+
+      setUploadStatus('Uploading...');
+      const fd = new FormData();
+      fd.append('file', compressed.file);
+
       const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
       const data = await res.json();
-      if (data.success) {
-        const next = [...images, data.url];
+
+      const finalUrl = data.success ? (data.url || data.dataUrl) : compressed.dataUrl;
+      if (finalUrl) {
+        const next = [...images, finalUrl];
         setImages(next);
-        if (!form.primaryImage) set('primaryImage', data.url);
+        if (!form.primaryImage) set('primaryImage', finalUrl);
       } else {
-        alert(data.error || 'Upload failed');
+        // Fallback to data URL so snapped camera photo is not lost
+        const next = [...images, compressed.dataUrl];
+        setImages(next);
+        if (!form.primaryImage) set('primaryImage', compressed.dataUrl);
       }
-    } catch { alert('Upload failed'); }
-    finally { setUploading(false); e.target.value = ''; }
+    } catch (err) {
+      console.warn('Compression/upload error, falling back to data URL:', err);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const fallbackUrl = reader.result as string;
+        const next = [...images, fallbackUrl];
+        setImages(next);
+        if (!form.primaryImage) set('primaryImage', fallbackUrl);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setUploading(false);
+      setUploadStatus('');
+      e.target.value = '';
+    }
   };
 
   const addUrlImage = () => {
@@ -261,12 +288,38 @@ function ProductForm({ initial, catalogs, onSave, onCancel, isSaving, mode }: Pr
             className="px-3 rounded-xl bg-surface-container-highest text-primary text-xs font-bold disabled:opacity-40">+ URL</button>
         </div>
 
-        {/* Upload from device */}
-        <label className="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container border border-surface-container-high text-on-surface text-xs cursor-pointer hover:bg-surface-container-high transition-colors">
-          <span className="material-symbols-outlined text-[16px] text-primary">{uploading ? 'hourglass_top' : 'upload'}</span>
-          <span>{uploading ? 'Uploading...' : 'Upload from Device (JPG/PNG/WEBP)'}</span>
-          <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileUpload} className="hidden" disabled={uploading} />
-        </label>
+        {/* Upload from device: Camera & Gallery */}
+        <div className="grid grid-cols-2 gap-2 mt-1">
+          {/* Snap with Camera */}
+          <label className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/30 text-primary text-xs font-bold cursor-pointer hover:bg-primary/20 transition-all text-center">
+            <span className="material-symbols-outlined text-[18px]">photo_camera</span>
+            <span>{uploading ? (uploadStatus || 'Processing...') : 'Take Photo (Camera)'}</span>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileUpload}
+              className="hidden"
+              disabled={uploading}
+            />
+          </label>
+
+          {/* Pick from Gallery / Files */}
+          <label className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-surface-container border border-surface-container-high text-on-surface text-xs font-bold cursor-pointer hover:bg-surface-container-high transition-all text-center">
+            <span className="material-symbols-outlined text-[18px] text-secondary">photo_library</span>
+            <span>{uploading ? (uploadStatus || 'Processing...') : 'Photo Gallery'}</span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+              disabled={uploading}
+            />
+          </label>
+        </div>
+        <p className="text-[11px] text-on-surface-variant/70 mt-1.5">
+          📸 Works with phone camera and photo library. Large photos (2MB+) are automatically optimized for instant loading.
+        </p>
       </div>
 
       {/* Status */}
@@ -486,13 +539,21 @@ export default function AdminDashboardPage() {
     setIsSaving(true);
     try {
       if (editingProduct) {
+        // Optimistic update
+        setProducts((prev) =>
+          prev.map((p) => (p.id === editingProduct.id ? { ...p, ...payload } : p))
+        );
         const { ok, data } = await adminFetch(`/api/admin/products/${editingProduct.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        if (!ok) { showToast(data.error || 'Update failed', 'error'); return; }
-        showToast('Product updated!');
+        if (!ok) {
+          showToast(data.error || 'Update failed', 'error');
+          await loadData();
+          return;
+        }
+        showToast('Product updated successfully!');
         setEditingProduct(null);
       } else {
         const { ok, data } = await adminFetch('/api/admin/products', {
@@ -500,8 +561,11 @@ export default function AdminDashboardPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        if (!ok) { showToast(data.error || 'Create failed', 'error'); return; }
-        showToast('Product created!');
+        if (!ok) {
+          showToast(data.error || 'Create failed', 'error');
+          return;
+        }
+        showToast('Product created successfully!');
         setShowAddProduct(false);
       }
       await loadData();
@@ -565,12 +629,22 @@ export default function AdminDashboardPage() {
 
   // ── Order Status ────────────────────────────────────────
   const handleOrderStatus = async (orderNumber: string, status: string) => {
+    // Optimistic update so UI responds immediately
+    setOrders((prev) =>
+      prev.map((o) => (o.orderNumber === orderNumber ? { ...o, status: status as Order['status'] } : o))
+    );
+
     const { ok, data } = await adminFetch(`/api/admin/orders/${orderNumber}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     });
-    if (!ok) { showToast(data.error || 'Failed', 'error'); return; }
+
+    if (!ok) {
+      showToast(data.error || 'Failed to update order status', 'error');
+      await loadData();
+      return;
+    }
     showToast(`Order ${orderNumber} → ${status}`);
     await loadData();
   };

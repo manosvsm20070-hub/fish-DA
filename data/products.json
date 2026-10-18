@@ -243,9 +243,9 @@
     "variety": "Dumbo Ear",
     "gender": "Male",
     "images": [
-      "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=80"
+      "/uploads/img_1792285264807_vxdx8v.png"
     ],
-    "primaryImage": "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=80",
+    "primaryImage": "/uploads/img_1792285264807_vxdx8v.png",
     "price": 499,
     "originalPrice": 599,
     "currency": "₹",
@@ -265,7 +265,7 @@
     "isLiveFish": true,
     "featured": true,
     "createdAt": "2026-09-01T00:00:00Z",
-    "updatedAt": "2026-09-25T07:33:47.657Z",
+    "updatedAt": "2026-10-18T01:01:06.443Z",
     "status": "Published"
   },
   {

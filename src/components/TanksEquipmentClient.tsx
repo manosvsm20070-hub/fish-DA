@@ -111,6 +111,7 @@ export default function TanksEquipmentClient({
                 src={item.primaryImage}
                 alt={item.name}
                 fill
+                unoptimized={Boolean(item.primaryImage?.startsWith('data:') || item.primaryImage?.startsWith('/api/uploads/') || item.primaryImage?.startsWith('/uploads/'))}
                 className="object-cover"
               />
               <div className="absolute top-2.5 left-2.5 flex gap-1 z-10">

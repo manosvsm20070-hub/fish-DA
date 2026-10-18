@@ -66,6 +66,7 @@ export default function ProductDetailClient({
                 alt={product.name}
                 fill
                 priority
+                unoptimized={Boolean(selectedImage.startsWith('data:') || selectedImage.startsWith('/api/uploads/') || selectedImage.startsWith('/uploads/'))}
                 className="object-cover transition-all duration-300"
               />
             ) : (
@@ -100,7 +101,13 @@ export default function ProductDetailClient({
                       : 'border-transparent opacity-75 hover:opacity-100'
                   }`}
                 >
-                  <Image src={img} alt={`Preview ${i + 1}`} fill className="object-cover" />
+                  <Image
+                    src={img}
+                    alt={`Preview ${i + 1}`}
+                    fill
+                    unoptimized={Boolean(img.startsWith('data:') || img.startsWith('/api/uploads/') || img.startsWith('/uploads/'))}
+                    className="object-cover"
+                  />
                 </button>
               ))}
             </div>

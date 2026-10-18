@@ -304,6 +304,7 @@ export default function CheckoutPage() {
                       src={item.primaryImage}
                       alt={item.productName}
                       fill
+                      unoptimized={Boolean(item.primaryImage?.startsWith('data:') || item.primaryImage?.startsWith('/api/uploads/') || item.primaryImage?.startsWith('/uploads/'))}
                       className="object-cover"
                     />
                   ) : (

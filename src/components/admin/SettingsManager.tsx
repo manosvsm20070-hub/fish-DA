@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { SiteSettings } from '@/types';
+import { compressImage } from '@/lib/imageCompression';
 
 interface SettingsManagerProps {
   settings: SiteSettings | null;
@@ -115,28 +116,36 @@ export default function SettingsManager({ settings, onRefresh, showToast }: Sett
     setAccentColor(preset.accent);
   };
 
-  // Upload hero banner image
+  // Upload hero banner image with auto-compression
   const handleHeroImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('Maximum image size is 5MB', 'error');
-      return;
-    }
+
     setUploadingHero(true);
-    const fd = new FormData();
-    fd.append('file', file);
     try {
+      // Auto-compress large phone camera photos to ~150-300KB
+      const compressed = await compressImage(file, { maxWidth: 1600, maxHeight: 1000, quality: 0.82 });
+      const fd = new FormData();
+      fd.append('file', compressed.file);
+
       const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
       const data = await res.json();
-      if (data.success && data.url) {
-        setHeroBannerImage(data.url);
-        showToast('Hero image uploaded!');
+      const finalUrl = data.success ? (data.url || data.dataUrl) : compressed.dataUrl;
+
+      if (finalUrl) {
+        setHeroBannerImage(finalUrl);
+        showToast('Hero image uploaded & optimized!');
       } else {
         showToast(data.error || 'Upload failed', 'error');
       }
-    } catch {
-      showToast('Upload failed', 'error');
+    } catch (err) {
+      console.warn('Hero upload error, using fallback:', err);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setHeroBannerImage(reader.result as string);
+        showToast('Hero image updated!');
+      };
+      reader.readAsDataURL(file);
     } finally {
       setUploadingHero(false);
       e.target.value = '';
@@ -825,17 +834,34 @@ export default function SettingsManager({ settings, onRefresh, showToast }: Sett
                       placeholder="Paste image URL (https://...)"
                       className="flex-1 h-10 px-3.5 rounded-xl bg-surface border border-outline-variant/60 font-body-md text-xs focus:ring-2 focus:ring-primary/40 focus:outline-none w-full"
                     />
-                    <label className="h-10 px-4 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-primary font-label-md text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shrink-0">
-                      <span className="material-symbols-outlined text-[16px]">upload</span>
-                      <span>{uploadingHero ? 'Uploading...' : 'Upload Image'}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleHeroImageUpload}
-                        disabled={uploadingHero}
-                        className="hidden"
-                      />
-                    </label>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {/* Camera Snap */}
+                      <label className="h-10 px-3.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-label-md text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer">
+                        <span className="material-symbols-outlined text-[16px]">photo_camera</span>
+                        <span>{uploadingHero ? 'Optimizing...' : 'Camera'}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={handleHeroImageUpload}
+                          disabled={uploadingHero}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {/* File / Gallery */}
+                      <label className="h-10 px-3.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer">
+                        <span className="material-symbols-outlined text-[16px] text-secondary">photo_library</span>
+                        <span>{uploadingHero ? '...' : 'Upload'}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleHeroImageUpload}
+                          disabled={uploadingHero}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
                   </div>
 
                   {heroBannerImage && (
@@ -844,6 +870,7 @@ export default function SettingsManager({ settings, onRefresh, showToast }: Sett
                         src={heroBannerImage}
                         alt="Hero Banner Preview"
                         fill
+                        unoptimized={Boolean(heroBannerImage.startsWith('data:') || heroBannerImage.startsWith('/api/uploads/') || heroBannerImage.startsWith('/uploads/'))}
                         className="object-cover"
                       />
                     </div>
