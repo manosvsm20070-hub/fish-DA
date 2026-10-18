@@ -64,20 +64,21 @@ interface ProductFormProps {
 }
 
 function ProductForm({ initial, catalogs, onSave, onCancel, isSaving, mode }: ProductFormProps) {
+  const activeCatalogName = catalogs.find((c) => c.status === 'Active')?.name || catalogs[0]?.name || 'Fish';
   const [form, setForm] = useState({
     name: initial?.name || '',
-    category: initial?.category || (catalogs[0]?.name || ''),
+    category: initial?.category || activeCatalogName,
     subCategory: initial?.subCategory || '',
     variety: initial?.variety || '',
     description: initial?.description || '',
-    price: initial?.price?.toString() || '',
+    price: initial?.price?.toString() || '0',
     originalPrice: initial?.originalPrice?.toString() || '',
     stock: initial?.stock?.toString() || '10',
     availability: initial?.availability || 'in_stock',
     sizes: (initial?.sizes || ['Standard']).join(', '),
-    isLiveFish: initial?.isLiveFish || false,
+    isLiveFish: initial?.isLiveFish !== undefined ? initial.isLiveFish : true,
     featured: initial?.featured || false,
-    status: initial?.status || 'Draft',
+    status: initial?.status || 'Published',
     primaryImage: initial?.primaryImage || '',
   });
   const [images, setImages] = useState<string[]>(initial?.images || (initial?.primaryImage ? [initial.primaryImage] : []));
@@ -86,6 +87,15 @@ function ProductForm({ initial, catalogs, onSave, onCancel, isSaving, mode }: Pr
   const [uploadStatus, setUploadStatus] = useState('');
 
   const set = (key: string, val: unknown) => setForm((p) => ({ ...p, [key]: val }));
+
+  useEffect(() => {
+    if (!form.category && catalogs.length > 0) {
+      const activeCat = catalogs.find((c) => c.status === 'Active') || catalogs[0];
+      if (activeCat) {
+        setForm((prev) => ({ ...prev, category: activeCat.name }));
+      }
+    }
+  }, [catalogs, form.category]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -152,20 +162,28 @@ function ProductForm({ initial, catalogs, onSave, onCancel, isSaving, mode }: Pr
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.name.trim()) return;
+
+    const finalCategory =
+      form.category.trim() ||
+      catalogs.find((c) => c.status === 'Active')?.name ||
+      catalogs[0]?.name ||
+      'Fish';
+
     const payload: Partial<Product> = {
       name: form.name.trim(),
-      category: form.category.trim(),
+      category: finalCategory,
       subCategory: form.subCategory.trim(),
       variety: form.variety.trim(),
       description: form.description.trim(),
-      price: parseFloat(form.price) || 0,
+      price: form.price.trim() !== '' ? (parseFloat(form.price) || 0) : 0,
       originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : undefined,
-      stock: parseInt(form.stock) || 10,
+      stock: form.stock.trim() !== '' ? (parseInt(form.stock) || 0) : 10,
       availability: form.availability as Product['availability'],
       sizes: form.sizes.split(',').map((s) => s.trim()).filter(Boolean),
       isLiveFish: form.isLiveFish,
       featured: form.featured,
-      status: form.status as Product['status'],
+      status: (form.status as Product['status']) || 'Published',
       images,
       primaryImage: form.primaryImage || images[0] || '',
     };
@@ -222,9 +240,18 @@ function ProductForm({ initial, catalogs, onSave, onCancel, isSaving, mode }: Pr
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelCls}>
-            Price (₹) * {form.isLiveFish && <span className="text-amber-600 font-normal text-[11px]">(Hidden on storefront for live fish)</span>}
+            Price (₹) {form.isLiveFish ? <span className="text-amber-600 font-normal text-[11px]">(Optional for live fish · Inquiry only on storefront)</span> : '*'}
           </label>
-          <input required type="number" min="0" step="1" value={form.price} onChange={(e) => set('price', e.target.value)} className={inputCls} placeholder="850" />
+          <input
+            required={!form.isLiveFish}
+            type="number"
+            min="0"
+            step="1"
+            value={form.price}
+            onChange={(e) => set('price', e.target.value)}
+            className={inputCls}
+            placeholder={form.isLiveFish ? '0 (Optional for live fish)' : '850'}
+          />
         </div>
         <div>
           <label className={labelCls}>Original Price (₹)</label>
@@ -338,8 +365,8 @@ function ProductForm({ initial, catalogs, onSave, onCancel, isSaving, mode }: Pr
       <div>
         <label className={labelCls}>Status</label>
         <select value={form.status} onChange={(e) => set('status', e.target.value)} className={inputCls}>
+          <option value="Published">Published (visible to customers immediately)</option>
           <option value="Draft">Draft (admin only)</option>
-          <option value="Published">Published (visible to customers)</option>
           <option value="Archived">Archived (hidden)</option>
         </select>
       </div>
@@ -625,8 +652,14 @@ export default function AdminDashboardPage() {
           showToast(data.error || 'Create failed', 'error');
           return;
         }
-        showToast('Product created successfully!');
+        if (data.product) {
+          setProducts((prev) => [data.product, ...prev]);
+        }
+        showToast('Product created & published successfully!');
         setShowAddProduct(false);
+        setProductStatusFilter('all');
+        setProductCategoryFilter('all');
+        setProductSearch('');
       }
       broadcastAdminUpdate('PRODUCTS_UPDATED');
       await loadData();

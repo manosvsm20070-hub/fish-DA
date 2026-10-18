@@ -59,8 +59,15 @@ export async function POST(req: NextRequest) {
 
     // Required field validation
     if (!body.name?.trim()) return NextResponse.json({ success: false, error: 'Product name is required' }, { status: 400 });
-    if (!body.category?.trim()) return NextResponse.json({ success: false, error: 'Category is required' }, { status: 400 });
-    if (body.price === undefined || isNaN(Number(body.price))) return NextResponse.json({ success: false, error: 'Valid price is required' }, { status: 400 });
+
+    const isLiveFish = body.isLiveFish === true || body.isLiveFish === 'true';
+    const category = body.category?.trim() || 'Fish';
+    
+    // Live fish can have 0 or empty price (inquiry only on storefront)
+    const priceVal =
+      body.price !== undefined && body.price !== '' && !isNaN(Number(body.price))
+        ? Number(body.price)
+        : (isLiveFish ? 0 : 0);
 
     const slug = body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const uniqueId = body.id || `prod-${slug}-${Date.now()}`;
@@ -68,22 +75,22 @@ export async function POST(req: NextRequest) {
     const newProduct: Omit<Product, 'createdAt' | 'updatedAt'> = {
       id: uniqueId,
       name: body.name.trim(),
-      category: body.category.trim(),
+      category,
       subCategory: body.subCategory?.trim() || '',
       variety: body.variety?.trim() || '',
       gender: body.gender || 'Unsexed',
       images: Array.isArray(body.images) ? body.images : (body.primaryImage ? [body.primaryImage] : []),
       primaryImage: body.primaryImage || (Array.isArray(body.images) ? body.images[0] : '') || '',
-      price: Number(body.price),
+      price: priceVal,
       originalPrice: body.originalPrice ? Number(body.originalPrice) : undefined,
       currency: '₹',
       sizes: Array.isArray(body.sizes) ? body.sizes : (body.sizes ? [body.sizes] : ['Standard']),
-      stock: Number(body.stock) || 10,
+      stock: Number(body.stock) >= 0 ? Number(body.stock) : 10,
       availability: body.availability || 'in_stock',
       description: body.description?.trim() || '',
-      isLiveFish: body.isLiveFish === true || body.isLiveFish === 'true',
+      isLiveFish,
       featured: body.featured === true || body.featured === 'true',
-      status: body.status || 'Draft',
+      status: body.status || 'Published',
       tags: Array.isArray(body.tags) ? body.tags : [],
       waterParams: body.waterParams || undefined,
       specs: body.specs || undefined,
@@ -94,8 +101,10 @@ export async function POST(req: NextRequest) {
 
     try {
       revalidatePath('/', 'layout');
-      revalidatePath('/fish');
-      revalidatePath('/tanks');
+      revalidatePath('/', 'page');
+      revalidatePath('/fish', 'page');
+      revalidatePath('/fish/[category]', 'page');
+      revalidatePath('/tanks', 'page');
     } catch {}
 
     return NextResponse.json({ success: true, product: result.product }, { status: 201 });
