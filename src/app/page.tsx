@@ -6,6 +6,8 @@ import { SHOP_INFO } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import LiveHeroBanner from '@/components/LiveHeroBanner';
 import LiveCuratedExotics from '@/components/LiveCuratedExotics';
+import LiveMotorsSection from '@/components/LiveMotorsSection';
+import LiveFishFoodSection from '@/components/LiveFishFoodSection';
 import LiveGearEssentials from '@/components/LiveGearEssentials';
 import Footer from '@/components/Footer';
 
@@ -20,7 +22,32 @@ export default async function HomePage() {
 
   const ci = settings.customerInterface;
   const featuredFish = products.filter((p) => p.isLiveFish && p.featured).slice(0, 4);
-  const gearEssentials = products.filter((p) => !p.isLiveFish).slice(0, 4);
+  const motorProducts = products.filter(
+    (p) =>
+      p.category?.toLowerCase().includes('motor') ||
+      p.category?.toLowerCase().includes('pump') ||
+      p.subCategory?.toLowerCase().includes('pump') ||
+      p.name?.toLowerCase().includes('motor') ||
+      p.name?.toLowerCase().includes('pump')
+  );
+  const foodProducts = products.filter(
+    (p) =>
+      p.category?.toLowerCase().includes('food') ||
+      p.subCategory?.toLowerCase().includes('food') ||
+      p.subCategory?.toLowerCase().includes('pellet') ||
+      p.subCategory?.toLowerCase().includes('flake') ||
+      p.variety?.toLowerCase().includes('food') ||
+      p.name?.toLowerCase().includes('pellet') ||
+      p.name?.toLowerCase().includes('flakes')
+  );
+  const gearEssentials = products
+    .filter(
+      (p) =>
+        !p.isLiveFish &&
+        !p.category?.toLowerCase().includes('food') &&
+        !p.category?.toLowerCase().includes('motor')
+    )
+    .slice(0, 6);
 
   return (
     <main className="flex-1 flex flex-col w-full px-4 md:px-8 max-w-7xl mx-auto">
@@ -51,6 +78,27 @@ export default async function HomePage() {
               className="shrink-0 px-4 py-2 rounded-full bg-primary text-on-primary font-label-md shadow-sm transition-all text-xs sm:text-sm"
             >
               All Stock
+            </Link>
+            <Link
+              href="/motors"
+              className="shrink-0 px-4 py-2 rounded-full bg-surface-container text-on-surface-variant font-label-md hover:bg-surface-container-high transition-all text-xs sm:text-sm flex items-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-[15px] text-primary">mode_fan</span>
+              <span>Motors & Pumps</span>
+            </Link>
+            <Link
+              href="/food"
+              className="shrink-0 px-4 py-2 rounded-full bg-surface-container text-on-surface-variant font-label-md hover:bg-surface-container-high transition-all text-xs sm:text-sm flex items-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-[15px] text-[#cc4729]">nutrition</span>
+              <span>Fish Food</span>
+            </Link>
+            <Link
+              href="/bowls"
+              className="shrink-0 px-4 py-2 rounded-full bg-surface-container text-on-surface-variant font-label-md hover:bg-surface-container-high transition-all text-xs sm:text-sm flex items-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-[15px] text-primary">circle</span>
+              <span>Fish Bowls</span>
             </Link>
             <Link
               href="/fish/goldfish"
@@ -86,13 +134,19 @@ export default async function HomePage() {
               href="/medicines"
               className="shrink-0 px-4 py-2 rounded-full bg-surface-container text-on-surface-variant font-label-md hover:bg-surface-container-high transition-all text-xs sm:text-sm"
             >
-              Food & Medicines
+              Care & Medicines
             </Link>
           </div>
         </section>
 
         {/* Live Showcase Grid — Curated Exotic Arrivals (Real-time price sync) */}
         <LiveCuratedExotics initialProducts={featuredFish} />
+
+        {/* Live Showcase — Aquarium Motors & Oxygen Pumps */}
+        <LiveMotorsSection initialProducts={motorProducts} />
+
+        {/* Live Showcase — Fish Food & Daily Nutrition */}
+        <LiveFishFoodSection initialProducts={foodProducts} />
 
         {/* Tanks, Filters & Care Essentials Strip (Real-time price sync) */}
         <LiveGearEssentials initialGear={gearEssentials} />

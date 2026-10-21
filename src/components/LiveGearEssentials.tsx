@@ -27,8 +27,13 @@ export default function LiveGearEssentials({ initialGear }: LiveGearEssentialsPr
           const data = await res.json();
           if (data.products && Array.isArray(data.products)) {
             const updated = data.products
-              .filter((p: Product) => !p.isLiveFish)
-              .slice(0, 4);
+              .filter(
+                (p: Product) =>
+                  !p.isLiveFish &&
+                  !p.category?.toLowerCase().includes('food') &&
+                  !p.category?.toLowerCase().includes('motor')
+              )
+              .slice(0, 6);
             setGearEssentials(updated);
           }
         }

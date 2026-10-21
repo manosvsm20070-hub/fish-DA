@@ -42,6 +42,8 @@ export default function Header({
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Fish Catalog', href: '/fish' },
+    { name: 'Motors & Pumps', href: '/motors' },
+    { name: 'Fish Food', href: '/food' },
     { name: 'Tanks & Custom', href: '/tanks' },
     { name: 'Care & Medicines', href: '/medicines' },
     { name: 'Store Info', href: '/contact' },
