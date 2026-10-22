@@ -147,29 +147,6 @@ export default function MedicinesAndCarePage() {
       createdAt: '',
       updatedAt: '',
     },
-    {
-      id: 'med-aquarium-salt-1kg',
-      name: 'Pure Aquarium Mineral Salt',
-      tag: 'Gill & Osmosis Support',
-      cap: '1kg Tub',
-      desc: 'Non-iodized pure minerals to assist gill aeration and osmotic barrier balance.',
-      description: 'Non-iodized pure minerals to assist gill aeration and osmotic barrier balance.',
-      price: 120,
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuAhTN9w6BbuR1j0Qw0wgIzWGyE4atuIleEzZS_uDrtUGqFL27BuIVp9yZWC6R90A_crw92byq8SPBTmpy3xd1Gr5Djc896vCyLAqC9AzqNy2cPLsBO3QxeaTyg-zd8-w8Xu4sPkGVgxTL8aENnYj4TykdcwuDqeCId59vbMApZzmo9nS0yBeXq_8zDkaDrTcPdxWkTjod5r56ktyYX4S38hsos3uQZt9ib8dRPDrXctV1jEXAFRVnlVyg',
-      category: 'Fish Medicines',
-      variety: 'Mineral Salt',
-      sizes: ['1kg Tub'],
-      isLiveFish: false,
-      stock: 60,
-      availability: 'in_stock' as const,
-      currency: '₹',
-      images: [],
-      primaryImage:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuAhTN9w6BbuR1j0Qw0wgIzWGyE4atuIleEzZS_uDrtUGqFL27BuIVp9yZWC6R90A_crw92byq8SPBTmpy3xd1Gr5Djc896vCyLAqC9AzqNy2cPLsBO3QxeaTyg-zd8-w8Xu4sPkGVgxTL8aENnYj4TykdcwuDqeCId59vbMApZzmo9nS0yBeXq_8zDkaDrTcPdxWkTjod5r56ktyYX4S38hsos3uQZt9ib8dRPDrXctV1jEXAFRVnlVyg',
-      createdAt: '',
-      updatedAt: '',
-    },
   ];
 
   return (
