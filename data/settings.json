@@ -10,7 +10,7 @@
     "storeName": "Dolphin Aquarium",
     "tagline": "Freshwater Specialist & Custom Rimless Tanks",
     "announcement": {
-      "enabled": true,
+      "enabled": false,
       "text": "🌊 Direct live fish transit & delivery across Sothupakkam & Chengalpattu region. Free delivery on orders over ₹1,500!",
       "linkText": "Shop Fish Now",
       "linkUrl": "/fish"

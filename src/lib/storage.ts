@@ -3,49 +3,7 @@ import path from 'path';
 import os from 'os';
 import { Product, Order, PriceHistory, Catalog, ProductStatus, OrderStatus, SiteSettings } from '@/types';
 import { INITIAL_PRODUCTS, SHOP_INFO } from '@/data/products';
-import {
-  getSupabaseDbClient,
-  mapCatalogToDb,
-  mapProductToDb,
-  mapOrderToDb,
-  mapPriceHistoryToDb,
-} from '@/lib/supabase-db';
 
-async function syncProductToSupabaseSafe(product: Product) {
-  try {
-    const supabase = getSupabaseDbClient();
-    if (!supabase) return;
-    const row = mapProductToDb(product);
-    await supabase.from('products').upsert(row, { onConflict: 'id' });
-  } catch {}
-}
-
-async function syncCatalogToSupabaseSafe(catalog: Catalog) {
-  try {
-    const supabase = getSupabaseDbClient();
-    if (!supabase) return;
-    const row = mapCatalogToDb(catalog);
-    await supabase.from('catalogs').upsert(row, { onConflict: 'id' });
-  } catch {}
-}
-
-async function syncOrderToSupabaseSafe(order: Order) {
-  try {
-    const supabase = getSupabaseDbClient();
-    if (!supabase) return;
-    const row = mapOrderToDb(order);
-    await supabase.from('orders').upsert(row, { onConflict: 'id' });
-  } catch {}
-}
-
-async function syncPriceHistoryToSupabaseSafe(ph: PriceHistory) {
-  try {
-    const supabase = getSupabaseDbClient();
-    if (!supabase) return;
-    const row = mapPriceHistoryToDb(ph);
-    await supabase.from('price_history').upsert(row, { onConflict: 'id' });
-  } catch {}
-}
 
 export const DEFAULT_SETTINGS: SiteSettings = {
   adminPassword: process.env.ADMIN_PASSWORD || 'bestfish',
@@ -308,7 +266,6 @@ export async function createCatalog(
     catalogs.push(newCatalog);
     writeFileSafe('catalogs.json', catalogs);
     touchSyncVersion('products');
-    syncCatalogToSupabaseSafe(newCatalog);
     return { success: true, catalog: newCatalog };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to create catalog';
@@ -328,7 +285,6 @@ export async function updateCatalog(
     catalogs[index] = { ...catalogs[index], ...updates, updatedAt: new Date().toISOString() };
     writeFileSafe('catalogs.json', catalogs);
     touchSyncVersion('products');
-    syncCatalogToSupabaseSafe(catalogs[index]);
     return { success: true, catalog: catalogs[index] };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to update catalog';
@@ -368,7 +324,6 @@ export async function createProduct(
     products.push(newProduct);
     writeFileSafe('products.json', products);
     touchSyncVersion('products');
-    syncProductToSupabaseSafe(newProduct);
     return { success: true, product: newProduct };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to create product';
@@ -419,7 +374,6 @@ export async function updateProductFull(
       products.unshift(newProduct);
       writeFileSafe('products.json', products);
       touchSyncVersion('products');
-      syncProductToSupabaseSafe(newProduct);
       return { success: true, product: newProduct };
     }
 
@@ -439,14 +393,12 @@ export async function updateProductFull(
         };
         history.push(phRecord);
         writeFileSafe('price_history.json', history);
-        syncPriceHistoryToSupabaseSafe(phRecord);
       } catch {}
     }
 
     products[index] = { ...currentProduct, ...updates, id: cleanId, createdAt: currentProduct.createdAt, updatedAt: now };
     writeFileSafe('products.json', products);
     touchSyncVersion('products');
-    syncProductToSupabaseSafe(products[index]);
     return { success: true, product: products[index] };
   } catch (err: unknown) {
     console.error('[storage] Failed to update product:', err);
@@ -474,16 +426,6 @@ export async function deleteAllProducts(): Promise<{ success: boolean; count: nu
     const count = products.length;
     writeFileSafe('products.json', []);
     touchSyncVersion('products');
-
-    // Attempt Supabase deletion in background
-    try {
-      const supabase = getSupabaseDbClient();
-      if (supabase) {
-        await supabase.from('products').delete().neq('id', '___none___');
-      }
-    } catch (e) {
-      console.warn('[storage] Notice: Supabase products delete skipped/offline:', e);
-    }
 
     return { success: true, count };
   } catch (err: unknown) {
@@ -513,7 +455,6 @@ export async function createOrder(order: Order): Promise<{ success: boolean; ord
 
     orders.unshift(order);
     writeFileSafe('orders.json', orders);
-    syncOrderToSupabaseSafe(order);
     return { success: true, order };
   } catch (err: unknown) {
     console.error('[storage] Failed creating order:', err);
@@ -532,7 +473,6 @@ export async function updateOrderStatus(
     if (index === -1) return { success: false, error: 'Order not found' };
     orders[index] = { ...orders[index], status: status as OrderStatus, updatedAt: new Date().toISOString() };
     writeFileSafe('orders.json', orders);
-    syncOrderToSupabaseSafe(orders[index]);
     return { success: true };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Failed to update order status';
@@ -561,16 +501,6 @@ export async function deleteAllOrders(): Promise<{ success: boolean; count: numb
     const orders = await getOrders();
     const count = orders.length;
     writeFileSafe('orders.json', []);
-
-    // Attempt Supabase deletion in background if connected
-    try {
-      const supabase = getSupabaseDbClient();
-      if (supabase) {
-        await supabase.from('orders').delete().neq('id', '___none___');
-      }
-    } catch (e) {
-      console.warn('[storage] Notice: Supabase orders delete skipped/offline:', e);
-    }
 
     return { success: true, count };
   } catch (err: unknown) {

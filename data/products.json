@@ -10,7 +10,7 @@
       "/uploads/liny-ly1000f-motor.png"
     ],
     "primaryImage": "/uploads/liny-ly1000f-motor.png",
-    "price": 280,
+    "price": 450,
     "originalPrice": 350,
     "currency": "₹",
     "sizes": [
@@ -29,7 +29,7 @@
     "featured": true,
     "status": "Published",
     "createdAt": "2026-10-21T14:49:13.668Z",
-    "updatedAt": "2026-10-21T14:49:13.668Z"
+    "updatedAt": "2026-10-23T14:56:34.218Z"
   },
   {
     "id": "motor-bluepet-bl600f",
@@ -587,24 +587,22 @@
   },
   {
     "id": "betta-halfmoon-royal-blue",
-    "name": "Royal Blue Halfmoon Betta",
+    "name": "female betta",
     "category": "Betta Fish",
-    "subCategory": "Halfmoon",
-    "variety": "Halfmoon",
+    "subCategory": "",
+    "variety": "",
     "gender": "Male",
     "images": [
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCLAXDObZy5BCxqWWScFhhJUTlUUOtlct7-sRC8RpkZz4_B-ZwDYLPXdA4ddI6Ehm-pCCM1KPUT0gY_13sC-p00tDf_jb7qzkIpnVXKQP9zuQkeGO6uQIDiOJhnhyhXwJBt0aDOn2QBGfDyvFfSRn4_DS-6EYAnz6rS1ltYyicIppLAPJa_v5gqTUUEP8yUDtfjW2sSJR9rm5n9jRFLxq54l8TeQZzI83FKm2x1Qv7xdCPwPMCvENEYXQ"
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShBmut_LWfmgQ0g2F1O5XvFBzdv6yzGkdcYZ_cBr0RVg&s"
     ],
-    "primaryImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuCLAXDObZy5BCxqWWScFhhJUTlUUOtlct7-sRC8RpkZz4_B-ZwDYLPXdA4ddI6Ehm-pCCM1KPUT0gY_13sC-p00tDf_jb7qzkIpnVXKQP9zuQkeGO6uQIDiOJhnhyhXwJBt0aDOn2QBGfDyvFfSRn4_DS-6EYAnz6rS1ltYyicIppLAPJa_v5gqTUUEP8yUDtfjW2sSJR9rm5n9jRFLxq54l8TeQZzI83FKm2x1Qv7xdCPwPMCvENEYXQ",
-    "price": 350,
-    "originalPrice": 420,
+    "primaryImage": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShBmut_LWfmgQ0g2F1O5XvFBzdv6yzGkdcYZ_cBr0RVg&s",
+    "price": 50,
+    "originalPrice": 10,
     "currency": "₹",
-    "sizes": [
-      "2.5 inch Show Grade"
-    ],
+    "sizes": [],
     "stock": 12,
     "availability": "in_stock",
-    "description": "Show-grade Royal Blue Halfmoon Betta displaying a perfect 180° caudal spread. Iridescent shimmering scales of cobalt and indigo.",
+    "description": "",
     "waterParams": {
       "ph": "6.5 - 7.4",
       "temp": "26-28°C",
@@ -615,12 +613,12 @@
     "isLiveFish": true,
     "featured": true,
     "createdAt": "2026-09-01T00:00:00Z",
-    "updatedAt": "2026-09-24T00:00:00Z",
+    "updatedAt": "2026-10-23T14:39:28.792Z",
     "status": "Published"
   },
   {
     "id": "betta-crowntail-dragon",
-    "name": "Red Dragon Crowntail Betta",
+    "name": "Crowntail Betta",
     "category": "Betta Fish",
     "subCategory": "Crowntail",
     "variety": "Crowntail",
@@ -629,14 +627,14 @@
       "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=800&q=80"
     ],
     "primaryImage": "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?auto=format&fit=crop&w=800&q=80",
-    "price": 280,
+    "price": 200,
     "currency": "₹",
     "sizes": [
       "2.5 inch"
     ],
     "stock": 9,
     "availability": "in_stock",
-    "description": "Distinctive crown-like spiked ray finnage with metallic dragon scale coating and fiery red highlights.",
+    "description": "",
     "waterParams": {
       "ph": "6.5 - 7.5",
       "temp": "25-28°C",
@@ -647,8 +645,9 @@
     "isLiveFish": true,
     "featured": false,
     "createdAt": "2026-09-01T00:00:00Z",
-    "updatedAt": "2026-09-24T00:00:00Z",
-    "status": "Published"
+    "updatedAt": "2026-10-23T14:40:01.157Z",
+    "status": "Published",
+    "originalPrice": 250
   },
   {
     "id": "betta-dumbo-elephant-ear",
@@ -1214,8 +1213,8 @@
     "isLiveFish": false,
     "featured": true,
     "createdAt": "2026-09-01T00:00:00Z",
-    "updatedAt": "2026-09-24T00:00:00Z",
-    "status": "Published"
+    "updatedAt": "2026-10-23T14:32:32.978Z",
+    "status": "Draft"
   },
   {
     "id": "hardscape-colored-gravel-blue",
@@ -1240,8 +1239,8 @@
     "isLiveFish": false,
     "featured": false,
     "createdAt": "2026-09-01T00:00:00Z",
-    "updatedAt": "2026-09-24T00:00:00Z",
-    "status": "Published"
+    "updatedAt": "2026-10-23T14:32:19.383Z",
+    "status": "Draft"
   },
   {
     "id": "gear-aquarium-nets",

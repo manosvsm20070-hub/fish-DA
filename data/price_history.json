@@ -214,5 +214,29 @@
     "newPrice": 1250,
     "changedAt": "2026-10-18T07:11:57.712Z",
     "adminId": "+917845637566"
+  },
+  {
+    "id": "ph_1792766291134_xnhpx",
+    "productId": "betta-halfmoon-royal-blue",
+    "oldPrice": 350,
+    "newPrice": 50,
+    "changedAt": "2026-10-23T14:38:11.134Z",
+    "adminId": "+917845637566"
+  },
+  {
+    "id": "ph_1792766401158_z1bbg",
+    "productId": "betta-crowntail-dragon",
+    "oldPrice": 280,
+    "newPrice": 200,
+    "changedAt": "2026-10-23T14:40:01.157Z",
+    "adminId": "+917845637566"
+  },
+  {
+    "id": "ph_1792767394218_0vqiu",
+    "productId": "motor-liny-ly1000f",
+    "oldPrice": 280,
+    "newPrice": 450,
+    "changedAt": "2026-10-23T14:56:34.218Z",
+    "adminId": "+917845637566"
   }
 ]

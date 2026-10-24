@@ -523,24 +523,7 @@ export default function AdminDashboardPage() {
   const [showAddCatalog, setShowAddCatalog] = useState(false);
   const [editingCatalog, setEditingCatalog] = useState<Catalog | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [syncingSupabase, setSyncingSupabase] = useState(false);
 
-  const handleSyncSupabase = async () => {
-    setSyncingSupabase(true);
-    try {
-      const res = await fetch('/api/supabase/push', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
-        showToast(`Synced ${data.pushed.products} products, ${data.pushed.catalogs} catalogs & ${data.pushed.orders} orders to Supabase!`);
-      } else {
-        showToast(data.hint || data.error || 'Failed to sync to Supabase', 'error');
-      }
-    } catch (e: any) {
-      showToast(e.message || 'Network error syncing to Supabase', 'error');
-    } finally {
-      setSyncingSupabase(false);
-    }
-  };
 
   // Quick Inline Price Editing
   const [quickPriceEditingId, setQuickPriceEditingId] = useState<string | null>(null);
@@ -919,17 +902,7 @@ export default function AdminDashboardPage() {
                 Add Catalog
               </button>
             )}
-            <button
-              onClick={handleSyncSupabase}
-              disabled={syncingSupabase}
-              title="Sync all products, catalogs & orders to Supabase"
-              className="h-9 px-3 rounded-xl border border-primary/30 text-primary font-label-md text-xs font-bold flex items-center gap-1.5 hover:bg-primary/10 transition-all disabled:opacity-40"
-            >
-              <span className={`material-symbols-outlined text-[16px] ${syncingSupabase ? 'animate-spin' : ''}`}>
-                {syncingSupabase ? 'sync' : 'cloud_upload'}
-              </span>
-              <span className="hidden sm:inline">{syncingSupabase ? 'Syncing...' : 'Sync Supabase'}</span>
-            </button>
+
             <button onClick={loadData} disabled={loading}
               className="h-9 w-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high disabled:opacity-40">
               <span className={`material-symbols-outlined text-[20px] text-primary ${loading ? 'animate-spin' : ''}`}>refresh</span>
